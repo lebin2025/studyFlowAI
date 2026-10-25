@@ -158,6 +158,18 @@ pg_dump "$DATABASE_URL" > studyflow-backup.sql
 ### `password authentication failed`
 连接串密码错误或未 URL 编码。重新复制 Session pooler URI，替换 `<password>`。
 
+### `connect ENETUNREACH 2406:...:5432`
+说明 `DATABASE_URL` 用的是 **Direct connection**，它解析到 IPv6 地址；Render 免费实例没有 IPv6 出网，所以连接被拒绝。
+
+改用 **Session pooler**：
+
+- 主机名必须包含 `.pooler.supabase.com`
+- 端口通常是 `5432`
+- 用户名形如 `postgres.<project-ref>`
+- 不是 `db.<project-ref>.supabase.co:5432`（这是 Direct connection，IPv6）
+
+在 Supabase 控制台 **Connect → Session pooler** 重新复制 URI，更新 Render 的 `DATABASE_URL`，再 Manual Deploy。
+
 ### `getaddrinfo ENOTFOUND` / IPv6 连接失败
 不要使用 Direct connection（IPv6）；使用 **Session pooler** 的 IPv4 主机名。
 
