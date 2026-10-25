@@ -158,6 +158,11 @@ pg_dump "$DATABASE_URL" > studyflow-backup.sql
 ### `password authentication failed`
 连接串密码错误或未 URL 编码。重新复制 Session pooler URI，替换 `<password>`。
 
+### `password authentication failed for user "postgres"` (28P01)
+如果用的是 Session pooler，用户名必须是 `postgres.<project-ref>`，不是 `postgres`。错误信息里显示 `user "postgres"`，通常说明手动改了主机名但没改用户名，或者复制了 Direct connection 的 URI。
+
+回到 Supabase **Connect → Session pooler** 完整复制 URI，不要只替换主机名。密码如有特殊字符要 URL 编码；不确定就重置成字母数字密码。
+
 ### `connect ENETUNREACH 2406:...:5432`
 说明 `DATABASE_URL` 用的是 **Direct connection**，它解析到 IPv6 地址；Render 免费实例没有 IPv6 出网，所以连接被拒绝。
 

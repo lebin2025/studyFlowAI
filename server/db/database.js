@@ -172,6 +172,30 @@ class PostgresAdapter {
   }
 
   async #initialize() {
+    const source = process.env.DATABASE_URL ? 'DATABASE_URL' : 'SUPABASE_DB_URL'
+    let target = {}
+    try {
+      const parsed = new URL(this.connectionString)
+      target = {
+        host: parsed.hostname,
+        port: parsed.port || '5432',
+        database: parsed.pathname.replace(/^\//, '') || 'postgres',
+        user: parsed.username,
+        hasProjectSuffix: parsed.username.includes('.'),
+        passwordLength: parsed.password.length,
+      }
+    } catch {
+      target = { parseError: true }
+    }
+    logger.info('PostgreSQL connection target', {
+      source,
+      ...target,
+      ssl: env.databaseSsl,
+    })
+    if (process.env.DATABASE_URL && process.env.SUPABASE_DB_URL) {
+      logger.warn('Both DATABASE_URL and SUPABASE_DB_URL are set; DATABASE_URL takes precedence')
+    }
+
     this.pool = new pg.Pool({
       connectionString: this.connectionString,
       ssl: env.databaseSsl ? { rejectUnauthorized: false } : false,
@@ -184,7 +208,23 @@ class PostgresAdapter {
       logger.error('Unexpected PostgreSQL pool error', { error })
     })
 
-    const client = await this.pool.connect()
+    let client
+    try {
+      client = await this.pool.connect()
+    } catch (error) {
+      if (error.code === '28P01') {
+        logger.error('PostgreSQL authentication failed', {
+          source,
+          host: target.host,
+          user: target.user,
+          hasProjectSuffix: target.hasProjectSuffix,
+          hint: target.hasProjectSuffix
+            ? 'Username has the project suffix. Check the database password and project ref; URL-encode special characters.'
+            : 'Session pooler username must be postgres.<project-ref>, not just postgres.',
+        })
+      }
+      throw error
+    }
     try {
       await client.query('SELECT 1')
 
