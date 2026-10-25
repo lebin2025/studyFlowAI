@@ -176,6 +176,12 @@ class PostgresAdapter {
     let target = {}
     try {
       const parsed = new URL(this.connectionString)
+      let decodedPassword = parsed.password
+      try {
+        decodedPassword = decodeURIComponent(parsed.password)
+      } catch {
+        /* keep raw value */
+      }
       target = {
         host: parsed.hostname,
         port: parsed.port || '5432',
@@ -183,6 +189,7 @@ class PostgresAdapter {
         user: parsed.username,
         hasProjectSuffix: parsed.username.includes('.'),
         passwordLength: parsed.password.length,
+        passwordLooksLikePlaceholder: /YOUR-PASSWORD|<password>|REPLACE/i.test(decodedPassword),
       }
     } catch {
       target = { parseError: true }
@@ -218,9 +225,13 @@ class PostgresAdapter {
           host: target.host,
           user: target.user,
           hasProjectSuffix: target.hasProjectSuffix,
-          hint: target.hasProjectSuffix
-            ? 'Username has the project suffix. Check the database password and project ref; URL-encode special characters.'
-            : 'Session pooler username must be postgres.<project-ref>, not just postgres.',
+          passwordLength: target.passwordLength,
+          passwordLooksLikePlaceholder: target.passwordLooksLikePlaceholder,
+          hint: target.passwordLooksLikePlaceholder
+            ? 'Password still contains a placeholder such as [YOUR-PASSWORD]. Replace it with the real database password.'
+            : target.hasProjectSuffix
+              ? 'Username has the project suffix. Check the database password and project ref; URL-encode special characters.'
+              : 'Session pooler username must be postgres.<project-ref>, not just postgres.',
         })
       }
       throw error
