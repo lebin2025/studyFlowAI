@@ -1,5 +1,7 @@
 # 推送到 GitHub 并部署
 
+> **想完全免费并保留 SQLite 数据？** 使用 [Alwaysdata Free](alwaysdata.md)：0€/月、1GB 持久化磁盘、256MB 内存、Node.js 24、SSH、免费 HTTPS 子域名，不需要信用卡。下面的 Render 方案需要付费 Starter 实例才有持久化磁盘，免费实例会丢失 SQLite 数据。
+
 ## 先说明：GitHub Pages 不能运行这个项目
 
 StudyFlow AI 是 **Vue 前端 + Express API + SQLite + DeepSeek 服务端调用** 的全栈应用：

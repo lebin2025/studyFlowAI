@@ -1,6 +1,8 @@
 # 部署指南
 
-> 想从 GitHub 自动部署？仓库已提供 `.github/workflows/ci.yml` 与 `render.yaml`，完整步骤见 [github.md](github.md)。GitHub Pages 无法运行本项目的 Node / SQLite 后端。
+> **免费推荐：** [Alwaysdata Free](alwaysdata.md)（1GB 持久化磁盘、256MB 内存、Node.js、SSH、免费 HTTPS，无需信用卡）。GitHub Pages 无法运行本项目的 Node / SQLite 后端；Render 免费实例没有持久化磁盘，SQLite 会丢数据。
+
+> 想从 GitHub 自动部署？仓库已提供 `.github/workflows/ci.yml` 与 `render.yaml`，完整步骤见 [github.md](github.md)。
 
 ## 1. 构建产物说明
 

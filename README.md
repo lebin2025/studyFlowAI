@@ -378,7 +378,9 @@ studyFlowAI/
 
 ## 10. 部署
 
-详见 [`docs/deployment.md`](docs/deployment.md)。核心步骤：
+**免费推荐：[Alwaysdata Free](docs/alwaysdata.md)**。0€/月、1GB 持久化磁盘、256MB 内存、Node.js 24、SSH、免费 HTTPS 子域名；SQLite 数据不会丢，也不需要信用卡。
+
+其他方式详见 [`docs/deployment.md`](docs/deployment.md)。核心步骤：
 
 ```bash
 npm ci
@@ -399,10 +401,11 @@ node server/index.js
 仓库已包含：
 
 - `.github/workflows/ci.yml`：推送 / PR 自动构建、23 个后端测试、18 个前端测试、25 项冒烟检查
-- `render.yaml`：Render Blueprint，一键创建 Node Web Service + SQLite 持久化磁盘
-- `docs/github.md`：从创建仓库、推送、GitHub Actions 到 Render / Railway 部署的完整步骤
+- `render.yaml`：Render Blueprint（**需要付费 Starter 实例才能使用持久化磁盘**，免费实例会丢 SQLite 数据）
+- `docs/alwaysdata.md`：免费、持久化 SQLite 的 Alwaysdata 部署步骤（推荐）
+- `docs/github.md`：从创建仓库、推送、GitHub Actions 到云端部署的完整步骤
 
-推荐路径：**GitHub 托管代码 + Render 运行全栈实例**。GitHub Pages 只能托管静态文件，无法运行 Express、SQLite 和 DeepSeek 服务端调用，因此不要用 Pages 部署本项目。
+推荐路径：**GitHub 托管代码 + Alwaysdata Free 运行全栈实例**。GitHub Pages 只能托管静态文件，无法运行 Express、SQLite 和 DeepSeek 服务端调用，因此不要用 Pages 部署本项目。
 
 ---
 
@@ -419,6 +422,7 @@ node server/index.js
 - [架构与技术决策](docs/architecture.md)
 - [API 文档](docs/api.md)
 - [部署指南](docs/deployment.md)
+- [Alwaysdata 免费部署（推荐）](docs/alwaysdata.md)
 - [GitHub 推送与云端部署](docs/github.md)
 - [简历项目描述与技术亮点](docs/resume.md)
 - [环境变量示例](.env.example)

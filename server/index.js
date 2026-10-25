@@ -12,9 +12,14 @@ try {
   process.exit(1)
 }
 
-const server = app.listen(env.port, '0.0.0.0', () => {
+// Alwaysdata injects the bind address via IP. Locally 0.0.0.0 preserves the
+// previous behaviour and keeps the server reachable through Vite's proxy.
+const bindHost = process.env.IP || '0.0.0.0'
+
+const server = app.listen(env.port, bindHost, () => {
   logger.info('StudyFlow AI server listening', {
     url: `http://localhost:${env.port}`,
+    bindHost,
     env: env.nodeEnv,
     aiConfigured: isDeepSeekConfigured(),
     model: env.deepseek.model,
