@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+server/data
+artifacts
+screenshots
+*.log
+.vscode
+.idea
+__pycache__

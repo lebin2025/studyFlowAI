@@ -1,0 +1,45 @@
+# Render Blueprint — one-click full-stack deployment from a GitHub repo.
+#
+# Notes:
+# - SQLite needs a persistent disk. Render disks require a paid instance plan
+#   (starter or above); the free plan cannot keep the database across deploys.
+# - After creating the Blueprint, paste DEEPSEEK_API_KEY when prompted.
+# - The service is deployed at https://<service-name>.onrender.com; same-origin
+#   requests work without setting APP_ORIGIN. Set APP_ORIGIN only if you add a
+#   custom domain or separate frontend origin.
+services:
+  - type: web
+    name: studyflow-ai
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --include=dev && npm run build && npm prune --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
+      - key: APP_TIMEZONE
+        value: Asia/Shanghai
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: true
+      - key: TRUST_PROXY
+        value: true
+      - key: DB_PATH
+        value: /var/data/studyflow.db
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_MODEL
+        value: deepseek-flash
+      - key: AI_RATE_LIMIT_PER_HOUR
+        value: 8
+
+    disk:
+      name: studyflow-data
+      mountPath: /var/data
+      sizeGB: 1

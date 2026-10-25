@@ -1,0 +1,6 @@
+process.env.NODE_ENV = 'test'
+process.env.DB_PATH = ':memory:'
+process.env.JWT_SECRET = 'studyflow-test-secret-that-is-long-enough-1234567890'
+process.env.DEEPSEEK_API_KEY = ''
+process.env.APP_TIMEZONE = 'Asia/Shanghai'
+process.env.AI_RATE_LIMIT_PER_HOUR = '100'

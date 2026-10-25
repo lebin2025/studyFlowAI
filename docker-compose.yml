@@ -1,0 +1,22 @@
+services:
+  app:
+    build: .
+    image: studyflow-ai:latest
+    container_name: studyflow-ai
+    restart: unless-stopped
+    ports:
+      - '8787:8787'
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 8787
+      DB_PATH: /data/studyflow.db
+      # 本地 HTTP 验证时保持 false；公网 HTTPS 必须改成 true
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      TRUST_PROXY: 1
+    volumes:
+      - studyflow-data:/data
+
+volumes:
+  studyflow-data:
