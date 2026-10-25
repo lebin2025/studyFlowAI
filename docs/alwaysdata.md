@@ -1,6 +1,8 @@
-# Alwaysdata Free 免费部署（推荐）
+# Alwaysdata Free 免费部署（SQLite 备用方案）
 
-这是目前最适合本项目的免费方案：**Alwaysdata Free 0€/月，终身有效，不需要信用卡**。它提供持久化磁盘，因此可以继续使用 SQLite，不需要把数据库改成付费服务。
+> 主推荐是 [Supabase Postgres + Render Free](supabase.md)。本文适合“不想使用外部数据库、希望 SQLite 文件直接放在服务器上”的情况。
+
+Alwaysdata Free 0€/月，终身有效，不需要信用卡。它提供持久化磁盘，因此可以继续使用 SQLite。
 
 ## 免费方案规格
 
@@ -197,15 +199,15 @@ scp 你的账号@ssh-你的账号.alwaysdata.net:~/studyflow/server/data/studyfl
 
 ---
 
-## 8. 为什么不用 Render 免费实例
+## 8. Render 免费实例 + SQLite 为什么不行
 
-Render 的免费 Web Service 没有持久化磁盘：
+Render 免费 Web Service 没有持久化磁盘，如果继续用本地 SQLite：
 
 - 服务重启 / 重新部署后 SQLite 文件会丢失
 - 用户账号和学习记录都会消失
 - Blueprint 的 `disk` 需要付费 Starter 实例
 
-所以本项目推荐 **Alwaysdata Free**，而不是 Render 免费版。Render 配置仍保留在仓库里，供以后需要更强性能时使用。
+但 **Render 免费 + Supabase PostgreSQL** 是可行的，也是当前主推荐：数据在 Supabase，Render 可自由重启。见 [supabase.md](supabase.md)。
 
 ---
 
@@ -224,4 +226,4 @@ Render 的免费 Web Service 没有持久化磁盘：
 - 长时间 CPU 密集任务
 - 需要 root / Docker 的场景
 
-如果以后用户变多，再迁移到 Render Starter、Railway、Fly.io 或 VPS；数据库文件可以直接迁移。
+如果以后用户变多，可以迁移到 **Render + Supabase**、Railway、Fly.io 或 VPS；SQLite 数据可以先导出，再迁移到 PostgreSQL。

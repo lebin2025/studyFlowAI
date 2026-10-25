@@ -3,14 +3,13 @@ import { env } from '../config/env.js'
 import { logger } from '../utils/logger.js'
 
 const db = getDb()
-const tables = db
-  .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
-  .all()
+await db.ready
+const tables = await db.listTables()
 
 logger.info('Migration complete', {
-  db: env.dbPath,
-  schemaVersion: db.pragma('user_version', { simple: true }),
-  tables: tables.map((row) => row.name),
+  dialect: db.dialect,
+  target: db.dialect === 'postgres' ? 'DATABASE_URL' : env.dbPath,
+  tables,
 })
 
-closeDb()
+await closeDb()

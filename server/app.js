@@ -4,6 +4,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import { env, isDeepSeekConfigured, ROOT_DIR } from './config/env.js'
 import { getDb } from './db/database.js'
+import { asyncHandler } from './utils/httpError.js'
 import { requestId } from './middleware/requestId.js'
 import { corsMiddleware, helmetMiddleware, originGuard } from './middleware/security.js'
 import { apiLimiter } from './middleware/rateLimits.js'
@@ -32,23 +33,26 @@ export const createApp = () => {
     next()
   })
 
-  app.get('/api/health', (req, res) => {
-    let database = 'ok'
-    try {
-      getDb().prepare('SELECT 1 AS ok').get()
-    } catch {
-      database = 'error'
-    }
-    res.json({
-      status: database === 'ok' ? 'ok' : 'degraded',
-      name: 'StudyFlow AI',
-      version: '1.0.0',
-      database,
-      aiConfigured: isDeepSeekConfigured(),
-      model: env.deepseek.model,
-      time: new Date().toISOString(),
-    })
-  })
+  app.get(
+    '/api/health',
+    asyncHandler(async (req, res) => {
+      let database = 'ok'
+      try {
+        await getDb().health()
+      } catch {
+        database = 'error'
+      }
+      res.json({
+        status: database === 'ok' ? 'ok' : 'degraded',
+        name: 'StudyFlow AI',
+        version: '1.0.0',
+        database,
+        aiConfigured: isDeepSeekConfigured(),
+        model: env.deepseek.model,
+        time: new Date().toISOString(),
+      })
+    }),
+  )
 
   app.use('/api', apiLimiter)
   app.use('/api/auth', authRoutes)

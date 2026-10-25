@@ -46,17 +46,25 @@ router.post('/logout', (req, res) => {
   res.json({ ok: true })
 })
 
-router.get('/session', optionalAuth, (req, res) => {
-  if (!req.user) {
-    res.json({ user: null, preferences: null })
-    return
-  }
-  res.json({ user: req.user, preferences: getPreferences(req.user.id) })
-})
+router.get(
+  '/session',
+  optionalAuth,
+  asyncHandler(async (req, res) => {
+    if (!req.user) {
+      res.json({ user: null, preferences: null })
+      return
+    }
+    res.json({ user: req.user, preferences: await getPreferences(req.user.id) })
+  }),
+)
 
-router.get('/me', requireAuth, (req, res) => {
-  res.json({ user: req.user, preferences: getPreferences(req.user.id) })
-})
+router.get(
+  '/me',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    res.json({ user: req.user, preferences: await getPreferences(req.user.id) })
+  }),
+)
 
 router.patch(
   '/password',

@@ -11,34 +11,29 @@ const TASK_SELECT = `
   JOIN plans p ON p.id = t.plan_id
 `
 
-export const getTaskRow = (userId, taskId, db = getDb()) => {
-  const row = db
-    .prepare(`${TASK_SELECT} WHERE t.id = ? AND p.user_id = ?`)
-    .get(taskId, userId)
+export const getTaskRow = async (userId, taskId, db = getDb()) => {
+  const row = await db.get(`${TASK_SELECT} WHERE t.id = ? AND p.user_id = ?`, [taskId, userId])
   if (!row) throw notFound('没有找到这个任务')
   return row
 }
 
-export const assertPlanOwned = (userId, planId, db = getDb()) => {
-  const plan = db
-    .prepare('SELECT * FROM plans WHERE id = ? AND user_id = ?')
-    .get(planId, userId)
+export const assertPlanOwned = async (userId, planId, db = getDb()) => {
+  const plan = await db.get('SELECT * FROM plans WHERE id = ? AND user_id = ?', [planId, userId])
   if (!plan) throw notFound('没有找到这个学习计划')
   return plan
 }
 
-const stageIdForDate = (db, planId, date) => {
-  const stage = db
-    .prepare(
-      `SELECT id FROM plan_stages
-       WHERE plan_id = ? AND start_date <= ? AND end_date >= ?
-       ORDER BY sort_order ASC, id ASC LIMIT 1`,
-    )
-    .get(planId, date, date)
+const stageIdForDate = async (db, planId, date) => {
+  const stage = await db.get(
+    `SELECT id FROM plan_stages
+     WHERE plan_id = ? AND start_date <= ? AND end_date >= ?
+     ORDER BY sort_order ASC, id ASC LIMIT 1`,
+    [planId, date, date],
+  )
   return stage ? stage.id : null
 }
 
-export const listTasks = (userId, filters = {}) => {
+export const listTasks = async (userId, filters = {}) => {
   const db = getDb()
   const conditions = ['p.user_id = ?']
   const params = [userId]
@@ -77,21 +72,20 @@ export const listTasks = (userId, filters = {}) => {
   const limit = filters.limit ?? 200
   const offset = filters.offset ?? 0
 
-  const rows = db
-    .prepare(
-      `${TASK_SELECT} WHERE ${where}
-       ORDER BY t.task_date ASC,
-         CASE t.priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END,
-         t.sort_order ASC, t.id ASC
-       LIMIT ? OFFSET ?`,
-    )
-    .all(...params, limit, offset)
+  const rows = await db.all(
+    `${TASK_SELECT} WHERE ${where}
+     ORDER BY t.task_date ASC,
+       CASE t.priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END,
+       t.sort_order ASC, t.id ASC
+     LIMIT ? OFFSET ?`,
+    [...params, limit, offset],
+  )
 
-  const total = db
-    .prepare(
-      `SELECT COUNT(*) AS count FROM tasks t JOIN plans p ON p.id = t.plan_id WHERE ${where}`,
-    )
-    .get(...params).count
+  const totalRow = await db.get(
+    `SELECT COUNT(*) AS count FROM tasks t JOIN plans p ON p.id = t.plan_id WHERE ${where}`,
+    params,
+  )
+  const total = Number(totalRow.count)
 
   return {
     items: rows.map(mapTask),
@@ -102,26 +96,26 @@ export const listTasks = (userId, filters = {}) => {
   }
 }
 
-export const createTask = (userId, input) => {
+export const createTask = async (userId, input) => {
   const db = getDb()
-  const plan = assertPlanOwned(userId, input.planId, db)
+  const plan = await assertPlanOwned(userId, input.planId, db)
   assertPlanWindow(plan, input.taskDate)
 
-  const maxOrder = db
-    .prepare('SELECT COALESCE(MAX(sort_order), -1) AS value FROM tasks WHERE plan_id = ? AND task_date = ?')
-    .get(plan.id, input.taskDate).value
+  const maxRow = await db.get(
+    'SELECT COALESCE(MAX(sort_order), -1) AS value FROM tasks WHERE plan_id = ? AND task_date = ?',
+    [plan.id, input.taskDate],
+  )
+  const maxOrder = Number(maxRow.value)
 
   const timestamp = nowIsoString()
-  const stageId = stageIdForDate(db, plan.id, input.taskDate)
-  const result = db
-    .prepare(
-      `INSERT INTO tasks
-        (plan_id, stage_id, user_id, title, description, task_date, duration_minutes,
-         priority, completion_criteria, is_completed, completed_at, is_review,
-         actual_minutes, source, sort_order, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, ?, NULL, 'manual', ?, ?, ?)`,
-    )
-    .run(
+  const stageId = await stageIdForDate(db, plan.id, input.taskDate)
+  const taskId = await db.insert(
+    `INSERT INTO tasks
+      (plan_id, stage_id, user_id, title, description, task_date, duration_minutes,
+       priority, completion_criteria, is_completed, completed_at, is_review,
+       actual_minutes, source, sort_order, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, ?, NULL, 'manual', ?, ?, ?)`,
+    [
       plan.id,
       stageId,
       userId,
@@ -135,16 +129,17 @@ export const createTask = (userId, input) => {
       maxOrder + 1,
       timestamp,
       timestamp,
-    )
+    ],
+  )
 
-  recalcPlanStatus(plan.id, db)
-  return mapTask(getTaskRow(userId, Number(result.lastInsertRowid), db))
+  await recalcPlanStatus(plan.id, db)
+  return mapTask(await getTaskRow(userId, taskId, db))
 }
 
-export const updateTask = (userId, taskId, patch) => {
+export const updateTask = async (userId, taskId, patch) => {
   const db = getDb()
-  const current = getTaskRow(userId, taskId, db)
-  const plan = db.prepare('SELECT * FROM plans WHERE id = ?').get(current.plan_id)
+  const current = await getTaskRow(userId, taskId, db)
+  const plan = await db.get('SELECT * FROM plans WHERE id = ?', [current.plan_id])
 
   const taskDate = patch.taskDate ?? current.task_date
   if (patch.taskDate !== undefined) {
@@ -175,21 +170,21 @@ export const updateTask = (userId, taskId, patch) => {
 
   if (patch.taskDate !== undefined) {
     fields.push('stage_id = ?')
-    values.push(stageIdForDate(db, current.plan_id, patch.taskDate))
+    values.push(await stageIdForDate(db, current.plan_id, patch.taskDate))
   }
 
   if (fields.length === 0) return mapTask(current)
   fields.push('updated_at = ?')
   values.push(nowIsoString(), taskId)
-  db.prepare(`UPDATE tasks SET ${fields.join(', ')} WHERE id = ?`).run(...values)
+  await db.run(`UPDATE tasks SET ${fields.join(', ')} WHERE id = ?`, values)
 
-  recalcPlanStatus(current.plan_id, db)
-  return mapTask(getTaskRow(userId, taskId, db))
+  await recalcPlanStatus(current.plan_id, db)
+  return mapTask(await getTaskRow(userId, taskId, db))
 }
 
-export const toggleTask = (userId, taskId, { isCompleted, actualMinutes }) => {
+export const toggleTask = async (userId, taskId, { isCompleted, actualMinutes }) => {
   const db = getDb()
-  const current = getTaskRow(userId, taskId, db)
+  const current = await getTaskRow(userId, taskId, db)
   const timestamp = nowIsoString()
 
   const nextActual =
@@ -199,30 +194,30 @@ export const toggleTask = (userId, taskId, { isCompleted, actualMinutes }) => {
         ? current.actual_minutes
         : null
 
-  db.prepare(
+  await db.run(
     `UPDATE tasks SET is_completed = ?, completed_at = ?, actual_minutes = ?, updated_at = ?
      WHERE id = ?`,
-  ).run(isCompleted ? 1 : 0, isCompleted ? timestamp : null, nextActual, timestamp, taskId)
+    [isCompleted ? 1 : 0, isCompleted ? timestamp : null, nextActual, timestamp, taskId],
+  )
 
-  const planStatus = recalcPlanStatus(current.plan_id, db)
-  const task = mapTask(getTaskRow(userId, taskId, db))
+  const planStatus = await recalcPlanStatus(current.plan_id, db)
+  const task = mapTask(await getTaskRow(userId, taskId, db))
   return {
     task,
     plan: {
       id: current.plan_id,
       status: planStatus,
-      ...getPlanCounts(current.plan_id, db),
+      ...(await getPlanCounts(current.plan_id, db)),
     },
   }
 }
 
-export const getPlanCounts = (planId, db = getDb()) => {
-  const row = db
-    .prepare(
-      `SELECT COUNT(*) AS taskCount, COALESCE(SUM(is_completed), 0) AS completedTasks
-       FROM tasks WHERE plan_id = ?`,
-    )
-    .get(planId)
+export const getPlanCounts = async (planId, db = getDb()) => {
+  const row = await db.get(
+    `SELECT COUNT(*) AS taskCount, COALESCE(SUM(is_completed), 0) AS completedTasks
+     FROM tasks WHERE plan_id = ?`,
+    [planId],
+  )
   const taskCount = Number(row.taskCount)
   const completedTasks = Number(row.completedTasks)
   return {
@@ -232,10 +227,10 @@ export const getPlanCounts = (planId, db = getDb()) => {
   }
 }
 
-export const deleteTask = (userId, taskId) => {
+export const deleteTask = async (userId, taskId) => {
   const db = getDb()
-  const current = getTaskRow(userId, taskId, db)
-  db.prepare('DELETE FROM tasks WHERE id = ?').run(taskId)
-  recalcPlanStatus(current.plan_id, db)
+  const current = await getTaskRow(userId, taskId, db)
+  await db.run('DELETE FROM tasks WHERE id = ?', [taskId])
+  await recalcPlanStatus(current.plan_id, db)
   return { deleted: true, planId: current.plan_id }
 }

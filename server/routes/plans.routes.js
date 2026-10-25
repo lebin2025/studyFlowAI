@@ -19,35 +19,47 @@ import {
 const router = Router()
 router.use(requireAuth)
 
-router.get('/', validate(planListQuerySchema, 'query'), (req, res) => {
-  res.json(listPlans(req.user.id, req.validated.query))
-})
+router.get(
+  '/',
+  validate(planListQuerySchema, 'query'),
+  asyncHandler(async (req, res) => {
+    res.json(await listPlans(req.user.id, req.validated.query))
+  }),
+)
 
 router.post(
   '/',
   validate(planCreateSchema),
   asyncHandler(async (req, res) => {
-    const detail = createPlan(req.user.id, req.validated.body)
+    const detail = await createPlan(req.user.id, req.validated.body)
     res.status(201).json(detail)
   }),
 )
 
-router.get('/:id', validate(planIdParamSchema, 'params'), (req, res) => {
-  res.json(getPlanDetail(req.user.id, req.validated.params.id))
-})
+router.get(
+  '/:id',
+  validate(planIdParamSchema, 'params'),
+  asyncHandler(async (req, res) => {
+    res.json(await getPlanDetail(req.user.id, req.validated.params.id))
+  }),
+)
 
 router.patch(
   '/:id',
   validate(planIdParamSchema, 'params'),
   validate(planUpdateSchema),
-  (req, res) => {
-    const detail = updatePlan(req.user.id, req.validated.params.id, req.validated.body)
+  asyncHandler(async (req, res) => {
+    const detail = await updatePlan(req.user.id, req.validated.params.id, req.validated.body)
     res.json(detail)
-  },
+  }),
 )
 
-router.delete('/:id', validate(planIdParamSchema, 'params'), (req, res) => {
-  res.json(deletePlan(req.user.id, req.validated.params.id))
-})
+router.delete(
+  '/:id',
+  validate(planIdParamSchema, 'params'),
+  asyncHandler(async (req, res) => {
+    res.json(await deletePlan(req.user.id, req.validated.params.id))
+  }),
+)
 
 export default router

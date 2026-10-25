@@ -5,7 +5,7 @@
 StudyFlow AI 是一个基于大语言模型的个性化学习规划与任务管理平台。它不是又一个待办清单：它真实调用 DeepSeek API，把学习目标拆成阶段、每日任务、完成标准与复习安排，并把「今天该做什么」放在第一位。
 
 - 前端：Vue 3 + Vite + JavaScript + Vue Router + Pinia + Axios
-- 后端：Node.js + Express + SQLite（better-sqlite3）
+- 后端：Node.js + Express + SQLite（本地）/ PostgreSQL（Supabase，生产）
 - AI：DeepSeek 官方 API（`deepseek-flash` / `deepseek-v4-pro`），JSON Output
 - 样式：原生 CSS、CSS Variables、完整 Design System，无 UI 框架
 - 测试：Vitest + Supertest + 真实 HTTP 冒烟测试 + 浏览器交互验收
@@ -114,7 +114,7 @@ npm run dev
 
 - 前端：http://localhost:5173
 - 后端：http://localhost:8787
-- 数据库：`server/data/studyflow.db`（首次启动自动建表）
+- 数据库：本地默认 `server/data/studyflow.db`；设置 `DATABASE_URL` 后使用 PostgreSQL / Supabase（首次启动自动建表）
 - Vite 已将 `/api` 代理到后端，无需额外配置 CORS
 
 ### 生产模式（单进程同时提供 API 与静态页面）
@@ -137,13 +137,18 @@ TRUST_PROXY=1   # 仅在可信反向代理后面
 
 ### 数据库初始化 / 迁移
 
-通常无需手动操作，应用启动时会自动执行 `server/db/schema.sql`。手动执行：
+通常无需手动操作，应用启动时会自动执行：
+
+- 本地 SQLite：`server/db/schema.sql`
+- PostgreSQL / Supabase：`server/db/schema.postgres.sql`
+
+手动执行：
 
 ```bash
 npm run db:migrate
 ```
 
-如果数据库不存在会创建；已存在时仅补齐缺失的表和索引（`PRAGMA user_version = 1`）。
+本地 SQLite 不存在时会创建；已存在时仅补齐缺失的表和索引（`PRAGMA user_version = 1`）。PostgreSQL 使用 `CREATE TABLE IF NOT EXISTS`，并通过事务级 advisory lock 防止多实例并发建表。
 
 ---
 
@@ -163,7 +168,7 @@ npm run db:migrate
   → 解析 JSON，服务端二次校验与归一化
   → 记录真实 Token 用量与估算费用
   → 返回可编辑草稿（此时不写数据库）
-  → 用户保存 → POST /api/plans → SQLite
+  → 用户保存 → POST /api/plans → SQLite / PostgreSQL
 ```
 
 ### 官方文档核对结果
@@ -216,7 +221,10 @@ npm run verify:ai
 | `NODE_ENV` | 否 | `development` / `production` |
 | `PORT` | 否 | 后端端口，默认 `8787` |
 | `APP_TIMEZONE` | 否 | 统计与「今天」的时区，默认 `Asia/Shanghai` |
-| `DB_PATH` | 否 | SQLite 路径，默认 `./server/data/studyflow.db` |
+| `DATABASE_URL` | 生产推荐 | PostgreSQL / Supabase 连接串；为空时使用 SQLite |
+| `DATABASE_SSL` | 否 | Supabase 设为 `true`；本地 PostgreSQL 无 TLS 时设 `false` |
+| `DB_POOL_MAX` | 否 | PostgreSQL 连接池上限，默认 `5` |
+| `DB_PATH` | 否 | SQLite 路径，默认 `./server/data/studyflow.db`；设置 `DATABASE_URL` 后忽略 |
 | `JWT_SECRET` | 生产必填 | JWT 签名密钥，至少 32 位随机字符串 |
 | `JWT_EXPIRES_IN` | 否 | 会话有效期，默认 `7d` |
 | `COOKIE_NAME` | 否 | 会话 Cookie 名，默认 `sf_session` |
@@ -243,7 +251,7 @@ npm run verify:ai
 
 ## 5. 数据库结构
 
-SQLite（WAL 模式、外键开启）。完整定义见 `server/db/schema.sql`。
+本地 SQLite（WAL 模式、外键开启）与 PostgreSQL / Supabase 双支持。完整定义见 `server/db/schema.sql` 和 `server/db/schema.postgres.sql`。
 
 | 表 | 作用 | 关键约束 |
 | --- | --- | --- |
@@ -298,12 +306,13 @@ npm run verify:ai        # 真实 DeepSeek 连通性（需要 Key）
 | 项目 | 结果 |
 | --- | --- |
 | 生产构建 | ✅ 通过（Vite 8，无编译错误） |
-| 后端测试 | ✅ 4 个文件、23 个用例通过 |
+| 后端测试 | ✅ SQLite + PostgreSQL（本地 18 / CI 17）各 4 个文件、23 个用例通过 |
 | 前端测试 | ✅ 5 个文件、18 个用例通过 |
 | 端到端 Smoke | ✅ 25 项检查通过（注册 / 登录 / 计划 / 任务 / 统计 / 越权 / 静态页面 / 重启持久化 / AI 未配置错误） |
 | 浏览器交互验收 | ✅ 任务弹窗新增/编辑/删除、AI 预览编辑保存、AI 调整预览应用、计划删除 |
 | 视觉验收 | ✅ 1440×1000 桌面与 390×844 移动端共 26 张截图，无横向溢出、无控制台错误 |
 | 真实 DeepSeek 调用 | ✅ 已通过：连通性 727ms / 111 tokens；真实生成 9.6s / 2375 tokens；真实调整 8.0s / 2492 tokens |
+| 真实 AI + PostgreSQL | ✅ 生成 12 个任务、调整保留 1 个已完成任务；6560 tokens / `$0.00521` |
 
 ### 覆盖的关键场景
 
@@ -363,22 +372,25 @@ studyFlowAI/
 1. 真实 DeepSeek 调用已在开发机验证（`deepseek-flash`）；但模型输出具有不确定性，生产环境仍需观察额度、延迟与内容质量。
 2. 没有邮箱验证、找回密码、OAuth、账户注销。
 3. 只有一个 7 天 JWT 会话；退出会清 Cookie，但不会把已泄露的 Token 加入黑名单（修改密码会使其失效）。
-4. SQLite 适合单实例 / 小规模部署；多实例需要迁移到 PostgreSQL，并将限流改为 Redis。
-5. AI 计划在结构、日期与时长上被严格校验，但内容的教育合理性仍需要用户判断；不保证完全符合考试大纲。
-6. AI 费用是估算值：按 DeepSeek 返回的真实 Token × `.env` 价格计算，未自动识别峰谷价，也不替代官方账单。
-7. AI 调整预览只可确认，不直接在预览中逐项编辑；应用后可以继续在计划详情中编辑。
-8. 实际学习用时需要用户手动填写；未填写时统计会明确显示「尚未登记」，不会把预计时长冒充实际时长。
-9. 服务端时区固定为 `APP_TIMEZONE`（默认 Asia/Shanghai），跨时区用户看到的「今天」可能与本地略有差异。
-10. 没有提醒推送、日历导出、离线模式、深色模式。
-11. AI 请求为非流式 JSON；长计划可能需要 20–60 秒，超时可在 `.env` 调整。
-12. 单计划最多 366 天、200 个任务（AI 生成最多 160 个）。
-13. 提供了 `Dockerfile` / `docker-compose.yml`，但当前环境没有安装 Docker，未实际构建镜像；直接 Node 部署已完整验证。
+4. 本地 SQLite 适合单实例；生产可使用 Supabase PostgreSQL。当前限流和 AI 草稿缓存仍基于单实例/数据库，真正水平扩展还需要 Redis 限流和任务队列。
+5. Supabase 免费项目 7 天无活动会暂停；Render 免费服务空闲后会休眠，首次访问可能冷启动。
+6. AI 计划在结构、日期与时长上被严格校验，但内容的教育合理性仍需要用户判断；不保证完全符合考试大纲。
+7. AI 费用是估算值：按 DeepSeek 返回的真实 Token × `.env` 价格计算，未自动识别峰谷价，也不替代官方账单。
+8. AI 调整预览只可确认，不直接在预览中逐项编辑；应用后可以继续在计划详情中编辑。
+9. 实际学习用时需要用户手动填写；未填写时统计会明确显示「尚未登记」，不会把预计时长冒充实际时长。
+10. 服务端时区固定为 `APP_TIMEZONE`（默认 Asia/Shanghai），跨时区用户看到的「今天」可能与本地略有差异。
+11. 没有提醒推送、日历导出、离线模式、深色模式。
+12. AI 请求为非流式 JSON；长计划可能需要 20–60 秒，超时可在 `.env` 调整。
+13. 单计划最多 366 天、200 个任务（AI 生成最多 160 个）。
+14. 提供了 `Dockerfile` / `docker-compose.yml`，但当前环境没有安装 Docker，未实际构建镜像；直接 Node 部署已完整验证。
 
 ---
 
 ## 10. 部署
 
-**免费推荐：[Alwaysdata Free](docs/alwaysdata.md)**。0€/月、1GB 持久化磁盘、256MB 内存、Node.js 24、SSH、免费 HTTPS 子域名；SQLite 数据不会丢，也不需要信用卡。
+**免费推荐：[Supabase Postgres + Render Free](docs/supabase.md)**。Supabase 免费托管 PostgreSQL（500MB），Render 免费运行 Express；不需要 Render 持久化磁盘，数据在 Supabase，免费额度内 0 美元。注意 Supabase 免费项目 7 天无活动会暂停，Render 免费实例会休眠。
+
+如果不想用外部数据库，也可以用 [Alwaysdata Free](docs/alwaysdata.md)：1GB 持久化磁盘 + SQLite，256MB 内存。
 
 其他方式详见 [`docs/deployment.md`](docs/deployment.md)。核心步骤：
 
@@ -386,6 +398,8 @@ studyFlowAI/
 npm ci
 npm run build
 NODE_ENV=production \
+DATABASE_URL=postgresql://... \
+DATABASE_SSL=true \
 JWT_SECRET=... \
 DEEPSEEK_API_KEY=... \
 COOKIE_SECURE=true \
@@ -394,18 +408,19 @@ TRUST_PROXY=1 \
 node server/index.js
 ```
 
-推荐 Nginx / Caddy 反向代理 + HTTPS + 持久化磁盘（SQLite 文件），单实例运行。数据库文件需要定期备份。
+生产环境建议 Nginx / Caddy 反向代理 + HTTPS。使用 Supabase 时无需本地数据库文件；使用 SQLite 时把文件放在持久化磁盘并定期备份。单实例仍是最简单可靠的部署方式。
 
 ### GitHub 仓库与一键部署
 
 仓库已包含：
 
-- `.github/workflows/ci.yml`：推送 / PR 自动构建、23 个后端测试、18 个前端测试、25 项冒烟检查
-- `render.yaml`：Render Blueprint（**需要付费 Starter 实例才能使用持久化磁盘**，免费实例会丢 SQLite 数据）
-- `docs/alwaysdata.md`：免费、持久化 SQLite 的 Alwaysdata 部署步骤（推荐）
+- `.github/workflows/ci.yml`：推送 / PR 自动构建、SQLite 与 PostgreSQL 双后端测试、18 个前端测试、25 项冒烟检查
+- `render.yaml`：Render 免费 Web Service + Supabase Postgres（无磁盘、无付费实例）
+- `docs/supabase.md`：Supabase 建库、Session Pooler、Render 部署和免费额度说明（推荐）
+- `docs/alwaysdata.md`：Alwaysdata Free + SQLite 的免费备用方案
 - `docs/github.md`：从创建仓库、推送、GitHub Actions 到云端部署的完整步骤
 
-推荐路径：**GitHub 托管代码 + Alwaysdata Free 运行全栈实例**。GitHub Pages 只能托管静态文件，无法运行 Express、SQLite 和 DeepSeek 服务端调用，因此不要用 Pages 部署本项目。
+推荐路径：**GitHub 托管代码 + Supabase 托管数据库 + Render Free 运行 Express**。GitHub Pages 只能托管静态文件，无法运行 Express、数据库和 DeepSeek 服务端调用，因此不要用 Pages 部署本项目。
 
 ---
 
@@ -413,7 +428,7 @@ node server/index.js
 
 详见 [`docs/resume.md`](docs/resume.md)。一句话版本：
 
-> StudyFlow AI：一个真实接入 DeepSeek 的个性化学习规划平台。独立完成 Vue 3 + Express + SQLite 全栈开发，设计完整 Design System；实现结构化 AI 输出、时间约束归一化、请求幂等与 Token 成本追踪；通过 41 个自动化测试、25 项端到端冒烟检查与桌面/移动视觉验收。
+> StudyFlow AI：一个真实接入 DeepSeek 的个性化学习规划平台。独立完成 Vue 3 + Express + SQLite/PostgreSQL 全栈开发，设计完整 Design System；实现结构化 AI 输出、时间约束归一化、请求幂等与 Token 成本追踪；通过 41 个自动化测试、25 项端到端冒烟检查与桌面/移动视觉验收。
 
 ---
 
@@ -422,7 +437,8 @@ node server/index.js
 - [架构与技术决策](docs/architecture.md)
 - [API 文档](docs/api.md)
 - [部署指南](docs/deployment.md)
-- [Alwaysdata 免费部署（推荐）](docs/alwaysdata.md)
+- [Supabase + Render 免费部署（推荐）](docs/supabase.md)
+- [Alwaysdata 免费部署（备用）](docs/alwaysdata.md)
 - [GitHub 推送与云端部署](docs/github.md)
 - [简历项目描述与技术亮点](docs/resume.md)
 - [环境变量示例](.env.example)

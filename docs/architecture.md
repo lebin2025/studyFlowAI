@@ -10,7 +10,7 @@ flowchart LR
   F -->|Axios /api| A[Express 应用]
   A --> M[鉴权 / Zod 校验 / 限流 / 安全头]
   M --> S[业务服务层]
-  S --> D[(SQLite WAL)]
+  S --> D[(SQLite / PostgreSQL)]
   S -->|JSON Output| AI[DeepSeek API]
   S -->|Token & 费用| D
 ```
@@ -25,7 +25,7 @@ flowchart LR
 | 样式 | 原生 CSS + CSS Variables | 完全掌控视觉，不引入 UI 框架；Design Token 统一 |
 | 图标 | lucide-vue-next | 轻量、统一线性风格、按需 tree-shaking |
 | 后端 | Node.js + Express 4 | 简单可靠，部署成本低 |
-| 数据库 | SQLite + better-sqlite3 | 零外部服务、同步 API、事务简单；适合个人项目和小规模部署 |
+| 数据库 | SQLite（本地）/ Supabase PostgreSQL（生产） | 本地零配置；生产用托管 Postgres，免费托管且数据不依赖单机磁盘；同一套异步数据层切换 |
 | 校验 | Zod | 前后端字段约束明确，错误信息可用 |
 | 鉴权 | JWT + HttpOnly Cookie | 避免 localStorage 被 XSS 直接读取；HttpOnly 降低 Token 泄露面 |
 | 密码 | bcryptjs (cost 12) | 纯 JS、跨平台安装简单，避免原生编译依赖 |
@@ -94,7 +94,7 @@ flowchart TD
   P --> Q[缓存草稿]
   Q --> R[返回可编辑预览]
   R --> S[用户保存 POST /api/plans]
-  S --> T[Zod + 事务写入 SQLite]
+  S --> T[Zod + 事务写入数据库]
 ```
 
 ### `normalizePlan` 做了什么
@@ -188,7 +188,7 @@ erDiagram
 
 - `tasks` 冗余 `user_id`：统计与权限查询更直接，也避免只依赖 JOIN。
 - `stage_id` 可空：AI 调整或用户移动任务后，保留任务但允许暂不归属阶段（`ON DELETE SET NULL`）。
-- `plans.risks` / `study_weekdays` 以 JSON 文本存储：SQLite 无原生数组，读取时统一解析并有默认值。
+- `plans.risks` / `study_weekdays` 以 JSON 文本存储：关系数据库没有统一数组类型，读取时统一解析并有默认值。
 - `ai_usage` 独立于 `ai_drafts`：一个记录成本，一个负责幂等，语义清晰。
 - 状态与优先级在数据库层有 `CHECK` 约束；API 层还有 Zod 校验。
 
@@ -200,7 +200,7 @@ erDiagram
 sequenceDiagram
   participant B as 浏览器
   participant A as Express
-  participant D as SQLite
+  participant D as SQLite / PostgreSQL
   B->>A: POST /api/auth/login (email,password)
   A->>D: SELECT password_hash, token_version
   A->>A: bcrypt.compare
@@ -260,12 +260,28 @@ sequenceDiagram
 
 ## 8. 部署拓扑
 
+### Supabase + Render Free（推荐）
+
 ```mermaid
 flowchart LR
-  C[用户浏览器] -->|HTTPS| N[Nginx / Caddy]
-  N -->|127.0.0.1:8787| E[Node.js + Express]
+  C[用户浏览器] -->|HTTPS| R[Render Free / Express]
+  R -->|TLS + pg pool| S[(Supabase PostgreSQL)]
+  R -->|HTTPS| D[DeepSeek API]
+```
+
+- Render 免费实例无持久化磁盘，数据库完全在 Supabase
+- 连接串使用 **Session Pooler**（IPv4）；`DATABASE_SSL=true`
+- 启动时自动建表，事务级 advisory lock 防止多实例并发建表
+- 免费限制：Supabase 500MB、7 天无活动暂停；Render 空闲休眠
+
+### 单机 / VPS / Alwaysdata（SQLite 备选）
+
+```mermaid
+flowchart LR
+  C[用户浏览器] -->|HTTPS| N[Nginx / Caddy / Alwaysdata]
+  N -->|127.0.0.1:PORT| E[Node.js + Express]
   E --> S[(SQLite 文件 / 持久卷)]
   E -->|HTTPS| D[DeepSeek API]
 ```
 
-生产建议单实例运行，SQLite 放在持久化磁盘；反向代理设置 `X-Forwarded-*`，应用配置 `TRUST_PROXY=1`。如果要水平扩展，需要把数据库迁移到 PostgreSQL、限流改用 Redis、AI 草稿缓存改用共享存储。
+单实例运行，SQLite 放在持久化磁盘；反向代理设置 `X-Forwarded-*`，应用配置 `TRUST_PROXY=1`。真正水平扩展还需要 Redis 限流和共享任务队列。

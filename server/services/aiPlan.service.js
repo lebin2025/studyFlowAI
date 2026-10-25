@@ -359,9 +359,9 @@ export const normalizePlan = ({ raw, base, allowOverrides = false, today = today
   }
 }
 
-const recordFailure = ({ userId, planId, requestId, kind, error, latencyMs }) => {
+const recordFailure = async ({ userId, planId, requestId, kind, error, latencyMs }) => {
   try {
-    recordAiUsage({
+    await recordAiUsage({
       userId,
       planId,
       requestId,
@@ -378,7 +378,7 @@ const recordFailure = ({ userId, planId, requestId, kind, error, latencyMs }) =>
 }
 
 export const generateStudyPlan = async (userId, input, requestId) => {
-  const cached = getDraft(userId, requestId, 'generate')
+  const cached = await getDraft(userId, requestId, 'generate')
   if (cached) {
     return { ...cached, meta: { ...cached.meta, cached: true } }
   }
@@ -414,7 +414,7 @@ export const generateStudyPlan = async (userId, input, requestId) => {
       today,
     })
     const usage = normalizeUsage(result.usage)
-    recordAiUsage({
+    await recordAiUsage({
       userId,
       planId: null,
       requestId,
@@ -439,7 +439,7 @@ export const generateStudyPlan = async (userId, input, requestId) => {
         generatedAt: nowIsoString(),
       },
     }
-    saveDraft(userId, requestId, 'generate', payload)
+    await saveDraft(userId, requestId, 'generate', payload)
     return payload
   } catch (error) {
     if (error?.name === 'ZodError' || error?.issues) {
@@ -447,7 +447,7 @@ export const generateStudyPlan = async (userId, input, requestId) => {
         issues: error.issues?.slice(0, 5),
         latencyMs: Date.now() - startedAt,
       })
-      recordFailure({
+      await recordFailure({
         userId,
         requestId,
         kind: 'generate',
@@ -456,7 +456,7 @@ export const generateStudyPlan = async (userId, input, requestId) => {
       })
       throw new AppError(502, 'AI_BAD_OUTPUT', 'AI 返回的计划结构不完整，请重试')
     }
-    recordFailure({
+    await recordFailure({
       userId,
       requestId,
       kind: 'generate',
@@ -468,9 +468,9 @@ export const generateStudyPlan = async (userId, input, requestId) => {
 }
 
 export const adjustStudyPlan = async (userId, planId, input, requestId) => {
-  const detail = getPlanDetail(userId, planId)
+  const detail = await getPlanDetail(userId, planId)
   const draftKey = `${planId}:${requestId}`
-  const cached = getDraft(userId, draftKey, 'adjust')
+  const cached = await getDraft(userId, draftKey, 'adjust')
   if (cached) {
     return { ...cached, meta: { ...cached.meta, cached: true } }
   }
@@ -542,7 +542,7 @@ export const adjustStudyPlan = async (userId, planId, input, requestId) => {
       })
     }
 
-    recordAiUsage({
+    await recordAiUsage({
       userId,
       planId,
       requestId,
@@ -579,11 +579,11 @@ export const adjustStudyPlan = async (userId, planId, input, requestId) => {
         generatedAt: nowIsoString(),
       },
     }
-    saveDraft(userId, draftKey, 'adjust', payload)
+    await saveDraft(userId, draftKey, 'adjust', payload)
     return payload
   } catch (error) {
     if (error?.name === 'ZodError' || error?.issues) {
-      recordFailure({
+      await recordFailure({
         userId,
         planId,
         requestId,
@@ -593,7 +593,7 @@ export const adjustStudyPlan = async (userId, planId, input, requestId) => {
       })
       throw new AppError(502, 'AI_BAD_OUTPUT', 'AI 返回的调整方案结构不完整，请重试')
     }
-    recordFailure({
+    await recordFailure({
       userId,
       planId,
       requestId,
@@ -605,8 +605,8 @@ export const adjustStudyPlan = async (userId, planId, input, requestId) => {
   }
 }
 
-export const applyAdjustment = (userId, planId, { proposedPlan, keepCompleted, keepManual }) => {
-  const current = getPlanDetail(userId, planId)
+export const applyAdjustment = async (userId, planId, { proposedPlan, keepCompleted, keepManual }) => {
+  const current = await getPlanDetail(userId, planId)
   const today = todayISO(env.timezone)
 
   if (
@@ -664,84 +664,83 @@ export const applyAdjustment = (userId, planId, { proposedPlan, keepCompleted, k
   const timestamp = nowIsoString()
   const warnings = [...normalized.warnings]
 
-  const run = db.transaction(() => {
+  await db.transaction(async (tx) => {
     // Detach preserved tasks before their stages are replaced.
-    db.prepare('UPDATE tasks SET stage_id = NULL WHERE plan_id = ?').run(planId)
+    await tx.run('UPDATE tasks SET stage_id = NULL WHERE plan_id = ?', [planId])
 
     for (const task of current.tasks) {
       if (!preservedIds.has(task.id)) {
-        db.prepare('DELETE FROM tasks WHERE id = ? AND plan_id = ?').run(task.id, planId)
+        await tx.run('DELETE FROM tasks WHERE id = ? AND plan_id = ?', [task.id, planId])
       }
     }
-    db.prepare('DELETE FROM plan_stages WHERE plan_id = ?').run(planId)
+    await tx.run('DELETE FROM plan_stages WHERE plan_id = ?', [planId])
 
-    const stageIds = normalized.plan.stages.map((stage, index) =>
-      Number(
-        db
-          .prepare(
-            `INSERT INTO plan_stages
-              (plan_id, title, objective, start_date, end_date, sort_order, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          )
-          .run(
-            planId,
-            stage.title,
-            stage.objective,
-            stage.startDate,
-            stage.endDate,
-            index,
-            timestamp,
-          ).lastInsertRowid,
-      ),
-    )
+    const stageIds = []
+    for (const [index, stage] of normalized.plan.stages.entries()) {
+      const stageId = await tx.insert(
+        `INSERT INTO plan_stages
+          (plan_id, title, objective, start_date, end_date, sort_order, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          planId,
+          stage.title,
+          stage.objective,
+          stage.startDate,
+          stage.endDate,
+          index,
+          timestamp,
+        ],
+      )
+      stageIds.push(stageId)
+    }
 
-    normalized.plan.tasks.forEach((task, index) => {
-      db.prepare(
+    for (const [index, task] of normalized.plan.tasks.entries()) {
+      await tx.run(
         `INSERT INTO tasks
           (plan_id, stage_id, user_id, title, description, task_date, duration_minutes,
            priority, completion_criteria, is_completed, completed_at, is_review,
            actual_minutes, source, sort_order, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, ?, NULL, 'ai_adjust', ?, ?, ?)`,
-      ).run(
-        planId,
-        stageIds[task.stageIndex] ?? null,
-        userId,
-        task.title,
-        task.description,
-        task.taskDate,
-        task.durationMinutes,
-        task.priority,
-        task.completionCriteria,
-        task.isReview ? 1 : 0,
-        index,
-        timestamp,
-        timestamp,
+        [
+          planId,
+          stageIds[task.stageIndex] ?? null,
+          userId,
+          task.title,
+          task.description,
+          task.taskDate,
+          task.durationMinutes,
+          task.priority,
+          task.completionCriteria,
+          task.isReview ? 1 : 0,
+          index,
+          timestamp,
+          timestamp,
+        ],
       )
-    })
+    }
 
-    db.prepare(
+    await tx.run(
       `UPDATE plans SET title = ?, overview = ?, advice = ?, risks = ?, end_date = ?,
          daily_minutes = ?, study_weekdays = ?, updated_at = ?
        WHERE id = ? AND user_id = ?`,
-    ).run(
-      normalized.plan.title,
-      normalized.plan.overview,
-      normalized.plan.advice,
-      JSON.stringify(normalized.plan.risks),
-      normalized.plan.endDate,
-      normalized.plan.dailyMinutes,
-      JSON.stringify(normalized.plan.studyWeekdays),
-      timestamp,
-      planId,
-      userId,
+      [
+        normalized.plan.title,
+        normalized.plan.overview,
+        normalized.plan.advice,
+        JSON.stringify(normalized.plan.risks),
+        normalized.plan.endDate,
+        normalized.plan.dailyMinutes,
+        JSON.stringify(normalized.plan.studyWeekdays),
+        timestamp,
+        planId,
+        userId,
+      ],
     )
 
-    recalcPlanStatus(planId, db)
+    await recalcPlanStatus(planId, tx)
   })
 
-  run()
-
-  const updated = getPlanDetail(userId, planId)
+  const updated = await getPlanDetail(userId, planId)
   const preservedCompleted = preserved.filter((task) => task.isCompleted).length
   const preservedManual = preserved.filter(
     (task) => !task.isCompleted && task.source === 'manual',

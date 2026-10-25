@@ -50,6 +50,9 @@ export const env = {
   trustProxy: bool(process.env.TRUST_PROXY, false),
 
   dbPath: dbPathRaw === ':memory:' ? ':memory:' : path.resolve(ROOT_DIR, dbPathRaw),
+  databaseUrl: (process.env.DATABASE_URL || process.env.SUPABASE_DB_URL || '').trim(),
+  databaseSsl: bool(process.env.DATABASE_SSL, true),
+  dbPoolMax: int(process.env.DB_POOL_MAX, 5),
 
   jwt: {
     secret: jwtSecret,

@@ -1,6 +1,6 @@
 # 部署指南
 
-> **免费推荐：** [Alwaysdata Free](alwaysdata.md)（1GB 持久化磁盘、256MB 内存、Node.js、SSH、免费 HTTPS，无需信用卡）。GitHub Pages 无法运行本项目的 Node / SQLite 后端；Render 免费实例没有持久化磁盘，SQLite 会丢数据。
+> **免费推荐：** [Supabase Postgres + Render Free](supabase.md)（Supabase 500MB 免费数据库，Render 免费 Web Service，无持久化磁盘）。如果不想用外部数据库，可以用 [Alwaysdata Free](alwaysdata.md)（1GB 持久化磁盘 + SQLite）。GitHub Pages 无法运行本项目的 Node 后端。
 
 > 想从 GitHub 自动部署？仓库已提供 `.github/workflows/ci.yml` 与 `render.yaml`，完整步骤见 [github.md](github.md)。
 
@@ -172,9 +172,45 @@ docker run -d --name studyflow \
   studyflow-ai
 ```
 
+使用 Supabase 时不需要 SQLite 卷，改为：
+
+```bash
+docker run -d --name studyflow \
+  -p 8787:8787 \
+  -e NODE_ENV=production \
+  -e JWT_SECRET="..." \
+  -e DEEPSEEK_API_KEY="sk-..." \
+  -e DATABASE_URL="postgresql://..." \
+  -e DATABASE_SSL=true \
+  -e COOKIE_SECURE=true \
+  -e TRUST_PROXY=1 \
+  studyflow-ai
+```
+
 ---
 
 ## 5. 数据库与备份
+
+### PostgreSQL / Supabase（生产推荐）
+
+设置 `DATABASE_URL` 后应用使用 PostgreSQL，不再读写本地 SQLite 文件：
+
+```ini
+DATABASE_URL=postgresql://...
+DATABASE_SSL=true
+DB_POOL_MAX=5
+```
+
+- 启动时自动执行 `server/db/schema.postgres.sql`
+- 使用事务级 advisory lock，多实例同时启动不会重复建表
+- Supabase 免费项目 7 天无活动会暂停；重要数据定期 `pg_dump`
+- Render 免费服务没有磁盘也可以，数据全部在 Supabase
+
+```bash
+pg_dump "$DATABASE_URL" > studyflow-backup-$(date +%F).sql
+```
+
+### SQLite（本地 / Alwaysdata / VPS）
 
 SQLite 文件默认：`server/data/studyflow.db`（Docker 中 `/data/studyflow.db`）。
 
@@ -192,7 +228,7 @@ sqlite3 server/data/studyflow.db ".backup 'backup-$(date +%F).db'"
 ```
 
 - 恢复：停止服务 → 替换 `.db` → 删除旧 `-wal/-shm` → 启动
-- 迁移：目前 schema 使用 `CREATE TABLE IF NOT EXISTS` + `PRAGMA user_version = 1`；未来新增字段需要编写显式迁移脚本
+- 迁移：SQLite 使用 `CREATE TABLE IF NOT EXISTS` + `PRAGMA user_version = 1`；PostgreSQL 使用 `CREATE TABLE IF NOT EXISTS` + advisory lock
 - 数据目录必须可写；`server/data/` 已在 `.gitignore` 中
 
 ---
@@ -200,14 +236,16 @@ sqlite3 server/data/studyflow.db ".backup 'backup-$(date +%F).db'"
 ## 6. 平台部署提示
 
 ### Render / Railway / Fly.io
-- 使用持久卷挂载 `/data`，设置 `DB_PATH=/data/studyflow.db`
+- 使用 Supabase PostgreSQL：设置 `DATABASE_URL`、`DATABASE_SSL=true`，不需要持久卷
+- 也可以使用持久卷 + SQLite：挂载 `/data`，设置 `DB_PATH=/data/studyflow.db`
 - 设置所有环境变量，尤其是 `JWT_SECRET`、`DEEPSEEK_API_KEY`
 - 健康检查路径：`/api/health`
-- 单实例；不要开多副本共享同一个 SQLite 文件
+- SQLite 模式单实例；PostgreSQL 模式仍建议单实例，因为限流在进程内存中
 
 ### Vercel / Netlify
-- 不适合直接部署本项目的后端（常驻 Node + SQLite 文件）
-- 若要使用 Serverless，需要把数据库换 PostgreSQL、把 AI 草稿缓存换共享存储，并重新设计限流
+- 配合 Supabase PostgreSQL 可以部署 Serverless API，但需要把 Express 路由改造成对应平台函数
+- AI 非流式请求可能超过平台默认函数超时；当前项目推荐 Render / 常驻 Node
+- 不要在前端放 DeepSeek Key
 
 ### 反向代理与超时
 - AI 非流式请求默认最长 180 秒；Nginx `proxy_read_timeout` 至少 240s
@@ -223,14 +261,14 @@ sqlite3 server/data/studyflow.db ".backup 'backup-$(date +%F).db'"
 - [ ] `COOKIE_SECURE=true` 且已启用 HTTPS
 - [ ] `APP_ORIGIN` 与真实域名一致
 - [ ] `TRUST_PROXY=1`（在可信代理后）
-- [ ] `server/data` 或 `/data` 已挂载持久化磁盘并设置权限
+- [ ] `DATABASE_URL` 已配置且 `DATABASE_SSL=true`（Supabase），或 `server/data` / `/data` 已挂载持久化磁盘并设置权限（SQLite）
 - [ ] `/api/health` 返回 `database: ok`、`aiConfigured: true`
 - [ ] `npm run verify:ai` 成功
 - [ ] 已测试注册、登录、生成计划、保存、完成任务、统计
-- [ ] 数据库备份任务已配置
+- [ ] 数据库备份任务已配置（Postgres `pg_dump` 或 SQLite `.backup`）
 - [ ] 日志中不包含 Key / 密码 / Cookie
 - [ ] 已限制服务器出站访问（只允许 DeepSeek API 等必要域名）可选
-- [ ] 单实例运行（SQLite + 内存限流）
+- [ ] 单实例运行（SQLite + 内存限流；PostgreSQL 仍建议单实例）
 
 ---
 
@@ -265,4 +303,4 @@ chown -R www-data:www-data server/data
 - 缩短计划周期，或降低 `DEEPSEEK_MAX_TOKENS`
 
 ### 多实例部署数据不一致
-SQLite + 内存限流只适用于单实例。需要 PostgreSQL + Redis + 共享草稿缓存。
+SQLite 只适用于单实例。PostgreSQL / Supabase 可以由多个实例共享数据库，但当前限流在进程内存中，多实例仍需要 Redis 限流和共享任务队列。

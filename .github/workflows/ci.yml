@@ -19,6 +19,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: studyflow_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d studyflow_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,8 +55,14 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Backend tests
+      - name: Backend tests (SQLite)
         run: npm run test:server
+
+      - name: Backend tests (PostgreSQL)
+        run: npm run test:server
+        env:
+          DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/studyflow_test
+          DATABASE_SSL: 'false'
 
       - name: Frontend tests
         run: npm run test:unit -- --run

@@ -10,7 +10,7 @@ const SORT_COLUMNS = {
   created: 'p.created_at',
   start: 'p.start_date',
   end: 'p.end_date',
-  title: 'p.title COLLATE NOCASE',
+  title: 'LOWER(p.title)',
   progress: 'progress',
 }
 
@@ -33,33 +33,33 @@ const planSelect = `
   FROM plans p
 `
 
-export const getPlanRow = (userId, planId, db = getDb()) => {  const row = db
-    .prepare(`${planSelect} WHERE p.id = ? AND p.user_id = ?`)
-    .get(planId, userId)
+export const getPlanRow = async (userId, planId, db = getDb()) => {
+  const row = await db.get(`${planSelect} WHERE p.id = ? AND p.user_id = ?`, [planId, userId])
   if (!row) throw notFound('没有找到这个学习计划')
   return row
 }
 
-export const getPlanDetail = (userId, planId) => {
-  const db = getDb()
-  const row = getPlanRow(userId, planId, db)
-  const stages = db
-    .prepare('SELECT * FROM plan_stages WHERE plan_id = ? ORDER BY sort_order ASC, id ASC')
-    .all(planId)
-    .map(mapStage)
-  const tasks = db
-    .prepare(
-      `SELECT * FROM tasks WHERE plan_id = ?
-       ORDER BY task_date ASC,
-         CASE priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END,
-         sort_order ASC, id ASC`,
-    )
-    .all(planId)
-    .map(mapTask)
-  return { plan: mapPlan(row), stages, tasks }
+export const getPlanDetail = async (userId, planId, db = getDb()) => {
+  const row = await getPlanRow(userId, planId, db)
+  const stageRows = await db.all(
+    'SELECT * FROM plan_stages WHERE plan_id = ? ORDER BY sort_order ASC, id ASC',
+    [planId],
+  )
+  const taskRows = await db.all(
+    `SELECT * FROM tasks WHERE plan_id = ?
+     ORDER BY task_date ASC,
+       CASE priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END,
+       sort_order ASC, id ASC`,
+    [planId],
+  )
+  return {
+    plan: mapPlan(row),
+    stages: stageRows.map(mapStage),
+    tasks: taskRows.map(mapTask),
+  }
 }
 
-export const listPlans = (userId, filters = {}) => {
+export const listPlans = async (userId, filters = {}) => {
   const db = getDb()
   const conditions = ['p.user_id = ?']
   const params = [userId]
@@ -82,21 +82,20 @@ export const listPlans = (userId, filters = {}) => {
 
   const sortKey = SORT_COLUMNS[filters.sort] || SORT_COLUMNS.updated
   const direction = filters.order === 'asc' ? 'ASC' : 'DESC'
-  const rows = db
-    .prepare(
-      `${planSelect} WHERE ${conditions.join(' AND ')} ORDER BY ${sortKey} ${direction}, p.id DESC`,
-    )
-    .all(...params)
+  const rows = await db.all(
+    `${planSelect} WHERE ${conditions.join(' AND ')} ORDER BY ${sortKey} ${direction}, p.id DESC`,
+    params,
+  )
 
-  const subjects = db
-    .prepare('SELECT DISTINCT subject FROM plans WHERE user_id = ? ORDER BY subject COLLATE NOCASE')
-    .all(userId)
-    .map((row) => row.subject)
+  const subjectRows = await db.all(
+    'SELECT subject FROM plans WHERE user_id = ? GROUP BY subject ORDER BY LOWER(subject)',
+    [userId],
+  )
 
   return {
     items: rows.map((row) => mapPlan(row)),
     total: rows.length,
-    subjects,
+    subjects: subjectRows.map((row) => row.subject),
   }
 }
 
@@ -119,18 +118,17 @@ export const assertPlanWindow = (plan, taskDate) => {
   }
 }
 
-export const createPlan = (userId, input) => {
+export const createPlan = async (userId, input) => {
   const db = getDb()
   const now = nowIsoString()
-  const create = db.transaction(() => {
-    const result = db
-      .prepare(
-        `INSERT INTO plans
-          (user_id, title, goal, subject, level, start_date, end_date, daily_minutes,
-           study_weekdays, preferences, overview, risks, advice, status, source, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?)`,
-      )
-      .run(
+
+  const planId = await db.transaction(async (tx) => {
+    const id = await tx.insert(
+      `INSERT INTO plans
+        (user_id, title, goal, subject, level, start_date, end_date, daily_minutes,
+         study_weekdays, preferences, overview, risks, advice, status, source, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?)`,
+      [
         userId,
         input.title,
         input.goal,
@@ -147,65 +145,64 @@ export const createPlan = (userId, input) => {
         input.source || 'ai',
         now,
         now,
-      )
-    const planId = Number(result.lastInsertRowid)
+      ],
+    )
 
     const stageIds = []
     const stages = []
-    input.stages.forEach((stage, index) => {
-      const stageResult = db
-        .prepare(
-          `INSERT INTO plan_stages (plan_id, title, objective, start_date, end_date, sort_order, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        )
-        .run(
-          planId,
+    for (const [index, stage] of input.stages.entries()) {
+      const stageId = await tx.insert(
+        `INSERT INTO plan_stages (plan_id, title, objective, start_date, end_date, sort_order, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id,
           stage.title,
           stage.objective || '',
           stage.startDate,
           stage.endDate,
           stage.sortOrder ?? index,
           now,
-        )
-      stageIds.push(Number(stageResult.lastInsertRowid))
-      stages.push({ ...stage, id: Number(stageResult.lastInsertRowid) })
-    })
+        ],
+      )
+      stageIds.push(stageId)
+      stages.push({ ...stage, id: stageId })
+    }
 
-    input.tasks.forEach((task, index) => {
-      db.prepare(
+    for (const [index, task] of input.tasks.entries()) {
+      await tx.run(
         `INSERT INTO tasks
           (plan_id, stage_id, user_id, title, description, task_date, duration_minutes,
            priority, completion_criteria, is_completed, completed_at, is_review,
            actual_minutes, source, sort_order, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, ?, NULL, ?, ?, ?, ?)`,
-      ).run(
-        planId,
-        stageIdForTask(task, stageIds, stages),
-        userId,
-        task.title,
-        task.description || '',
-        task.taskDate,
-        task.durationMinutes,
-        task.priority,
-        task.completionCriteria || '',
-        task.isReview ? 1 : 0,
-        input.source === 'manual' ? 'manual' : 'ai',
-        index,
-        now,
-        now,
+        [
+          id,
+          stageIdForTask(task, stageIds, stages),
+          userId,
+          task.title,
+          task.description || '',
+          task.taskDate,
+          task.durationMinutes,
+          task.priority,
+          task.completionCriteria || '',
+          task.isReview ? 1 : 0,
+          input.source === 'manual' ? 'manual' : 'ai',
+          index,
+          now,
+          now,
+        ],
       )
-    })
+    }
 
-    return planId
+    return id
   })
 
-  const planId = create()
   return getPlanDetail(userId, planId)
 }
 
-export const updatePlan = (userId, planId, patch) => {
+export const updatePlan = async (userId, planId, patch) => {
   const db = getDb()
-  const current = getPlanRow(userId, planId, db)
+  const current = await getPlanRow(userId, planId, db)
   const merged = {
     title: patch.title ?? current.title,
     goal: patch.goal ?? current.goal,
@@ -235,78 +232,79 @@ export const updatePlan = (userId, planId, patch) => {
   }
 
   if (patch.startDate || patch.endDate) {
-    const outside = db
-      .prepare(
-        'SELECT COUNT(*) AS count FROM tasks WHERE plan_id = ? AND (task_date < ? OR task_date > ?)',
-      )
-      .get(planId, merged.startDate, merged.endDate)
-    if (outside.count > 0) {
+    const outside = await db.get(
+      'SELECT COUNT(*) AS count FROM tasks WHERE plan_id = ? AND (task_date < ? OR task_date > ?)',
+      [planId, merged.startDate, merged.endDate],
+    )
+    if (Number(outside.count) > 0) {
       throw conflict(
         'PLAN_RANGE_CONFLICT',
         `有 ${outside.count} 个任务不在新的日期范围内，请先调整这些任务`,
-        { taskCount: outside.count },
+        { taskCount: Number(outside.count) },
       )
     }
   }
 
-  db.prepare(
+  await db.run(
     `UPDATE plans SET title = ?, goal = ?, subject = ?, level = ?, start_date = ?,
        end_date = ?, daily_minutes = ?, study_weekdays = ?, preferences = ?,
        overview = ?, advice = ?, risks = ?, status = ?, updated_at = ?
      WHERE id = ? AND user_id = ?`,
-  ).run(
-    merged.title,
-    merged.goal,
-    merged.subject,
-    merged.level,
-    merged.startDate,
-    merged.endDate,
-    merged.dailyMinutes,
-    JSON.stringify(merged.studyWeekdays),
-    merged.preferences,
-    merged.overview,
-    merged.advice,
-    JSON.stringify(merged.risks),
-    merged.status,
-    nowIsoString(),
-    planId,
-    userId,
+    [
+      merged.title,
+      merged.goal,
+      merged.subject,
+      merged.level,
+      merged.startDate,
+      merged.endDate,
+      merged.dailyMinutes,
+      JSON.stringify(merged.studyWeekdays),
+      merged.preferences,
+      merged.overview,
+      merged.advice,
+      JSON.stringify(merged.risks),
+      merged.status,
+      nowIsoString(),
+      planId,
+      userId,
+    ],
   )
 
-  return getPlanDetail(userId, planId)
+  return getPlanDetail(userId, planId, db)
 }
 
-export const deletePlan = (userId, planId) => {
+export const deletePlan = async (userId, planId) => {
   const db = getDb()
-  getPlanRow(userId, planId, db)
-  db.prepare('DELETE FROM plans WHERE id = ? AND user_id = ?').run(planId, userId)
+  await getPlanRow(userId, planId, db)
+  await db.run('DELETE FROM plans WHERE id = ? AND user_id = ?', [planId, userId])
   return { deleted: true }
 }
 
 /** Keeps plan.status in sync with its tasks (never touches archived plans). */
-export const recalcPlanStatus = (planId, db = getDb()) => {
-  const plan = db.prepare('SELECT id, status FROM plans WHERE id = ?').get(planId)
+export const recalcPlanStatus = async (planId, db = getDb()) => {
+  const plan = await db.get('SELECT id, status FROM plans WHERE id = ?', [planId])
   if (!plan || plan.status === 'archived') return plan?.status
-  const counts = db
-    .prepare(
-      `SELECT COUNT(*) AS total,
-              COALESCE(SUM(is_completed), 0) AS completed
-       FROM tasks WHERE plan_id = ?`,
-    )
-    .get(planId)
-  if (counts.total === 0) return plan.status
-  if (counts.completed === counts.total && plan.status === 'active') {
-    db.prepare("UPDATE plans SET status = 'completed', updated_at = ? WHERE id = ?").run(
+  const counts = await db.get(
+    `SELECT COUNT(*) AS total,
+            COALESCE(SUM(is_completed), 0) AS completed
+     FROM tasks WHERE plan_id = ?`,
+    [planId],
+  )
+  const total = Number(counts.total) || 0
+  const completed = Number(counts.completed) || 0
+  if (total === 0) return plan.status
+  if (completed === total && plan.status === 'active') {
+    await db.run("UPDATE plans SET status = 'completed', updated_at = ? WHERE id = ?", [
       nowIsoString(),
       planId,
-    )
+    ])
     return 'completed'
   }
-  if (counts.completed < counts.total && plan.status === 'completed') {
-    db.prepare("UPDATE plans SET status = 'active', updated_at = ? WHERE id = ?").run(
+  if (completed < total && plan.status === 'completed') {
+    await db.run("UPDATE plans SET status = 'active', updated_at = ? WHERE id = ?", [
       nowIsoString(),
       planId,
-    )
+    ])
     return 'active'
   }
   return plan.status

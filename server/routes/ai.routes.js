@@ -19,20 +19,27 @@ import {
 const router = Router()
 router.use(requireAuth)
 
-router.get('/status', (req, res) => {
-  res.json({
-    ...aiConfigurationStatus(),
-    usage: usageSummary(req.user.id, 30),
-    recent: recentUsage(req.user.id, 5),
-  })
-})
+router.get(
+  '/status',
+  asyncHandler(async (req, res) => {
+    res.json({
+      ...aiConfigurationStatus(),
+      usage: await usageSummary(req.user.id, 30),
+      recent: await recentUsage(req.user.id, 5),
+    })
+  }),
+)
 
-router.get('/usage', validate(aiUsageQuerySchema, 'query'), (req, res) => {
-  res.json({
-    summary: usageSummary(req.user.id, 30),
-    recent: recentUsage(req.user.id, req.validated.query.limit),
-  })
-})
+router.get(
+  '/usage',
+  validate(aiUsageQuerySchema, 'query'),
+  asyncHandler(async (req, res) => {
+    res.json({
+      summary: await usageSummary(req.user.id, 30),
+      recent: await recentUsage(req.user.id, req.validated.query.limit),
+    })
+  }),
+)
 
 router.post(
   '/plans',
@@ -66,14 +73,14 @@ router.post(
   '/plans/:planId/adjust/apply',
   validate(aiPlanIdParamSchema, 'params'),
   validate(aiApplySchema),
-  (req, res) => {
-    const result = applyAdjustment(
+  asyncHandler(async (req, res) => {
+    const result = await applyAdjustment(
       req.user.id,
       req.validated.params.planId,
       req.validated.body,
     )
     res.json(result)
-  },
+  }),
 )
 
 export default router

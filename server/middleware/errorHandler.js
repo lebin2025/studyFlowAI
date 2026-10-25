@@ -24,11 +24,16 @@ export const errorHandler = (err, req, res, next) => {
     status = 413
     code = 'PAYLOAD_TOO_LARGE'
     message = '提交的内容过大'
-  } else if (typeof err?.code === 'string' && err.code.startsWith('SQLITE_CONSTRAINT')) {
+  } else if (
+    (typeof err?.code === 'string' && err.code.startsWith('SQLITE_CONSTRAINT')) ||
+    err?.code === '23505' ||
+    err?.code === '23503' ||
+    err?.code === '23514'
+  ) {
     status = 409
     code = 'CONSTRAINT_VIOLATION'
     message =
-      err.code === 'SQLITE_CONSTRAINT_UNIQUE'
+      err.code === 'SQLITE_CONSTRAINT_UNIQUE' || err.code === '23505'
         ? '该数据已存在，请勿重复提交'
         : '提交的数据不符合要求'
     details = undefined

@@ -57,7 +57,7 @@ export const clearSessionCookie = (res) => {
 }
 
 /** Authenticates the request and attaches a fresh user row to req.user. */
-const resolveSession = (req) => {
+const resolveSession = async (req) => {
   const token = readToken(req)
   if (!token) {
     return { error: unauthorized() }
@@ -77,13 +77,12 @@ const resolveSession = (req) => {
     return { error: unauthorized('登录状态无效，请重新登录') }
   }
 
-  const user = getDb()
-    .prepare(
-      `SELECT id, email, display_name AS displayName, bio,
-              token_version AS tokenVersion, created_at AS createdAt
-       FROM users WHERE id = ?`,
-    )
-    .get(userId)
+  const user = await getDb().get(
+    `SELECT id, email, display_name AS displayName, bio,
+            token_version AS tokenVersion, created_at AS createdAt
+     FROM users WHERE id = ?`,
+    [userId],
+  )
 
   if (!user) {
     return { error: unauthorized('账户不存在或已注销') }
@@ -96,14 +95,18 @@ const resolveSession = (req) => {
   return { user: safeUser }
 }
 
-export const requireAuth = (req, res, next) => {
-  const { user, error } = resolveSession(req)
-  if (error) {
+export const requireAuth = async (req, res, next) => {
+  try {
+    const { user, error } = await resolveSession(req)
+    if (error) {
+      next(error)
+      return
+    }
+    req.user = user
+    next()
+  } catch (error) {
     next(error)
-    return
   }
-  req.user = user
-  next()
 }
 
 /**
@@ -111,8 +114,12 @@ export const requireAuth = (req, res, next) => {
  * requests. Used by the lightweight `/auth/session` bootstrap endpoint so a
  * visitor without a cookie does not produce a spurious 401 in the console.
  */
-export const optionalAuth = (req, res, next) => {
-  const { user } = resolveSession(req)
-  if (user) req.user = user
-  next()
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const { user } = await resolveSession(req)
+    if (user) req.user = user
+    next()
+  } catch (error) {
+    next(error)
+  }
 }

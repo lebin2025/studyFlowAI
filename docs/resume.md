@@ -6,25 +6,26 @@
 
 ## 一句话介绍
 
-基于 Vue 3 + Node.js + SQLite 的学习规划平台，真实接入 DeepSeek API，把学习目标拆解为阶段、每日任务与复习安排，并完成计划管理、任务追踪、真实统计和自然语言调整。
+基于 Vue 3 + Node.js + SQLite/PostgreSQL 的学习规划平台，真实接入 DeepSeek API，把学习目标拆解为阶段、每日任务与复习安排，并完成计划管理、任务追踪、真实统计和自然语言调整。
 
 ## 简历项目描述（中文，约 120 字）
 
-> 独立设计并开发 StudyFlow AI：一个真实调用 DeepSeek 的个性化学习规划平台。前端使用 Vue 3 + Vite 构建完整 Design System 与响应式交互；后端使用 Express + SQLite 实现 JWT 鉴权、数据隔离、AI 编排、幂等与成本追踪。实现「目标 → 阶段 → 每日任务 → 完成统计 → AI 调整」闭环，并通过 41 个自动化测试、25 项端到端冒烟检查及桌面/移动视觉验收。
+> 独立设计并开发 StudyFlow AI：一个真实调用 DeepSeek 的个性化学习规划平台。前端使用 Vue 3 + Vite 构建完整 Design System 与响应式交互；后端使用 Express + SQLite/PostgreSQL 实现 JWT 鉴权、数据隔离、AI 编排、幂等与成本追踪。实现「目标 → 阶段 → 每日任务 → 完成统计 → AI 调整」闭环，并通过 41 个自动化测试（SQLite + PostgreSQL）、25 项端到端冒烟检查及桌面/移动视觉验收。
 
 ## 简历要点（可直接放项目经历）
 
-- 独立完成从前端设计系统、后端 API、SQLite 数据建模到部署文档的全栈开发。
+- 独立完成从前端设计系统、后端 API、SQLite/PostgreSQL 数据建模到云端部署的全栈开发。
+- 设计双数据库异步数据层：本地 SQLite、生产 Supabase PostgreSQL；统一查询/事务适配、占位符与 `RETURNING id` 转换、启动自动建表与 advisory lock，并在两种数据库上跑通同一套 23 个后端用例。
 - 设计并实现 DeepSeek 结构化输出流水线：Prompt → JSON Mode → Zod 校验 → 服务端日期/时长归一化 → 事务落库，保证模型输出不会产生越界日期、超每日时长或非法任务。
 - 实现 AI 请求幂等（`requestId` 缓存）、每用户限流、超时重试与 Token 成本记录；Key 仅保存在后端，缺失时返回明确错误而非伪造结果。
 - 设计「先预览、后应用」的 AI 计划调整流程，明确区分已完成 / 手动 / 未完成任务，默认保护用户已经投入的时间。
 - 基于 HttpOnly Cookie + JWT 实现会话，使用 `token_version` 实现修改密码后其他设备立即失效；所有数据接口在后端校验归属，跨用户访问统一 404。
 - 使用原生 CSS Variables 建立完整 Design System，实现桌面、平板、手机三档响应式布局、焦点管理、`prefers-reduced-motion` 与完整空状态。
-- 建立自动化质量保障：23 个后端用例、18 个前端用例、25 项真实 HTTP 冒烟检查，并完成 26 张桌面/移动端截图视觉验收。
+- 建立自动化质量保障：23 个后端用例（SQLite + PostgreSQL 各跑一遍）、18 个前端用例、25 项真实 HTTP 冒烟检查，并完成 26 张桌面/移动端截图视觉验收。
 
 ## 技术栈
 
-`Vue 3` · `Vite` · `JavaScript` · `Vue Router` · `Pinia` · `Axios` · `Node.js` · `Express` · `SQLite` · `better-sqlite3` · `Zod` · `JWT` · `bcryptjs` · `DeepSeek API` · `Vitest` · `Supertest` · `Playwright`（仅验收）
+`Vue 3` · `Vite` · `JavaScript` · `Vue Router` · `Pinia` · `Axios` · `Node.js` · `Express` · `SQLite` · `better-sqlite3` · `PostgreSQL` · `Supabase` · `pg` · `Zod` · `JWT` · `bcryptjs` · `DeepSeek API` · `Render` · `Vitest` · `Supertest` · `Playwright`（仅验收）
 
 ## 技术亮点（面试展开）
 
@@ -59,7 +60,7 @@ AI 只负责生成内容，不负责决定系统行为。所有输出经过：
 
 ### 5. 真实数据而非装饰
 
-统计页的每个数字都来自 SQLite 中的任务记录。没有历史数据时只显示空状态；实际用时只统计用户主动填写的值，不把预计时长冒充实际时长。
+统计页的每个数字都来自 SQLite/PostgreSQL 中的任务记录。没有历史数据时只显示空状态；实际用时只统计用户主动填写的值，不把预计时长冒充实际时长。
 
 ### 6. 设计与工程化
 
@@ -83,7 +84,7 @@ AI 只负责生成内容，不负责决定系统行为。所有输出经过：
 
 > **StudyFlow AI — AI-powered Study Planning Platform** (Solo Full-Stack Project)
 >
-> Built a production-style study planner with Vue 3, Express and SQLite that genuinely integrates the DeepSeek API. Designed a structured-output pipeline (JSON mode → Zod validation → deterministic date/duration normalization → transactional persistence), request idempotency, per-user rate limits and token-cost tracking. Implemented JWT authentication with HttpOnly cookies, per-user data isolation, AI-assisted plan revision with protected completed tasks, and a complete responsive design system. Verified with 41 automated tests, a 25-check HTTP smoke test, and desktop/mobile visual QA.
+> Built a production-style study planner with Vue 3, Express and SQLite/PostgreSQL that genuinely integrates the DeepSeek API. Designed a structured-output pipeline (JSON mode → Zod validation → deterministic date/duration normalization → transactional persistence), request idempotency, per-user rate limits and token-cost tracking. Built an async dual-database layer (SQLite locally, Supabase PostgreSQL in production) and deployed the stack on Render's free tier. Implemented JWT authentication with HttpOnly cookies, per-user data isolation, AI-assisted plan revision with protected completed tasks, and a complete responsive design system. Verified with 41 automated tests across both databases, a 25-check HTTP smoke test, and desktop/mobile visual QA.
 
 ## 注意事项
 
