@@ -572,7 +572,6 @@ const saveDraft = () => {
           <AppButton block :loading="saving" :disabled="saving" @click="save">
             {{ saving ? '正在保存…' : '保存计划' }}
           </AppButton>
-          <p class="summary-card__hint">草稿只保存在当前浏览器，正式保存后才写入账户。</p>
         </div>
       </aside>
     </div>

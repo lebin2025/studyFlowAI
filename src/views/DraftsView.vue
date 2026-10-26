@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import {
   ArrowRight,
   FileText,
-  HardDrive,
   PencilLine,
   Plus,
   Sparkles,
@@ -70,7 +69,7 @@ const confirmDelete = () => {
 
 <template>
   <div class="drafts-page">
-    <PageHeader title="草稿箱" description="仅保存在当前浏览器。">
+    <PageHeader title="草稿箱">
       <template #actions>
         <AppButton to="/app/plans/new" variant="ai">
           <template #icon><Sparkles :size="15" /></template>
@@ -78,11 +77,6 @@ const confirmDelete = () => {
         </AppButton>
       </template>
     </PageHeader>
-
-    <div class="drafts-notice">
-      <HardDrive :size="14" />
-      <span>草稿只保存在当前设备，正式创建后才会写入账户。</span>
-    </div>
 
     <p v-if="drafts.storageError" class="drafts-error" role="alert">{{ drafts.storageError }}</p>
     <p v-if="createError" class="drafts-error" role="alert">{{ createError }}</p>
@@ -140,7 +134,7 @@ const confirmDelete = () => {
     <ConfirmDialog
       :model-value="Boolean(deletingDraft)"
       title="删除这份草稿？"
-      :message="deletingDraft ? `「${deletingDraft.title}」只会从当前浏览器删除。` : ''"
+      :message="deletingDraft ? `「${deletingDraft.title}」删除后无法恢复。` : ''"
       confirm-label="删除草稿"
       @update:model-value="(value) => !value && (deletingDraft = null)"
       @confirm="confirmDelete"

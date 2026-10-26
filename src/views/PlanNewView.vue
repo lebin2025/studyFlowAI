@@ -11,7 +11,6 @@ import {
   KeyRound,
   RotateCcw,
   Save,
-  ShieldCheck,
   Sparkles,
   TriangleAlert,
 } from 'lucide-vue-next'
@@ -323,7 +322,7 @@ const saveDraftNow = ({ manual = false, planPayload = null, previewOverride = nu
     lastSavedAt.value = saved.updatedAt
     if (saved.persisted) {
       autosaveState.value = 'saved'
-      if (manual) ui.success('草稿已保存', '仅保存在当前浏览器')
+      if (manual) ui.success('草稿已保存')
     } else {
       autosaveState.value = 'error'
       draftError.value = drafts.storageError || '草稿保存失败'
@@ -1140,10 +1139,6 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
                 <span>总投入</span>
                 <strong>{{ formatMinutes(totalMinutes) }}</strong>
               </div>
-            </div>
-            <div class="aside-note">
-              <ShieldCheck :size="13" />
-              草稿仅保存在本机，正式创建后写入账户。
             </div>
           </div>
         </aside>
