@@ -2,6 +2,10 @@
 
 > 把大目标，拆成今天的一小步。
 
+**在线演示**：<https://studyflow-ai-hntk.onrender.com>
+
+> Render 免费实例空闲后会休眠，首次打开可能需要 30–60 秒；Supabase 免费项目 7 天无活动会暂停，恢复后数据仍在。
+
 StudyFlow AI 是一个基于大语言模型的个性化学习规划与任务管理平台。它不是又一个待办清单：它真实调用 DeepSeek API，把学习目标拆成阶段、每日任务、完成标准与复习安排，并把「今天该做什么」放在第一位。
 
 - 前端：Vue 3 + Vite + JavaScript + Vue Router + Pinia + Axios
