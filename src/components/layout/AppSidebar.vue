@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ChartNoAxesColumnIncreasing,
+  FileText,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -23,6 +24,7 @@ const loggingOut = ref(false)
 const items = [
   { name: 'dashboard', label: '仪表盘', icon: LayoutDashboard, to: '/app' },
   { name: 'plans', label: '学习计划', icon: NotebookPen, to: '/app/plans' },
+  { name: 'drafts', label: '草稿箱', icon: FileText, to: '/app/drafts' },
   { name: 'tasks', label: '学习任务', icon: ListChecks, to: '/app/tasks' },
   { name: 'stats', label: '学习统计', icon: ChartNoAxesColumnIncreasing, to: '/app/stats' },
 ]
@@ -272,6 +274,52 @@ const logout = async () => {
 @media (max-width: 900px) {
   .sidebar {
     display: none;
+  }
+}
+</style>
+<style scoped>
+.nav-item {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease),
+    box-shadow var(--duration-fast) var(--ease),
+    transform 160ms var(--ease-spring);
+}
+
+.nav-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 18% 20%, rgba(208, 69, 45, 0.08), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease);
+  pointer-events: none;
+}
+
+.nav-item:hover::before,
+.nav-item.is-active::before {
+  opacity: 1;
+}
+
+.nav-item > * {
+  position: relative;
+  z-index: 1;
+}
+
+.nav-item:active {
+  transform: scale(0.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-item,
+  .nav-item::before {
+    transition: none;
+  }
+
+  .nav-item:active {
+    transform: none;
   }
 }
 </style>

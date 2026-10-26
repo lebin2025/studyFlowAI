@@ -246,3 +246,67 @@ const onClick = (event) => {
   flex: none;
 }
 </style>
+<style scoped>
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 0%, rgba(255, 255, 255, 0.2), transparent 58%);
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease);
+  pointer-events: none;
+}
+
+.btn--primary::before,
+.btn--inverse::before {
+  background: radial-gradient(circle at 32% -10%, rgba(255, 255, 255, 0.22), transparent 62%);
+}
+
+.btn--ai::before {
+  background: radial-gradient(circle at 20% 20%, rgba(208, 69, 45, 0.16), transparent 70%);
+}
+
+.btn:hover::before {
+  opacity: 1;
+}
+
+.btn > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn:active {
+  transform: scale(0.975);
+  transition-duration: 80ms;
+}
+
+.btn--primary:hover,
+.btn--inverse:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--ai:hover {
+  box-shadow: 0 8px 24px -20px rgba(208, 69, 45, 0.7);
+}
+
+.btn:hover .btn__label :deep(svg) {
+  transform: translateX(1.5px);
+}
+
+.btn .btn__label :deep(svg) {
+  transition: transform var(--duration) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn::before,
+  .btn .btn__label :deep(svg) {
+    transition: none;
+  }
+
+  .btn:active {
+    transform: none;
+  }
+}
+</style>

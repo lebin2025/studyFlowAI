@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { onBeforeRouteLeave, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import {
   AlertCircle,
   ArrowLeft,
@@ -10,6 +10,7 @@ import {
   Clock3,
   KeyRound,
   RotateCcw,
+  Save,
   ShieldCheck,
   Sparkles,
   TriangleAlert,
@@ -22,7 +23,9 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import AiGeneratingPanel from '@/components/plans/AiGeneratingPanel.vue'
 import AiPlanPreview from '@/components/plans/AiPlanPreview.vue'
 import { aiApi, plansApi } from '@/api/index.js'
+import { useActivityStore } from '@/stores/activity.js'
 import { useAuthStore } from '@/stores/auth.js'
+import { useDraftsStore } from '@/stores/drafts.js'
 import { useUiStore } from '@/stores/ui.js'
 import {
   addDaysISO,
@@ -38,8 +41,11 @@ import { LEVEL_LABELS } from '@/utils/format.js'
 import { validatePlanWindow } from '@/utils/validation.js'
 
 const auth = useAuthStore()
+const activity = useActivityStore()
+const drafts = useDraftsStore()
 const ui = useUiStore()
 const router = useRouter()
+const route = useRoute()
 
 const step = ref(1)
 const maxVisited = ref(1)
@@ -61,6 +67,13 @@ const aiStatusError = ref('')
 
 const regenerateOpen = ref(false)
 let allowLeave = false
+const draftId = ref('')
+const autosaveState = ref('idle')
+const lastSavedAt = ref(0)
+const draftError = ref('')
+const previewSnapshot = ref(null)
+let autosaveTimer = null
+let hydratingDraft = false
 
 const today = todayISO()
 
@@ -214,6 +227,143 @@ const clearDraft = () => {
   }
 }
 
+const hasDraftContent = computed(
+  () => Boolean(form.goal.trim() || form.subject.trim() || preview.value),
+)
+
+const autosaveLabel = computed(() => {
+  if (autosaveState.value === 'saving') return '保存中…'
+  if (autosaveState.value === 'pending') return '待保存'
+  if (autosaveState.value === 'error') return '保存失败'
+  if (autosaveState.value === 'saved' && lastSavedAt.value) {
+    const time = new Date(lastSavedAt.value).toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    return `已保存 ${time}`
+  }
+  return ''
+})
+
+const snapshotForm = () => ({
+  ...form,
+  studyWeekdays: [...form.studyWeekdays],
+})
+
+const applyDraft = (draft) => {
+  if (!draft) return
+  hydratingDraft = true
+  const allowed = [
+    'goal',
+    'subject',
+    'level',
+    'startDate',
+    'endDate',
+    'dailyMinutes',
+    'studyWeekdays',
+    'preferences',
+    'notes',
+  ]
+  allowed.forEach((key) => {
+    if (draft.form?.[key] !== undefined) form[key] = draft.form[key]
+  })
+  form.dailyMinutes = Number(form.dailyMinutes) || 60
+  if (!Array.isArray(form.studyWeekdays) || !form.studyWeekdays.length) {
+    form.studyWeekdays = [...defaultWeekdays]
+  }
+  if (!['beginner', 'intermediate', 'advanced'].includes(form.level)) {
+    form.level = 'intermediate'
+  }
+  draftId.value = draft.id
+  step.value = draft.step || 1
+  maxVisited.value = Math.max(step.value, draft.preview ? 3 : 1)
+  lastSavedAt.value = draft.updatedAt
+  autosaveState.value = 'saved'
+  if (draft.preview) {
+    previewSnapshot.value = draft.preview
+    preview.value = draft.preview
+    previewKey.value += 1
+    showPreview.value = true
+  }
+  hydratingDraft = false
+}
+
+const loadRouteDraft = () => {
+  const id = typeof route.query.draft === 'string' ? route.query.draft : ''
+  if (!id) return
+  const draft = drafts.get(id)
+  if (!draft) {
+    ui.error('草稿不存在或已被删除', '草稿箱')
+    return
+  }
+  applyDraft(draft)
+}
+
+const saveDraftNow = ({ manual = false, planPayload = null, previewOverride = null, updateRoute = true } = {}) => {
+  if (hydratingDraft) return null
+  if (!hasDraftContent.value) {
+    if (manual) ui.info('请先填写目标或科目')
+    return null
+  }
+  autosaveState.value = 'saving'
+  draftError.value = ''
+  try {
+    const saved = drafts.save({
+      id: draftId.value || undefined,
+      form: snapshotForm(),
+      step: step.value,
+      preview: previewOverride || previewSnapshot.value || preview.value,
+      planPayload,
+    })
+    if (!saved) {
+      autosaveState.value = 'idle'
+      return null
+    }
+    draftId.value = saved.id
+    lastSavedAt.value = saved.updatedAt
+    if (saved.persisted) {
+      autosaveState.value = 'saved'
+      if (manual) ui.success('草稿已保存', '仅保存在当前浏览器')
+    } else {
+      autosaveState.value = 'error'
+      draftError.value = drafts.storageError || '草稿保存失败'
+      if (manual) ui.error(draftError.value, '保存草稿失败')
+    }
+    const query = { ...route.query, draft: saved.id }
+    if (updateRoute && route.query.draft !== saved.id) router.replace({ query })
+    return saved
+  } catch (error) {
+    autosaveState.value = 'error'
+    draftError.value = error.message || '草稿保存失败'
+    if (manual) ui.error(draftError.value, '保存草稿失败')
+    return null
+  }
+}
+
+const scheduleAutoSave = () => {
+  if (hydratingDraft || !hasDraftContent.value) return
+  autosaveState.value = 'pending'
+  if (autosaveTimer) window.clearTimeout(autosaveTimer)
+  autosaveTimer = window.setTimeout(() => {
+    autosaveTimer = null
+    saveDraftNow()
+  }, 900)
+}
+
+const saveDraftFromPreview = (payload, planSnapshot = null) => {
+  const snapshot = planSnapshot ? { ...preview.value, plan: planSnapshot } : null
+  previewSnapshot.value = snapshot
+  saveDraftNow({
+    manual: true,
+    planPayload: payload,
+    previewOverride: snapshot,
+  })
+}
+
+const handlePageHide = () => {
+  if (!allowLeave && hasDraftContent.value) saveDraftNow({ updateRoute: false })
+}
+
 const validateStepOne = () => {
   if (!form.goal.trim()) errors.goal = '请描述你的学习目标'
   else if (form.goal.trim().length < 2) errors.goal = '目标至少需要 2 个字符'
@@ -348,6 +498,7 @@ const generate = async ({ retry = false } = {}) => {
   saving.value = false
   saveError.value = ''
   generating.value = true
+  activity.beginAI()
   startTimer()
   controller.value = new AbortController()
 
@@ -367,10 +518,13 @@ const generate = async ({ retry = false } = {}) => {
       },
       { signal: controller.value.signal },
     )
+    previewSnapshot.value = null
     preview.value = result
     previewKey.value += 1
     showPreview.value = true
     maxVisited.value = 3
+    activity.finishAI({ ok: true, message: '学习计划已生成' })
+    saveDraftNow()
     window.scrollTo({ top: 0, behavior: 'smooth' })
   } catch (error) {
     if (error?.isCanceled) {
@@ -378,13 +532,16 @@ const generate = async ({ retry = false } = {}) => {
         code: 'CANCELLED',
         message: '已取消本次生成。你填写的信息都还在，可以随时重试。',
       }
+      activity.clear()
     } else {
       generateError.value = {
         code: error.code || 'AI_ERROR',
         message: error.message || 'AI 生成没有完成，请稍后重试',
         requestId: error.requestId,
       }
+      activity.finishAI({ ok: false, message: generateError.value.message })
     }
+    saveDraftNow()
   } finally {
     generating.value = false
     stopTimer()
@@ -417,6 +574,7 @@ const askRegenerate = () => {
 
 const confirmRegenerate = () => {
   regenerateOpen.value = false
+  previewSnapshot.value = null
   preview.value = null
   showPreview.value = false
   generate({ retry: false })
@@ -426,10 +584,14 @@ const savePlan = async (payload) => {
   if (saving.value) return
   saving.value = true
   saveError.value = ''
+  saveDraftNow({ planPayload: payload })
   try {
     const detail = await plansApi.create({ ...payload, source: 'ai' })
+    if (draftId.value) drafts.remove(draftId.value)
+    draftId.value = ''
     clearDraft()
     allowLeave = true
+    activity.finishAI({ ok: true, message: '计划已创建' })
     ui.success('计划已保存', '创建成功')
     router.push({ name: 'plan-detail', params: { id: detail.plan.id } })
   } catch (error) {
@@ -437,6 +599,7 @@ const savePlan = async (payload) => {
       error.details?.length
         ? `${error.message}：${error.details[0].message}`
         : error.message || '保存计划失败，请稍后重试'
+    activity.finishAI({ ok: false, message: '计划创建失败，草稿已保留' })
     ui.error(saveError.value, '保存计划失败')
   } finally {
     saving.value = false
@@ -446,12 +609,16 @@ const savePlan = async (payload) => {
 watch(
   form,
   () => {
-    persistDraft()
+    scheduleAutoSave()
     if (touched[1]) validateStepOne()
     if (touched[2]) validateStepTwo()
   },
   { deep: true },
 )
+
+watch(step, () => {
+  scheduleAutoSave()
+})
 
 watch(
   () => form.startDate,
@@ -463,19 +630,22 @@ watch(
 )
 
 onMounted(() => {
-  restoreDraft()
+  drafts.bindUser(auth.user?.id)
+  loadRouteDraft()
   loadAiStatus()
+  window.addEventListener('pagehide', handlePageHide)
 })
 
 onBeforeUnmount(() => {
   stopTimer()
   controller.value?.abort()
+  if (autosaveTimer) window.clearTimeout(autosaveTimer)
+  window.removeEventListener('pagehide', handlePageHide)
 })
 
 onBeforeRouteLeave(() => {
-  if (preview.value && !allowLeave) {
-    return window.confirm('这份 AI 计划草稿还没有保存，确定离开吗？已填写的条件会保留在浏览器中。')
-  }
+  if (allowLeave) return true
+  if (hasDraftContent.value) saveDraftNow({ updateRoute: false })
   return true
 })
 
@@ -493,6 +663,18 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
       back-label="返回"
     >
       <template #actions>
+        <span v-if="autosaveLabel" class="plan-autosave" :class="`is-${autosaveState}`">
+          {{ autosaveLabel }}
+        </span>
+        <AppButton
+          variant="secondary"
+          size="sm"
+          :loading="autosaveState === 'saving'"
+          @click="saveDraftNow({ manual: true })"
+        >
+          <template #icon><Save :size="14" /></template>
+          保存草稿
+        </AppButton>
         <AppButton
           v-if="preview"
           variant="secondary"
@@ -504,6 +686,10 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
       </template>
     </PageHeader>
 
+    <p v-if="draftError" class="plan-draft-error" role="alert">
+      {{ draftError }} 当前内容仍保留在页面里，请稍后重试。
+    </p>
+
     <AiPlanPreview
       v-if="preview"
       v-show="showPreview"
@@ -514,6 +700,7 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
       :saving="saving"
       :save-error="saveError"
       @save="savePlan"
+      @save-draft="saveDraftFromPreview"
       @back="backToForm"
       @regenerate="askRegenerate"
     />
@@ -956,7 +1143,7 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
             </div>
             <div class="aside-note">
               <ShieldCheck :size="13" />
-              数据仅保存到你的账户。
+              草稿仅保存在本机，正式创建后写入账户。
             </div>
           </div>
         </aside>
@@ -2258,5 +2445,26 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
   margin-top: 12px;
   color: var(--ink-faint);
   font-size: 10.5px;
+}
+</style>
+
+<style scoped>
+.plan-autosave {
+  color: var(--ink-faint);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.plan-autosave.is-error {
+  color: var(--danger-700);
+}
+
+.plan-draft-error {
+  margin: -4px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--danger-100);
+  color: var(--danger-700);
+  font-size: 11.5px;
 }
 </style>

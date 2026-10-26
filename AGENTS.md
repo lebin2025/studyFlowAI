@@ -21,8 +21,9 @@ Its 18 documents are imported into the local knowledge base (category `网页设
 ## Product rules
 
 - StudyFlow AI is an AI-native learning planner. The primary user task is completing today's study tasks.
-- Primary art mode: **Precision Instrument** — warm-neutral, Apple-inspired tech minimalism: modern sans typography, data-first hierarchy, soft surfaces, precise spacing and one restrained brand accent. No editorial serif, no light/dark theme switch, no glassmorphism, no card-grid-by-default.
+- Primary art mode: **Precision Instrument** — warm-neutral, Apple-inspired tech minimalism: modern sans typography, data-first hierarchy, soft surfaces, precise spacing and one restrained brand accent. No editorial serif, no light/dark theme switch, no card-grid-by-default. Glass is reserved for floating controls, the quick panel and the focus overlay; ordinary page cards stay solid for readability.
 - Visual motif: **the learning path** — each plan is a route from goal to today's next executable task. Data graphics carry the story; decoration does not.
+- Global interaction layer: `FloatingOrb` + `FocusOverlay` are mounted in `App.vue`; focus, ambience and activity are Pinia stores; drafts are user-scoped local storage (`studyflow:drafts:v1:*`) until a server draft API exists. Do not describe local drafts as server-synced.
 - Do not replace the design system without a stated reason.
 - Do not use fake AI output, fake loading, or unlicensed cultural ornament.
 - Keep the DeepSeek key and database credentials server-side only.

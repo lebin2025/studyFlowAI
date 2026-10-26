@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   AlertCircle,
   CalendarDays,
@@ -33,6 +34,8 @@ import {
 } from '@/utils/date.js'
 
 const ui = useUiStore()
+const route = useRoute()
+const router = useRouter()
 
 const loading = ref(true)
 const error = ref('')
@@ -286,8 +289,25 @@ watch(
 onMounted(() => {
   loadPlans()
   load()
+  if (route.query.create === '1') {
+    openCreate()
+    const query = { ...route.query }
+    delete query.create
+    router.replace({ query })
+  }
 })
 
+
+watch(
+  () => route.query.create,
+  (value) => {
+    if (value !== '1') return
+    openCreate()
+    const query = { ...route.query }
+    delete query.create
+    router.replace({ query })
+  },
+)
 onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 </script>
 

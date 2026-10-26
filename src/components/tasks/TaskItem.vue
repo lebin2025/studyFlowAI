@@ -314,3 +314,67 @@ const priorityLabel = computed(() => {
   }
 }
 </style>
+<style scoped>
+.task-check {
+  transition:
+    background-color var(--duration) var(--ease),
+    border-color var(--duration) var(--ease),
+    transform 180ms var(--ease-spring);
+}
+
+.task-item.is-done .task-check {
+  animation: task-check-pop 320ms var(--ease-spring);
+}
+
+@keyframes task-check-pop {
+  0% {
+    transform: scale(0.8);
+  }
+  55% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-item.is-done .task-check {
+    animation: none;
+  }
+}
+</style>
+
+<style scoped>
+.task-check {
+  position: relative;
+}
+
+.task-item.is-done .task-check::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  animation: task-check-ring 520ms var(--ease-out);
+  pointer-events: none;
+}
+
+@keyframes task-check-ring {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.75);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-item.is-done .task-check::after {
+    animation: none;
+  }
+}
+</style>

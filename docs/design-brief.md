@@ -93,3 +93,12 @@
 - 页面优先服务「今天做什么」，而不是展示功能数量。
 - 保持温和治愈的基调，但避免幼稚化；关键操作要清楚、有反馈。
 - 不用 Apple 的具体版式、图片或品牌资产；“Apple-inspired”只取目的、清晰、工艺、连贯与叙事。
+
+## G. 第四轮：交互、专注与草稿（实现说明）
+
+- 全局交互层：`FloatingOrb` + `FocusOverlay`，由 `App.vue` 挂载；玻璃只用于浮层，普通页面卡片保持实色。
+- 悬浮球状态：idle / hover / expanded / focusing / paused / processing / success / error / rest / minimal；AI 与专注状态来自真实 store，不用随机动画。
+- 专注：`endsAt` 时间戳计时、暂停/继续/结束、15/25/45/60 分钟与自定义时长、刷新恢复、120 分钟休息提醒（可调/关闭）。
+- 环境音：Web Audio 合成粉红噪声，专注/放松/静音三种模式；不自动播放，不引入外部音频素材。
+- 草稿箱：本地持久化（`studyflow:drafts:v1:<userId>`），自动保存、恢复、删除、正式创建；只保存在当前浏览器，不是服务端草稿。
+- 详细契约见 [`round4-interactions.md`](round4-interactions.md)。

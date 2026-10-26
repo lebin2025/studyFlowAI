@@ -58,6 +58,12 @@ const routes = [
         meta: { title: '学习任务' },
       },
       {
+        path: 'drafts',
+        name: 'drafts',
+        component: () => import('@/views/DraftsView.vue'),
+        meta: { title: '草稿箱' },
+      },
+      {
         path: 'stats',
         name: 'stats',
         component: () => import('@/views/StatsView.vue'),

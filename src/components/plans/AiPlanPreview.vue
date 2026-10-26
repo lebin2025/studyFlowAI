@@ -6,6 +6,7 @@ import {
   Clock3,
   Plus,
   RefreshCw,
+  Save,
   Sparkles,
   Trash2,
   TriangleAlert,
@@ -31,7 +32,7 @@ const props = defineProps({
   saveError: { type: String, default: '' },
 })
 
-const emit = defineEmits(['save', 'back', 'regenerate'])
+const emit = defineEmits(['save', 'save-draft', 'back', 'regenerate'])
 
 const clone = (value) => JSON.parse(JSON.stringify(value))
 const withKeys = (value) => {
@@ -192,42 +193,48 @@ const validate = () => {
   return ''
 }
 
+const buildPayload = () => ({
+  title: local.title.trim() || '未命名计划',
+  goal: local.goal.trim(),
+  subject: local.subject,
+  level: local.level,
+  startDate: local.startDate,
+  endDate: local.endDate,
+  dailyMinutes: Number(local.dailyMinutes),
+  studyWeekdays: [...local.studyWeekdays],
+  preferences: local.preferences || '',
+  overview: local.overview || '',
+  risks: local.risks || [],
+  advice: local.advice || '',
+  stages: local.stages.map((stage) => ({
+    title: stage.title.trim(),
+    objective: stage.objective || '',
+    startDate: stage.startDate,
+    endDate: stage.endDate,
+  })),
+  tasks: local.tasks.map((task) => ({
+    title: task.title.trim(),
+    description: task.description || '',
+    taskDate: task.taskDate,
+    durationMinutes: Number(task.durationMinutes),
+    priority: task.priority,
+    completionCriteria: task.completionCriteria || '',
+    isReview: Boolean(task.isReview),
+    stageIndex: Number(task.stageIndex) || 0,
+  })),
+})
+
 const save = () => {
   error.value = validate()
   if (error.value) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     return
   }
-  emit('save', {
-    title: local.title.trim(),
-    goal: local.goal.trim(),
-    subject: local.subject,
-    level: local.level,
-    startDate: local.startDate,
-    endDate: local.endDate,
-    dailyMinutes: Number(local.dailyMinutes),
-    studyWeekdays: [...local.studyWeekdays],
-    preferences: local.preferences || '',
-    overview: local.overview || '',
-    risks: local.risks || [],
-    advice: local.advice || '',
-    stages: local.stages.map((stage) => ({
-      title: stage.title.trim(),
-      objective: stage.objective || '',
-      startDate: stage.startDate,
-      endDate: stage.endDate,
-    })),
-    tasks: local.tasks.map((task) => ({
-      title: task.title.trim(),
-      description: task.description || '',
-      taskDate: task.taskDate,
-      durationMinutes: Number(task.durationMinutes),
-      priority: task.priority,
-      completionCriteria: task.completionCriteria || '',
-      isReview: Boolean(task.isReview),
-      stageIndex: Number(task.stageIndex) || 0,
-    })),
-  })
+  emit('save', buildPayload())
+}
+
+const saveDraft = () => {
+  emit('save-draft', buildPayload(), clone(local))
 }
 </script>
 
@@ -558,10 +565,14 @@ const save = () => {
 
           <div v-if="saveError" class="summary-error" role="alert">{{ saveError }}</div>
 
+          <AppButton variant="secondary" block :disabled="saving" @click="saveDraft">
+            <template #icon><Save :size="14" /></template>
+            保存草稿
+          </AppButton>
           <AppButton block :loading="saving" :disabled="saving" @click="save">
             {{ saving ? '正在保存…' : '保存计划' }}
           </AppButton>
-          <p class="summary-card__hint">保存后可继续编辑或让 AI 调整。</p>
+          <p class="summary-card__hint">草稿只保存在当前浏览器，正式保存后才写入账户。</p>
         </div>
       </aside>
     </div>
@@ -570,6 +581,9 @@ const save = () => {
       <AppButton variant="secondary" size="sm" :disabled="saving" @click="emit('back')">
         <template #icon><ArrowLeft :size="14" /></template>
         返回
+      </AppButton>
+      <AppButton variant="secondary" size="sm" :disabled="saving" @click="saveDraft">
+        存草稿
       </AppButton>
       <AppButton size="sm" block :loading="saving" @click="save">
         {{ saving ? '保存中…' : '保存计划' }}
