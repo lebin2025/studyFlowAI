@@ -21,15 +21,19 @@ const jars = new Map()
 let child = null
 let logs = ''
 
-const todayISO = () => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-}
+const todayISO = () =>
+  new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
 
 const addDays = (iso, amount) => {
-  const date = new Date(`${iso}T00:00:00`)
-  date.setDate(date.getDate() + amount)
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+  const [year, month, day] = iso.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  date.setUTCDate(date.getUTCDate() + amount)
+  return date.toISOString().slice(0, 10)
 }
 
 const cookiesFor = (user) => jars.get(user) || ''
