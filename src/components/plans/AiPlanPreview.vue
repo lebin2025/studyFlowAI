@@ -237,11 +237,11 @@ const save = () => {
       <div class="preview__head-copy">
         <span class="preview__badge">
           <Sparkles :size="12" />
-          AI 生成结果 · 尚未保存
+          AI 生成 · 未保存
         </span>
-        <h1>这是你的计划草稿</h1>
+        <h1>计划草稿</h1>
         <p>
-          可以直接修改计划名称、目标和每一项任务。点击「保存计划」后，它才会写入你的账户。
+          修改后保存到账户。
         </p>
       </div>
       <div class="preview__head-actions">
@@ -266,7 +266,7 @@ const save = () => {
         <section class="edit-card">
           <header class="edit-card__head">
             <h2>基本信息</h2>
-            <span class="edit-card__meta">可直接修改</span>
+
           </header>
           <div class="edit-card__body">
             <label class="edit-label" for="preview-title">计划名称</label>
@@ -559,9 +559,9 @@ const save = () => {
           <div v-if="saveError" class="summary-error" role="alert">{{ saveError }}</div>
 
           <AppButton block :loading="saving" :disabled="saving" @click="save">
-            {{ saving ? '正在保存…' : '保存到我的计划' }}
+            {{ saving ? '正在保存…' : '保存计划' }}
           </AppButton>
-          <p class="summary-card__hint">保存后才会写入数据库；之后仍可编辑或让 AI 调整。</p>
+          <p class="summary-card__hint">保存后可继续编辑或让 AI 调整。</p>
         </div>
       </aside>
     </div>
@@ -1550,7 +1550,7 @@ const save = () => {
 .task-group__day {
   font-family: var(--font-display);
   font-size: 20px;
-  font-style: italic;
+  font-style: normal;
 }
 
 .task-edit {
@@ -1568,5 +1568,80 @@ const save = () => {
   .preview__layout {
     grid-template-columns: 1fr;
   }
+}
+</style>
+
+<style scoped>
+.preview__head h1 {
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.preview__badge {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 10.5px;
+}
+
+.edit-card {
+  margin-bottom: 12px;
+  padding: 18px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.edit-card__head {
+  padding: 0 0 8px;
+  border: 0;
+}
+
+.edit-card__head h2 {
+  font-size: 16px;
+  font-weight: 620;
+}
+
+.edit-card__body {
+  padding: 6px 0 0;
+}
+
+.task-group {
+  border: 0;
+  background: transparent;
+}
+
+.task-group__head {
+  padding: 8px 0;
+  border: 0;
+}
+
+.task-edit {
+  margin: 0 -10px;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+}
+
+.task-edit:hover {
+  background: var(--surface-soft);
+}
+
+.summary-card {
+  padding: 16px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.summary-card__hint {
+  color: var(--ink-faint);
+  font-size: 10.5px;
 }
 </style>

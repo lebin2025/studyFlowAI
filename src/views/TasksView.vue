@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Plus,
   Search,
+  Sparkles,
 } from 'lucide-vue-next'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -212,7 +213,7 @@ const toggleTask = async (task, next) => {
       const index = tasks.value.findIndex((item) => item.id === task.id)
       if (index >= 0) tasks.value[index] = result.task
     }
-    ui.success(next ? '完成一小步' : '已取消完成', next ? '做得好' : '没关系')
+    ui.success(next ? '已完成' : '已恢复', '任务状态已更新')
   } catch (toggleError) {
     ui.error(toggleError.message, '更新任务失败')
   } finally {
@@ -293,12 +294,13 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 <template>
   <div class="tasks-page">
     <PageHeader
-      eyebrow="学习任务"
-      title="把今天的小步走完"
-      description="按日期、优先级和计划查看所有任务。完成状态会实时同步到计划进度和统计。"
+      eyebrow=""
+      title="学习任务"
+      description="按日期、优先级和计划查看。"
     >
       <template #actions>
-        <AppButton variant="secondary" to="/app/plans/new">
+        <AppButton variant="ai" to="/app/plans/new">
+          <template #icon><Sparkles :size="15" /></template>
           用 AI 规划
         </AppButton>
         <AppButton @click="openCreate">
@@ -351,11 +353,7 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
     </div>
 
     <div class="tasks-count">
-      <span v-if="!loading">
-        共 {{ total }} 个任务
-        <template v-if="filters.status === 'open'">待完成</template>
-        <template v-else-if="filters.status === 'done'">已完成</template>
-      </span>
+      <span v-if="!loading">共 {{ total }} 个任务</span>
       <span v-else>正在整理任务…</span>
       <button v-if="hasFilters" type="button" class="tasks-count__clear" @click="clearFilters">
         重置筛选
@@ -380,22 +378,21 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 
     <div v-else-if="!tasks.length" class="tasks-empty card">
       <AppEmptyState
-        :title="hasFilters ? '没有匹配的任务' : '还没有任务'"
+        :title="hasFilters ? '没有匹配的任务' : '暂无任务'"
         :description="
           hasFilters
-            ? '换一个筛选条件，或者重置后看看全部任务。'
+            ? '换一个筛选条件。'
             : plans.length
-              ? '添加一个今天能完成的小任务，进度会从这里开始累计。'
-              : '任务需要归属于一份学习计划。先让 AI 生成一份计划吧。'
+              ? ''
+              : '先创建学习计划。'
         "
-        :variant="hasFilters ? 'thinking' : 'happy'"
       >
         <AppButton v-if="hasFilters" variant="secondary" @click="clearFilters">重置筛选</AppButton>
         <AppButton v-else-if="plans.length" @click="openCreate">
           <template #icon><Plus :size="14" /></template>
-          添加第一个任务
+          添加任务
         </AppButton>
-        <AppButton v-else to="/app/plans/new">生成学习计划</AppButton>
+        <AppButton v-else to="/app/plans/new">创建计划</AppButton>
       </AppEmptyState>
     </div>
 
@@ -427,7 +424,6 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
             :task="task"
             :busy="busyIds.has(task.id)"
             show-plan
-            detailed
             @toggle="(next) => toggleTask(task, next)"
             @edit="openEdit"
             @delete="askDelete"
@@ -466,267 +462,23 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 .tasks-page {
   display: flex;
   flex-direction: column;
+  gap: 18px;
 }
 
 .tasks-toolbar {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 10px;
-  margin-bottom: 12px;
-}
-
-.tasks-toolbar__search {
-  width: min(100%, 360px);
-  align-self: flex-start;
-}
-
-.tasks-toolbar__row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 100%;
-}
-
-.tasks-toolbar__select {
-  width: 136px;
-}
-
-.tasks-toolbar__select--wide {
-  width: 180px;
-}
-
-.tasks-toolbar__custom {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 360px;
-}
-
-.tasks-toolbar__custom :deep(.field) {
-  flex: 1;
-}
-
-.tasks-toolbar__dash {
-  color: var(--ink-faint);
-  font-size: 12px;
-}
-
-.tasks-count {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-  color: var(--ink-faint);
-  font-size: 11px;
-}
-
-.tasks-count__clear {
-  color: var(--lav-700);
-  font-size: 11px;
-  font-weight: 550;
-}
-
-.tasks-count__clear:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.tasks-loading {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 4px;
-}
-
-.task-groups {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.task-group {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  padding: 14px;
+  border-radius: 16px;
   background: var(--surface);
   box-shadow: var(--shadow-xs);
-  overflow: hidden;
-}
-
-.task-group__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 18px;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface-soft);
-}
-
-.task-group__date {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-
-.task-group__day {
-  font-size: 13px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.task-group__full {
-  color: var(--ink-faint);
-  font-size: 10px;
-}
-
-.task-group__overdue {
-  padding: 1px 6px;
-  border-radius: 5px;
-  background: var(--danger-100);
-  color: var(--danger-700);
-  font-size: 9px;
-  font-weight: 600;
-}
-
-.task-group__meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--ink-faint);
-  font-size: 9.5px;
-  white-space: nowrap;
-}
-
-.task-group__minutes {
-  color: var(--ink-muted);
-}
-
-.task-group__list {
-  padding: 5px 10px 9px;
-}
-
-.tasks-empty {
-  padding: 18px;
-}
-
-.tasks-error {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 22px;
-}
-
-.tasks-error__icon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 0;
-  background: var(--danger-100);
-  color: var(--danger-600);
-}
-
-.tasks-error h2 {
-  font-size: 14px;
-}
-
-.tasks-error p {
-  margin-top: 3px;
-  color: var(--ink-muted);
-  font-size: 11.5px;
-}
-
-.tasks-error .btn {
-  margin-left: auto;
-}
-
-.tasks-more {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-@media (max-width: 860px) {
-  .tasks-toolbar__row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .tasks-toolbar__select,
-  .tasks-toolbar__select--wide {
-    width: 100%;
-  }
-
-  .tasks-toolbar__row :deep(.segmented) {
-    grid-column: span 2;
-    justify-self: start;
-  }
-}
-
-@media (max-width: 560px) {
-  .tasks-toolbar__search {
-    width: 100%;
-  }
-
-  .tasks-toolbar__row {
-    grid-template-columns: 1fr;
-  }
-
-  .tasks-toolbar__row :deep(.segmented) {
-    grid-column: auto;
-  }
-
-  .task-group__head {
-    flex-wrap: wrap;
-    padding: 11px 13px;
-  }
-
-  .task-group__meta {
-    gap: 8px;
-  }
-
-  .task-group__list {
-    padding-inline: 4px;
-  }
-
-  .tasks-error {
-    flex-wrap: wrap;
-  }
-
-  .tasks-error .btn {
-    margin-left: 0;
-    width: 100%;
-  }
-}
-</style>
-<style scoped>
-.tasks-page {
-  display: flex;
-  flex-direction: column;
-}
-
-.tasks-toolbar {
-  padding: 14px 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  border-radius: 0;
-  box-shadow: none;
 }
 
 .tasks-toolbar__row {
   display: flex;
-  align-items: flex-end;
-  gap: 14px;
-}
-
-.tasks-toolbar__row + .tasks-toolbar__row {
-  margin-top: 10px;
+  align-items: center;
+  gap: 8px;
 }
 
 .tasks-toolbar__search {
@@ -737,101 +489,57 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 .tasks-toolbar__filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
-.tasks-summary {
+.tasks-toolbar__select {
+  min-width: 132px;
+}
+
+.tasks-toolbar__select--wide {
+  min-width: 170px;
+}
+
+.tasks-toolbar__custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tasks-toolbar__dash {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.tasks-count {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.04em;
-}
-
-.task-groups {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding-top: 0;
-}
-
-.task-group {
-  display: grid;
-  grid-template-columns: 190px minmax(0, 1fr);
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  overflow: visible;
-}
-
-.task-group + .task-group {
-  border-top: 0;
-}
-
-.task-group__head {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 16px 18px 14px 0;
-  border-right: 1px solid var(--line);
-  background: transparent;
-  color: var(--ink);
-}
-
-.task-group__day {
-  font-family: var(--font-display);
-  font-size: clamp(26px, 2.8vw, 38px);
-  font-style: italic;
-  font-weight: 400;
-  line-height: 0.9;
-  letter-spacing: -0.06em;
-}
-
-.task-group__date {
-  margin-top: 5px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.04em;
-}
-
-.task-group__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  margin-top: 22px;
+  padding: 0 2px;
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
 }
 
-.task-group__list {
-  padding: 8px 0 8px 22px;
+.tasks-count__clear {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 550;
 }
 
-.tasks-empty {
-  padding: 34px 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  border-radius: 0;
+.tasks-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .tasks-error {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 20px 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
 }
 
 .tasks-error__icon {
@@ -839,22 +547,90 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 }
 
 .tasks-error h2 {
-  font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .tasks-error p {
-  margin-top: 3px;
+  margin-top: 2px;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.tasks-empty {
+  padding: 0 18px;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.task-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-group {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.task-group__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 8px;
+}
+
+.task-group__date {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.task-group__day {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.task-group__full {
   color: var(--ink-muted);
   font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.task-group__overdue {
+  color: var(--accent);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.task-group__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 12px;
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.task-group__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .tasks-more {
   display: flex;
   justify-content: center;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--line);
+  padding: 4px 0 12px;
 }
 
 @media (max-width: 760px) {
@@ -873,27 +649,39 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
     grid-template-columns: 1fr 1fr;
   }
 
+  .tasks-toolbar__select,
+  .tasks-toolbar__select--wide {
+    min-width: 0;
+  }
+
   .task-group {
-    grid-template-columns: 1fr;
+    padding: 13px 14px;
+    border-radius: 16px;
   }
 
   .task-group__head {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: end;
-    padding: 12px 0 9px;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
+    display: block;
   }
 
   .task-group__meta {
-    margin-top: 0;
-    justify-content: flex-end;
-    text-align: right;
+    justify-content: flex-start;
+    margin-top: 4px;
+  }
+}
+</style>
+<style scoped>
+@media (max-width: 760px) {
+  .tasks-toolbar__row {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .task-group__list {
-    padding: 4px 0;
+  .tasks-toolbar__row > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .tasks-toolbar__select,
+  .tasks-toolbar__select--wide {
+    min-width: 0;
   }
 }
 </style>

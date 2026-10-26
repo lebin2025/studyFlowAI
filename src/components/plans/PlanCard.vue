@@ -78,25 +78,27 @@ const barColor = computed(() => {
 .plan-card {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 150px;
+  grid-template-columns: minmax(0, 1fr) 130px;
   grid-template-areas:
     'head progress'
     'title progress'
     'goal progress'
     'foot progress';
-  gap: 0 24px;
-  padding: 18px 0;
-  border-top: 1px solid var(--ink);
-  background: transparent;
-  transition: background-color var(--duration) var(--ease);
-}
-
-.plan-card:hover {
+  gap: 0 22px;
+  margin-bottom: 10px;
+  padding: 18px 20px;
+  border-radius: 18px;
   background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  transition:
+    box-shadow var(--duration) var(--ease),
+    transform var(--duration) var(--ease);
 }
 
+.plan-card:hover,
 .plan-card:focus-within {
-  background: var(--surface);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .plan-card__overlay {
@@ -111,7 +113,6 @@ const barColor = computed(() => {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding-bottom: 6px;
 }
 
 .plan-card__tags {
@@ -123,9 +124,7 @@ const barColor = computed(() => {
 
 .plan-card__overdue {
   color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.04em;
+  font-size: 10.5px;
 }
 
 .plan-card__delete {
@@ -135,11 +134,13 @@ const barColor = computed(() => {
   place-items: center;
   width: 26px;
   height: 26px;
+  border-radius: 7px;
   color: var(--ink-faint);
   opacity: 0;
   transition:
     color var(--duration-fast) var(--ease),
-    opacity var(--duration-fast) var(--ease);
+    opacity var(--duration-fast) var(--ease),
+    background-color var(--duration-fast) var(--ease);
 }
 
 .plan-card:hover .plan-card__delete,
@@ -148,25 +149,27 @@ const barColor = computed(() => {
 }
 
 .plan-card__delete:hover {
+  background: var(--accent-soft);
   color: var(--accent);
 }
 
 .plan-card__title {
   grid-area: title;
-  max-width: 26ch;
+  max-width: 28ch;
   margin-top: 3px;
-  font-size: clamp(21px, 2.2vw, 30px);
-  line-height: 1.14;
-  letter-spacing: -0.04em;
+  font-size: 18px;
+  font-weight: 620;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
 }
 
 .plan-card__goal {
   grid-area: goal;
-  max-width: 60ch;
-  margin-top: 5px;
+  max-width: 62ch;
+  margin-top: 4px;
   color: var(--ink-muted);
   font-size: 11.5px;
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 .plan-card__progress {
@@ -175,7 +178,7 @@ const barColor = computed(() => {
   flex-direction: column;
   justify-content: center;
   min-width: 0;
-  padding-left: 20px;
+  padding-left: 18px;
   border-left: 1px solid var(--line);
 }
 
@@ -189,18 +192,15 @@ const barColor = computed(() => {
 
 .plan-card__progress-head span {
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  line-height: 1.4;
+  font-size: 10.5px;
 }
 
 .plan-card__progress-head strong {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-style: italic;
-  font-weight: 400;
+  font-size: 24px;
+  font-weight: 650;
   line-height: 1;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 .plan-card__foot {
@@ -208,11 +208,10 @@ const barColor = computed(() => {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 5px 14px;
-  margin-top: 10px;
+  gap: 4px 12px;
+  margin-top: 9px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 10.5px;
 }
 
 .plan-card__meta,
@@ -220,6 +219,7 @@ const barColor = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  font-variant-numeric: tabular-nums;
 }
 
 .plan-card__ai {
@@ -228,16 +228,17 @@ const barColor = computed(() => {
 
 @media (max-width: 680px) {
   .plan-card {
-    grid-template-columns: minmax(0, 1fr) 92px;
-    gap: 0 14px;
+    grid-template-columns: minmax(0, 1fr) 86px;
+    gap: 0 12px;
+    padding: 16px;
   }
 
   .plan-card__title {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .plan-card__progress {
-    padding-left: 12px;
+    padding-left: 10px;
   }
 
   .plan-card__progress-head {
@@ -247,7 +248,7 @@ const barColor = computed(() => {
   .plan-card__progress-head strong {
     display: block;
     margin-top: 4px;
-    font-size: 23px;
+    font-size: 21px;
   }
 
   .plan-card__delete {

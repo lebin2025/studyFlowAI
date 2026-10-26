@@ -218,7 +218,7 @@ const submit = async () => {
   <AppModal
     :model-value="modelValue"
     :title="isEditing ? '编辑学习任务' : '添加学习任务'"
-    :description="isEditing ? '可以调整任务内容、日期和实际用时。' : '把它拆成今天能完成的一小步。'"
+
     size="lg"
     @update:model-value="emit('update:modelValue', $event)"
   >
@@ -232,7 +232,7 @@ const submit = async () => {
       v-else-if="!plans.length && !loadError"
       compact
       title="还没有可以添加任务的学习计划"
-      description="任务需要归属于一个学习计划。先让 AI 帮你生成一份计划吧。"
+      description="先创建学习计划。"
     >
       <AppButton to="/app/plans/new" size="sm" @click="close">创建学习计划</AppButton>
     </AppEmptyState>
@@ -340,7 +340,7 @@ const submit = async () => {
         placeholder="例如：能不看笔记复述 3 条要点"
         :rows="2"
         :maxlength="600"
-        hint="给自己一个可检验的完成信号，比「学过了」更可靠。"
+        hint="用于判断任务是否完成。"
       />
 
       <label v-if="isEditing" class="check-row">

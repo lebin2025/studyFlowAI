@@ -1,28 +1,24 @@
-/* Editorial underline fields. No boxed SaaS inputs. */
+/* Modern product fields: soft surfaces, precise focus states. */
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
 }
 
 .field__label {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 550;
   line-height: 1.4;
-  text-transform: uppercase;
 }
 
 .field__required {
   color: var(--accent);
-  font-weight: 500;
 }
 
 .field__control {
@@ -30,32 +26,29 @@
   align-items: center;
   gap: 9px;
   min-height: 46px;
-  padding: 0 2px;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--line-strong);
-  border-radius: 0;
+  padding: 0 13px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
   transition:
     border-color var(--duration-fast) var(--ease),
+    box-shadow var(--duration-fast) var(--ease),
     background-color var(--duration-fast) var(--ease);
 }
 
 .field__control:hover {
-  border-bottom-color: var(--ink-muted);
+  border-color: var(--line-strong);
 }
 
 .field__control:focus-within {
-  border-bottom-color: var(--accent);
-  box-shadow: inset 0 -1px 0 var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(208, 69, 45, 0.12);
 }
 
 .field--error .field__control {
-  border-bottom-color: var(--danger-600);
-}
-
-.field--error .field__control:focus-within {
-  border-bottom-color: var(--danger-600);
-  box-shadow: inset 0 -1px 0 var(--danger-600);
+  border-color: var(--danger-600);
+  box-shadow: 0 0 0 3px rgba(208, 69, 45, 0.1);
 }
 
 .field--disabled .field__control {
@@ -79,8 +72,9 @@
   outline: none;
   background: transparent;
   color: var(--ink);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 
 .field__input::placeholder,
@@ -90,26 +84,27 @@
 
 .field__input:-webkit-autofill {
   -webkit-text-fill-color: var(--ink);
-  -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
 }
 
 .field__textarea {
   flex: 1;
   width: 100%;
-  min-height: 108px;
-  padding: 10px 0;
+  min-height: 112px;
+  padding: 12px 13px;
   border: 0;
   outline: none;
   background: transparent;
   color: var(--ink);
-  font-size: 15px;
-  line-height: 1.72;
+  font-size: 14px;
+  line-height: 1.65;
   resize: vertical;
 }
 
 .field__control--area {
   align-items: stretch;
-  padding: 0 2px;
+  padding: 0;
+  min-height: 112px;
 }
 
 .field__reveal {
@@ -118,18 +113,22 @@
   justify-content: center;
   width: 28px;
   height: 28px;
+  border-radius: 8px;
   color: var(--ink-faint);
-  transition: color var(--duration-fast) var(--ease);
+  transition:
+    color var(--duration-fast) var(--ease),
+    background-color var(--duration-fast) var(--ease);
 }
 
 .field__reveal:hover {
+  background: var(--surface-soft);
   color: var(--ink);
 }
 
 .field__hint {
   color: var(--ink-muted);
   font-size: 11.5px;
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 .field__error {
@@ -149,9 +148,7 @@
 .field__counter {
   align-self: flex-end;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.04em;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -164,7 +161,7 @@
   outline: none;
   background: transparent;
   color: var(--ink);
-  font-size: 15px;
+  font-size: 14px;
   appearance: none;
   cursor: pointer;
 }

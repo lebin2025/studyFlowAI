@@ -90,13 +90,12 @@ const isComposing = computed(() => route.name === 'plan-new')
   display: none;
   grid-template-columns: repeat(5, 1fr);
   align-items: end;
-  padding: 7px 10px calc(13px + env(safe-area-inset-bottom, 0px));
-  background: var(--bg);
-  border-top: 1px solid var(--ink);
+  padding: 6px 10px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  box-shadow: 0 -12px 30px -24px rgba(23, 22, 20, 0.28);
 }
 
 .mobile-nav__item {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -105,23 +104,14 @@ const isComposing = computed(() => route.name === 'plan-new')
   min-height: 44px;
   padding: 5px 2px 3px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.05em;
+  font-size: 10px;
+  font-weight: 500;
+  transition: color var(--duration-fast) var(--ease);
 }
 
 .mobile-nav__item.is-active {
-  color: var(--ink);
-}
-
-.mobile-nav__item.is-active::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 30%;
-  right: 30%;
-  height: 2px;
-  background: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .mobile-nav__compose {
@@ -130,10 +120,8 @@ const isComposing = computed(() => route.name === 'plan-new')
   align-items: center;
   gap: 2px;
   padding-bottom: 3px;
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+  font-size: 10px;
 }
 
 .mobile-nav__compose-circle {
@@ -141,8 +129,10 @@ const isComposing = computed(() => route.name === 'plan-new')
   place-items: center;
   width: 34px;
   height: 34px;
+  border-radius: 10px;
   background: var(--ink);
   color: var(--bg);
+  box-shadow: var(--shadow-xs);
   transition: background-color var(--duration-fast) var(--ease);
 }
 

@@ -85,8 +85,8 @@ const touched = reactive({ 1: false, 2: false, 3: false })
 
 const steps = [
   { id: 1, title: '目标', caption: '想学什么' },
-  { id: 2, title: '时间', caption: '什么时候学' },
-  { id: 3, title: '偏好', caption: '怎么学更舒服' },
+  { id: 2, title: '时间', caption: '' },
+  { id: 3, title: '偏好', caption: '' },
 ]
 
 const subjectSuggestions = [
@@ -430,7 +430,7 @@ const savePlan = async (payload) => {
     const detail = await plansApi.create({ ...payload, source: 'ai' })
     clearDraft()
     allowLeave = true
-    ui.success('学习计划已保存，可以开始今天的一小步了', '计划创建成功')
+    ui.success('计划已保存', '创建成功')
     router.push({ name: 'plan-detail', params: { id: detail.plan.id } })
   } catch (error) {
     saveError.value =
@@ -486,11 +486,11 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
   <div class="plan-new">
     <PageHeader
       v-if="!showPreview"
-      eyebrow="AI 学习规划"
-      title="让 AI 把目标拆到每一天"
-      description="告诉我们你想学什么、有多少时间。AI 会生成一份带阶段、每日任务和复习节奏的计划，你可以先修改，再保存。"
+      eyebrow=""
+      title="用 AI 制定计划"
+      description="告诉我们目标和时间，生成可调整的计划。"
       back-to="/app/plans"
-      back-label="返回学习计划"
+      back-label="返回"
     >
       <template #actions>
         <AppButton
@@ -602,14 +602,14 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
           <template v-else>
             <div v-if="step === 1" class="step-panel">
               <header class="step-head">
-                <p class="eyebrow">第 1 步 · 目标</p>
-                <h2>你真正想达成什么？</h2>
-                <p>尽量具体：目标分数、截止日期、想完成的作品，都会帮助 AI 拆得更准。</p>
+
+                <h2>学习目标</h2>
+                <p>目标分数、截止日期或想完成的作品。</p>
               </header>
 
               <AppTextarea
                 v-model="form.goal"
-                label="学习目标"
+                label="目标描述"
                 placeholder="例如：12 月前通过英语六级，重点提升听力和写作，目标 500 分以上。"
                 :rows="5"
                 :maxlength="1000"
@@ -665,18 +665,13 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
                   </button>
                 </div>
               </fieldset>
-
-              <p class="step-tip">
-                <Sparkles :size="14" />
-                不确定怎么写？描述你的现状和截止日期就够了，AI 会先理解，再规划。
-              </p>
             </div>
 
             <div v-else-if="step === 2" class="step-panel">
               <header class="step-head">
-                <p class="eyebrow">第 2 步 · 时间</p>
-                <h2>你能拿出多少时间？</h2>
-                <p>真实的时间比理想的时间更有用。AI 会严格按这里的约束安排任务。</p>
+
+                <h2>时间安排</h2>
+                <p>AI 会按这里的约束安排任务。</p>
               </header>
 
               <div class="form-grid">
@@ -789,9 +784,9 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
 
             <div v-else class="step-panel">
               <header class="step-head">
-                <p class="eyebrow">第 3 步 · 偏好</p>
-                <h2>让计划更适合你</h2>
-                <p>这些不是必填项，但会帮助 AI 安排得更贴近你的学习习惯。</p>
+
+                <h2>学习偏好</h2>
+                <p>可选。</p>
               </header>
 
               <div class="field-group">
@@ -961,21 +956,8 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
             </div>
             <div class="aside-note">
               <ShieldCheck :size="13" />
-              表单只保存在你的浏览器；密钥只留在后端。
+              数据仅保存到你的账户。
             </div>
-          </div>
-
-          <div class="aside-card aside-card--soft">
-            <p class="aside-card__eyebrow">AI 会做什么</p>
-            <ul class="aside-list">
-              <li><span>01</span> 拆出 2–5 个连续阶段</li>
-              <li><span>02</span> 把任务安排到可学习日</li>
-              <li><span>03</span> 控制每天不超过设定时长</li>
-              <li><span>04</span> 加入阶段复习与风险提示</li>
-            </ul>
-            <p class="aside-footnote">
-              生成后系统会再次校验日期、时长和结构。不合格的结果不会写入数据库。
-            </p>
           </div>
         </aside>
       </div>
@@ -1819,82 +1801,81 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
 .plan-new {
   display: flex;
   flex-direction: column;
+  gap: 18px;
 }
 
 .stepper {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0;
+  gap: 3px;
   margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  border-radius: 0;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--surface-muted);
 }
 
 .stepper__item {
   display: flex;
-  align-items: center;
-  border-right: 1px solid var(--line);
-}
-
-.stepper__item:last-child {
-  border-right: 0;
+  min-width: 0;
 }
 
 .stepper__button {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  padding: 10px 14px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 9px;
   color: var(--ink-muted);
   text-align: left;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    box-shadow var(--duration-fast) var(--ease);
 }
 
 .stepper__item.is-active .stepper__button {
+  background: var(--surface);
   color: var(--ink);
+  box-shadow: var(--shadow-xs);
 }
 
 .stepper__number {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
-  border: 1px solid var(--line-strong);
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 10px;
+  font-weight: 650;
+  box-shadow: var(--shadow-xs);
 }
 
 .stepper__item.is-active .stepper__number {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .stepper__item.is-done .stepper__number {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--surface-muted);
+  color: var(--ink);
 }
 
 .stepper__text {
   display: flex;
   flex-direction: column;
-  line-height: 1.3;
-}
-
-.stepper__text strong {
-  font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
+  line-height: 1.35;
 }
 
 .stepper__text span {
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 10px;
+  font-weight: 400;
 }
 
 .stepper__line {
@@ -1903,76 +1884,72 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
 
 .wizard-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(230px, 0.34fr);
-  gap: 34px;
-  margin-top: 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.32fr);
+  gap: 20px;
   align-items: start;
 }
 
 .wizard-card {
-  padding: 0;
+  padding: 22px;
   border: 0;
-  border-top: 1px solid var(--ink);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .step-panel {
-  padding: 18px 0 10px;
+  padding: 0;
 }
 
-.step-head h1 {
-  max-width: 16ch;
-  font-family: var(--font-display);
-  font-size: clamp(34px, 4.3vw, 56px);
-  line-height: 0.96;
-  letter-spacing: -0.06em;
+.step-head h2 {
+  margin-top: 0;
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 650;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
 }
 
-.step-head p:not(.eyebrow) {
-  max-width: 50ch;
-  margin-top: 9px;
+.step-head > p:last-child {
+  max-width: 52ch;
+  margin-top: 6px;
   color: var(--ink-muted);
   font-size: 12.5px;
-  line-height: 1.75;
+  line-height: 1.6;
+}
+
+.step-head .eyebrow {
+  display: none;
 }
 
 .field-group {
-  margin-top: 24px;
+  margin-top: 22px;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 14px;
 }
 
 .suggestions {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 5px;
   margin-top: 7px;
 }
 
 .suggestion {
   padding: 4px 8px;
-  border: 1px solid var(--line);
-  border-radius: 0;
+  border-radius: 6px;
+  background: var(--surface-soft);
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .suggestion:hover,
 .suggestion.is-active {
-  border-color: var(--ink);
-  color: var(--ink);
-}
-
-.suggestion.is-active {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
 .level-options {
@@ -1985,34 +1962,35 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
 .level-option {
   padding: 10px 12px;
   border: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  text-align: left;
-}
-
-.level-option:hover,
-.level-option.is-active {
-  border-color: var(--ink);
-}
-
-.level-option.is-active {
+  border-radius: 10px;
   background: var(--surface);
+  text-align: left;
+  transition:
+    border-color var(--duration-fast) var(--ease),
+    background-color var(--duration-fast) var(--ease);
+}
+
+.level-option:hover {
+  border-color: var(--line-strong);
+}
+
+.level-option.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .level-option strong {
   display: block;
-  font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
 }
 
 .level-option span {
   display: block;
   margin-top: 2px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  line-height: 1.5;
+  color: var(--ink-muted);
+  font-size: 10.5px;
+  line-height: 1.4;
 }
 
 .preset-row {
@@ -2025,22 +2003,20 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
 
 .preset-row__label {
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .preset {
   padding: 4px 8px;
-  border: 1px solid var(--line);
-  border-radius: 0;
+  border-radius: 6px;
+  background: var(--surface-soft);
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .preset:hover {
-  border-color: var(--ink);
-  color: var(--ink);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
 .weekday-row {
@@ -2051,74 +2027,68 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
 }
 
 .weekday {
-  width: 38px;
+  width: 36px;
   padding: 5px 0;
   border: 1px solid var(--line);
-  border-radius: 0;
+  border-radius: 8px;
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
   text-align: center;
 }
 
 .weekday.is-active {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--bg);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
 .weekday-hint {
   margin-top: 7px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .calc-card,
 .review-box,
 .ai-config {
-  margin-top: 22px;
-  padding: 14px 0;
+  margin-top: 18px;
+  padding: 14px;
   border: 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
+  border-radius: 12px;
+  background: var(--surface-soft);
 }
 
 .calc-card__grid,
 .review-box__rows {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px 20px;
+  gap: 8px 18px;
 }
 
 .calc-card__grid span,
 .review-box__rows dt {
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  color: var(--ink-muted);
+  font-size: 11px;
 }
 
 .calc-card__grid strong,
 .review-box__rows dd {
-  font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .review-box__title,
 .ai-config__head strong {
-  font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .step-tip,
 .cost-note {
-  margin-top: 16px;
+  margin-top: 14px;
   color: var(--ink-faint);
-  font-size: 10px;
-  line-height: 1.6;
+  font-size: 11px;
+  line-height: 1.55;
 }
 
 .wizard-footer {
@@ -2126,8 +2096,9 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 0;
-  border-top: 1px solid var(--ink);
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
 }
 
 .wizard-footer__right {
@@ -2138,56 +2109,46 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
 
 .wizard-footer__count {
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .wizard-aside {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 14px;
 }
 
 .aside-card {
-  padding: 0;
+  padding: 16px;
   border: 0;
-  border-top: 1px solid var(--ink);
-  border-radius: 0;
-  background: transparent;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
 }
 
 .aside-card__head {
-  padding: 9px 0;
-  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.aside-card__body {
-  padding: 12px 0;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .aside-card__title {
-  font-family: var(--font-display);
-  font-size: 22px;
-  line-height: 1.15;
-  letter-spacing: -0.04em;
+  font-size: 17px;
+  font-weight: 620;
+  line-height: 1.3;
 }
 
 .aside-card__hint,
 .aside-card p {
-  margin-top: 6px;
+  margin-top: 5px;
   color: var(--ink-muted);
-  font-size: 10.5px;
-  line-height: 1.65;
+  font-size: 11.5px;
+  line-height: 1.6;
 }
 
 .wizard-error {
-  padding: 22px 0;
-  border-bottom: 1px solid var(--line);
+  padding: 16px 0;
 }
 
 .wizard-error__icon {
@@ -2195,15 +2156,14 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
 }
 
 .wizard-error h2 {
-  font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .setup-card {
-  margin-top: 12px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-soft);
 }
 
 @media (max-width: 980px) {
@@ -2218,21 +2178,21 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
 }
 
 @media (max-width: 700px) {
-  .stepper {
-    grid-template-columns: repeat(3, 1fr);
+  .wizard-card {
+    padding: 16px;
+    border-radius: 18px;
   }
 
   .stepper__button {
-    gap: 6px;
-    padding: 8px 8px;
+    padding: 0 8px;
+  }
+
+  .stepper__text {
+    font-size: 11px;
   }
 
   .stepper__text span {
     display: none;
-  }
-
-  .stepper__text strong {
-    font-size: 9.5px;
   }
 
   .form-grid,
@@ -2249,38 +2209,54 @@ const aiReady = computed(() => Boolean(aiStatus.value?.configured))
   .wizard-footer {
     flex-wrap: wrap;
   }
-
-  .step-head h1 {
-    font-size: 36px;
-  }
 }
 </style>
 <style scoped>
-.stepper__number {
-  border-radius: 0 !important;
-  background: transparent !important;
+.aside-card__eyebrow {
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-weight: 600;
 }
 
-.stepper__item.is-active .stepper__number {
-  border-color: var(--accent) !important;
-  background: transparent !important;
-  color: var(--accent) !important;
+.aside-goal {
+  margin-top: 5px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
-.stepper__item.is-done .stepper__number {
-  border-color: var(--ink) !important;
-  background: var(--ink) !important;
-  color: var(--bg) !important;
+.aside-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
 }
 
-.stepper__item.is-active {
-  background: transparent !important;
+.aside-rows > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
-</style>
 
-<style scoped>
-.stepper__item.is-active .stepper__button {
-  background: transparent !important;
-  box-shadow: inset 2px 0 0 var(--accent);
+.aside-rows span {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.aside-rows strong {
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.aside-note {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+  color: var(--ink-faint);
+  font-size: 10.5px;
 }
 </style>

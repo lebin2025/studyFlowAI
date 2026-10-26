@@ -187,9 +187,9 @@ onMounted(loadAi)
 <template>
   <div class="settings-page">
     <PageHeader
-      eyebrow="个人设置"
-      title="让这里更像你的学习空间"
-      description="更新资料、学习偏好和账户安全设置。所有修改都会真实保存到后端。"
+      eyebrow=""
+      title="个人设置"
+      description="账户、学习偏好与 AI 用量。"
     />
 
     <div class="settings-grid">
@@ -925,73 +925,69 @@ onMounted(loadAi)
 .settings-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.34fr) minmax(0, 0.66fr);
-  gap: 32px;
+  gap: 18px;
   align-items: start;
 }
 
 .settings-main {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 16px;
 }
 
 .settings-card {
-  padding: 0;
+  padding: 18px;
   border: 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
 }
 
 .settings-card__head {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0 14px;
-  border-bottom: 1px solid var(--line);
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .settings-card__icon {
   display: grid;
   place-items: center;
   flex: none;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--line-strong);
-  color: var(--ink);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--ink-muted);
 }
 
 .settings-card__head h2 {
-  font-family: var(--font-display);
-  font-size: clamp(22px, 2.3vw, 30px);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.045em;
+  font-size: 16px;
+  font-weight: 620;
+  letter-spacing: -0.02em;
 }
 
 .settings-card__head p {
-  margin-top: 4px;
+  margin-top: 2px;
   color: var(--ink-muted);
-  font-size: 10.5px;
+  font-size: 11.5px;
   line-height: 1.5;
 }
 
 .settings-card__body {
-  padding: 18px 0 14px;
+  padding: 0;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
 }
 
 .settings-card__actions {
   display: flex;
   justify-content: flex-end;
-  padding-top: 12px;
+  padding-top: 14px;
 }
 
 .quick-row {
@@ -1004,28 +1000,26 @@ onMounted(loadAi)
 .quick-chip,
 .weekday {
   padding: 5px 8px;
-  border: 1px solid var(--line);
-  border-radius: 0;
+  border-radius: 7px;
+  background: var(--surface-soft);
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
   transition:
     background-color var(--duration-fast) var(--ease),
-    border-color var(--duration-fast) var(--ease),
     color var(--duration-fast) var(--ease);
 }
 
 .quick-chip:hover,
 .weekday:hover {
-  border-color: var(--ink);
+  background: var(--surface-muted);
   color: var(--ink);
 }
 
 .quick-chip.is-active,
 .weekday.is-active {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-weight: 600;
 }
 
 .weekday-row {
@@ -1035,15 +1029,14 @@ onMounted(loadAi)
 }
 
 .weekday {
-  width: 36px;
+  min-width: 36px;
   text-align: center;
 }
 
 .weekday-hint {
   margin-top: 7px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .password-form {
@@ -1054,76 +1047,143 @@ onMounted(loadAi)
 
 .settings-aside {
   position: sticky;
-  top: 24px;
+  top: 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .settings-aside .settings-card {
-  padding: 0;
-  background: transparent;
+  background: var(--surface);
 }
 
-.settings-aside .settings-card__head {
-  border-bottom-color: var(--line);
-}
-
-.settings-aside .settings-card:nth-child(2) {
-  border-top-color: var(--line);
-}
-
-.usage-grid {
-  border-color: var(--line);
-  border-radius: 0;
-  background: var(--line);
-}
-
-.usage-grid > div {
-  background: transparent;
-}
-
-.usage-grid strong {
-  color: var(--ink);
-}
-
-.usage-grid span,
-.usage-empty,
-.usage-note,
-.usage-list__title {
+.refresh-button {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   color: var(--ink-faint);
 }
 
-.account-list {
+.refresh-button:hover {
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.ai-status {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: var(--sage-soft);
+}
+
+.ai-status__dot {
+  width: 7px;
+  height: 7px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--sage);
+}
+
+.ai-status strong {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.ai-status p {
+  margin-top: 1px;
+  color: var(--ink-muted);
+  font-size: 10.5px;
+}
+
+.usage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.usage-grid > div {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.usage-grid strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.usage-grid span {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-faint);
+  font-size: 10px;
+}
+
+.usage-list__title {
+  margin: 14px 0 4px;
+  color: var(--ink-faint);
+  font-size: 10.5px;
+}
+
+.usage-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+}
+
+.usage-item__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.usage-item__text strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.usage-item__text span,
+.usage-item__cost {
+  color: var(--ink-faint);
+  font-size: 10px;
+}
+
+.usage-empty,
+.usage-note {
+  margin-top: 10px;
+  color: var(--ink-faint);
+  font-size: 10.5px;
+  line-height: 1.55;
 }
 
 .account-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--line);
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.account-row > span:first-child,
+.account-row dt {
+  color: var(--ink-muted);
   font-size: 11px;
 }
 
-.account-row:last-child {
-  border-bottom: 0;
-}
-
-.account-row dt,
-.account-row span:first-child {
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
-}
-
-.account-row dd,
-.account-row span:last-child {
+.account-row > span:last-child,
+.account-row dd {
   color: var(--ink);
-  font-size: 10.5px;
+  font-size: 11px;
   text-align: right;
 }
 
@@ -1142,57 +1202,56 @@ onMounted(loadAi)
     grid-template-columns: 1fr;
   }
 
-  .settings-grid {
-    gap: 24px;
-  }
-
-  .settings-card__head h2 {
-    font-size: 24px;
+  .settings-card {
+    padding: 16px;
+    border-radius: 16px;
   }
 }
 </style>
 <style scoped>
+.ai-status {
+  background: transparent;
+  padding: 6px 0;
+}
+
 .usage-grid {
   gap: 0;
-  border: 0 !important;
-  border-top: 1px solid var(--line) !important;
-  border-bottom: 1px solid var(--line) !important;
-  background: transparent !important;
+  margin-top: 10px;
 }
 
 .usage-grid > div {
-  padding: 9px 12px 9px 0;
+  padding: 5px 12px 5px 0;
+  border-radius: 0;
+  background: transparent;
   border-right: 1px solid var(--line);
-  background: transparent !important;
 }
 
 .usage-grid > div:last-child {
   border-right: 0;
 }
+</style>
 
-.ai-status,
-.ai-status__dot {
-  border-radius: 0;
+<style scoped>
+.ai-status.is-ready {
+  background: transparent;
 }
 
-.ai-status {
+.usage-grid {
   border: 0;
-  border-left: 2px solid var(--sage);
   background: transparent;
 }
 </style>
 
 <style scoped>
-.ai-status {
-  padding: 8px 0 8px 12px !important;
-  border: 0 !important;
-  border-left: 2px solid var(--sage) !important;
-  border-radius: 0 !important;
+.ai-status,
+.ai-status.is-ready {
   background: transparent !important;
+  box-shadow: none !important;
 }
 
-.ai-status__dot {
-  border-radius: 0 !important;
-  background: var(--sage) !important;
+.usage-grid,
+.usage-grid > div {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 </style>

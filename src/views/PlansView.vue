@@ -158,12 +158,12 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 <template>
   <div class="plans-page">
     <PageHeader
-      eyebrow="学习计划"
-      title="你想学什么，我们都记得"
-      description="每一个目标都有阶段、每日任务和复习安排。可以随时调整，也可以让 AI 重新规划。"
+      eyebrow=""
+      title="学习计划"
+      description="管理阶段、任务与进度。"
     >
       <template #actions>
-        <AppButton to="/app/plans/new">
+        <AppButton to="/app/plans/new" variant="ai">
           <template #icon><Sparkles :size="16" /></template>
           新建 AI 计划
         </AppButton>
@@ -221,13 +221,12 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 
     <div v-else-if="!plans.length" class="plans-empty card">
       <AppEmptyState
-        :title="hasFilters ? '没有找到匹配的计划' : '从第一份学习计划开始'"
+        :title="hasFilters ? '没有匹配的计划' : '暂无计划'"
         :description="
           hasFilters
-            ? '换一个关键词或筛选条件试试。'
-            : '告诉 AI 你的目标、基础和时间，它会生成一份拆到每一天的计划。'
+            ? '换一个筛选条件。'
+            : ''
         "
-        :variant="hasFilters ? 'thinking' : 'happy'"
       >
         <template v-if="hasFilters">
           <AppButton variant="secondary" @click="clearFilters">清除筛选</AppButton>
@@ -235,7 +234,7 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
         <template v-else>
           <AppButton to="/app/plans/new">
             <template #icon><Sparkles :size="15" /></template>
-            生成第一份计划
+            创建计划
           </AppButton>
         </template>
       </AppEmptyState>
@@ -277,6 +276,7 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 .plans-page {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
 .plans-toolbar {
@@ -284,249 +284,57 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  padding: 11px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
 }
 
 .plans-toolbar__search {
-  width: min(100%, 330px);
+  width: min(100%, 320px);
 }
 
 .plans-toolbar__filters {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
 .plans-toolbar__select {
-  width: 132px;
-}
-
-.plans-count {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-  color: var(--ink-faint);
-  font-size: 11px;
-}
-
-.plans-count__clear {
-  color: var(--lav-700);
-  font-size: 11px;
-  font-weight: 550;
-}
-
-.plans-count__clear:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
-  gap: 16px;
-}
-
-.plan-add {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 236px;
-  padding: 24px;
-  border: 1px dashed var(--line-strong);
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.38);
-  color: var(--ink-muted);
-  text-align: center;
-  transition:
-    border-color var(--duration) var(--ease),
-    background-color var(--duration) var(--ease),
-    transform var(--duration) var(--ease);
-}
-
-.plan-add:hover {
-  border-color: var(--lav-300);
-  background: rgba(255, 255, 255, 0.72);
-  transform: translateY(-2px);
-}
-
-.plan-add__icon {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  margin-bottom: 4px;
-  border-radius: 50%;
-  background: var(--lav-100);
-  color: var(--lav-700);
-}
-
-.plan-add strong {
-  color: var(--ink-soft);
-  font-size: 14px;
-  font-weight: 620;
-}
-
-.plan-add > span:last-child {
-  max-width: 26ch;
-  color: var(--ink-faint);
-  font-size: 10.5px;
-  line-height: 1.55;
-}
-
-.plans-empty {
-  padding: 18px;
-}
-
-.plans-error {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 22px;
-}
-
-.plans-error__icon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 0;
-  background: var(--danger-100);
-  color: var(--danger-600);
-}
-
-.plans-error h2 {
-  font-size: 14px;
-}
-
-.plans-error p {
-  margin-top: 3px;
-  color: var(--ink-muted);
-  font-size: 11.5px;
-}
-
-.plans-error .btn {
-  margin-left: auto;
-}
-
-@media (max-width: 1080px) {
-  .plans-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .plans-toolbar__search {
-    width: 100%;
-  }
-
-  .plans-toolbar__filters {
-    justify-content: space-between;
-  }
-
-  .plans-toolbar__select {
-    flex: 1;
-    min-width: 120px;
-  }
-}
-
-@media (max-width: 620px) {
-  .plans-toolbar__filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .plans-toolbar__select {
-    width: 100%;
-  }
-
-  .plans-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .plans-error {
-    flex-wrap: wrap;
-  }
-
-  .plans-error .btn {
-    margin-left: 0;
-    width: 100%;
-  }
-}
-</style>
-<style scoped>
-.plans-page {
-  display: flex;
-  flex-direction: column;
-}
-
-.plans-toolbar {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 14px 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.plans-toolbar__search {
-  width: min(100%, 360px);
-}
-
-.plans-toolbar__filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.plans-toolbar__select {
-  min-width: 120px;
+  min-width: 118px;
 }
 
 .plans-count {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 0;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.04em;
-  border-bottom: 1px solid var(--line);
+  padding: 0 2px;
+  color: var(--ink-muted);
+  font-size: 12px;
 }
 
 .plans-count__clear {
   color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
+  font-weight: 550;
 }
 
 .plans-grid {
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-top: 0;
 }
 
 .plans-error,
 .plans-empty {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 34px 0;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  gap: 12px;
+  padding: 22px;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
 }
 
 .plans-error__icon {
@@ -535,84 +343,78 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
 
 .plans-error h2,
 .plans-empty h2 {
-  font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .plans-error p,
 .plans-empty p {
   max-width: 50ch;
-  margin-top: 5px;
+  margin-top: 4px;
   color: var(--ink-muted);
-  font-size: 11.5px;
-  line-height: 1.7;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .plans-empty {
   display: block;
-  padding: 52px 0;
+  padding: 0;
 }
 
-.plans-empty :deep(.empty-state) {
-  border: 0;
-  background: transparent;
+.plans-empty :deep(.empty) {
+  padding: 24px;
 }
 
 .plan-add {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
+  display: flex;
   align-items: center;
-  gap: 16px;
-  min-height: 0;
-  padding: 16px 0;
-  border: 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
+  gap: 12px;
+  margin-top: 2px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--surface-soft);
   color: var(--ink);
-  text-align: left;
-  transition: background-color var(--duration) var(--ease);
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    box-shadow var(--duration-fast) var(--ease);
 }
 
 .plan-add:hover {
   background: var(--surface);
+  box-shadow: var(--shadow-xs);
 }
 
 .plan-add__icon {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--ink);
-  color: var(--ink);
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: var(--shadow-xs);
 }
 
 .plan-add__text {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .plan-add__text strong {
-  font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  white-space: nowrap;
 }
 
 .plan-add__text span {
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11.5px;
 }
 
-.plan-add > svg {
-  color: var(--accent);
-}
-
-@media (max-width: 760px) {
+@media (max-width: 820px) {
   .plans-toolbar {
     display: block;
   }
@@ -622,35 +424,22 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
   }
 
   .plans-toolbar__filters {
-    margin-top: 12px;
+    margin-top: 9px;
   }
 
   .plans-toolbar__select {
     flex: 1;
     min-width: 0;
   }
+}
 
+@media (max-width: 560px) {
   .plan-add {
-    grid-template-columns: 38px 1fr;
-    gap: 12px;
+    padding: 13px 14px;
   }
 
-  .plan-add > svg {
-    display: none;
+  .plan-add__text strong {
+    white-space: normal;
   }
-}
-</style>
-<style scoped>
-.plan-add {
-  width: 100%;
-  max-width: none;
-}
-
-.plan-add__text {
-  min-width: 0;
-}
-
-.plan-add__text strong {
-  white-space: nowrap;
 }
 </style>

@@ -105,20 +105,22 @@ const priorityLabel = computed(() => {
 <style scoped>
 .task-item {
   display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) auto;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
   align-items: start;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--line);
-  transition: opacity var(--duration-fast) var(--ease);
+  gap: 10px;
+  margin: 0 -10px;
+  padding: 10px;
+  border-radius: 10px;
+  transition: background-color var(--duration-fast) var(--ease);
 }
 
-.task-item:last-child {
-  border-bottom: 0;
+.task-item:hover,
+.task-item:focus-within {
+  background: var(--surface-soft);
 }
 
 .task-item.is-done {
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .task-check {
@@ -127,20 +129,26 @@ const priorityLabel = computed(() => {
   width: 18px;
   height: 18px;
   margin-top: 2px;
-  border: 1px solid var(--line-strong);
-  color: var(--bg);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 6px;
+  color: var(--accent-ink);
   transition:
     background-color var(--duration-fast) var(--ease),
-    border-color var(--duration-fast) var(--ease);
+    border-color var(--duration-fast) var(--ease),
+    transform var(--duration-fast) var(--ease);
 }
 
 .task-check:hover {
   border-color: var(--accent);
 }
 
+.task-check:active {
+  transform: scale(0.9);
+}
+
 .task-item.is-done .task-check {
-  border-color: var(--ink);
-  background: var(--ink);
+  border-color: var(--accent);
+  background: var(--accent);
 }
 
 .task-body {
@@ -151,15 +159,14 @@ const priorityLabel = computed(() => {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 5px 8px;
+  gap: 4px 8px;
 }
 
 .task-title {
   color: var(--ink);
-  font-size: 13.5px;
-  font-weight: 560;
+  font-size: 13px;
+  font-weight: 550;
   line-height: 1.45;
-  letter-spacing: -0.012em;
 }
 
 .task-item.is-done .task-title {
@@ -170,11 +177,11 @@ const priorityLabel = computed(() => {
 
 .task-tag {
   padding: 1px 5px;
-  border: 1px solid var(--sage);
+  border-radius: 4px;
+  background: var(--sage-soft);
   color: var(--sage);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.03em;
+  font-size: 9.5px;
+  font-weight: 600;
 }
 
 .task-priority {
@@ -182,14 +189,13 @@ const priorityLabel = computed(() => {
   align-items: center;
   gap: 4px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.02em;
+  font-size: 10px;
 }
 
 .task-priority__dot {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
   background: currentColor;
 }
 
@@ -207,21 +213,20 @@ const priorityLabel = computed(() => {
 
 .task-description {
   max-width: 70ch;
-  margin-top: 4px;
+  margin-top: 3px;
   color: var(--ink-muted);
   font-size: 11.5px;
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 .task-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 12px;
-  margin-top: 5px;
+  gap: 3px 10px;
+  margin-top: 4px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 10.5px;
   line-height: 1.5;
 }
 
@@ -234,27 +239,23 @@ const priorityLabel = computed(() => {
 
 .task-plan {
   color: var(--ink-muted);
-  border-bottom: 1px solid var(--line);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 10.5px;
 }
 
 .task-plan:hover {
   color: var(--accent);
-  border-bottom-color: var(--accent);
 }
 
 .task-criteria {
   flex-basis: 100%;
   color: var(--ink-faint);
-  font-family: var(--font-sans);
-  font-size: 9.5px;
+  font-size: 10px;
 }
 
 .task-actions {
   display: flex;
   align-items: center;
-  gap: 1px;
+  gap: 0;
   opacity: 0;
   transition: opacity var(--duration-fast) var(--ease);
 }
@@ -269,6 +270,7 @@ const priorityLabel = computed(() => {
   place-items: center;
   width: 26px;
   height: 26px;
+  border-radius: 7px;
   color: var(--ink-faint);
   transition:
     color var(--duration-fast) var(--ease),
@@ -287,16 +289,11 @@ const priorityLabel = computed(() => {
 
 .task-item--compact {
   grid-template-columns: 22px minmax(0, 1fr) auto;
-  padding: 9px 0;
-  gap: 10px;
+  padding: 8px 10px;
 }
 
 .task-item--compact .task-title {
   font-size: 12px;
-}
-
-.task-item--compact .task-meta {
-  margin-top: 2px;
 }
 
 @media (hover: none) {
@@ -308,8 +305,8 @@ const priorityLabel = computed(() => {
 @media (max-width: 620px) {
   .task-item {
     grid-template-columns: 24px minmax(0, 1fr) auto;
-    gap: 10px;
-    padding: 11px 0;
+    margin: 0;
+    padding: 10px 0;
   }
 
   .task-actions {

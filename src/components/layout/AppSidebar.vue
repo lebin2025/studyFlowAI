@@ -21,10 +21,10 @@ const ui = useUiStore()
 const loggingOut = ref(false)
 
 const items = [
-  { name: 'dashboard', label: '仪表盘', caption: '今天学什么', to: '/app' },
-  { name: 'plans', label: '学习计划', caption: '目标与阶段', to: '/app/plans' },
-  { name: 'tasks', label: '学习任务', caption: '每天的小步', to: '/app/tasks' },
-  { name: 'stats', label: '学习统计', caption: '真实的进度', to: '/app/stats' },
+  { name: 'dashboard', label: '仪表盘', icon: LayoutDashboard, to: '/app' },
+  { name: 'plans', label: '学习计划', icon: NotebookPen, to: '/app/plans' },
+  { name: 'tasks', label: '学习任务', icon: ListChecks, to: '/app/tasks' },
+  { name: 'stats', label: '学习统计', icon: ChartNoAxesColumnIncreasing, to: '/app/stats' },
 ]
 
 const isActive = (item) => {
@@ -56,41 +56,30 @@ const logout = async () => {
     </div>
 
     <nav class="sidebar__nav" aria-label="主导航">
-      <p class="sidebar__label">INDEX / 学习空间</p>
       <RouterLink
-        v-for="(item, index) in items"
+        v-for="item in items"
         :key="item.name"
         :to="item.to"
         class="nav-item"
         :class="{ 'is-active': isActive(item) }"
         :aria-current="isActive(item) ? 'page' : undefined"
       >
-        <span class="nav-item__index">0{{ index + 1 }}</span>
-        <span class="nav-item__text">
-          <span class="nav-item__title">{{ item.label }}</span>
-          <span class="nav-item__caption">{{ item.caption }}</span>
-        </span>
-        <span v-if="isActive(item)" class="nav-item__dot" aria-hidden="true" />
+        <component :is="item.icon" :size="17" :stroke-width="1.8" />
+        <span class="nav-item__title">{{ item.label }}</span>
       </RouterLink>
     </nav>
 
     <div class="sidebar__bottom">
-      <div class="ai-card">
-        <p class="ai-card__title">把目标交给 AI</p>
-        <p class="ai-card__text">说出你想学什么、有多少时间。剩下的，交给 StudyFlow。</p>
-        <RouterLink to="/app/plans/new" class="ai-card__link">
-          生成新计划
-          <span aria-hidden="true">→</span>
-        </RouterLink>
-      </div>
+      <RouterLink to="/app/plans/new" class="ai-shortcut">
+        <span class="ai-shortcut__icon"><Sparkles :size="14" /></span>
+        <span>AI 计划</span>
+        <span class="ai-shortcut__arrow" aria-hidden="true">→</span>
+      </RouterLink>
 
       <div class="user-card">
         <RouterLink to="/app/settings" class="user-card__profile">
           <span class="avatar" aria-hidden="true">{{ auth.initials }}</span>
-          <span class="user-card__text">
-            <span class="user-card__name">{{ greeting }}</span>
-            <span class="user-card__caption">查看个人设置</span>
-          </span>
+          <span class="user-card__name">{{ greeting }}</span>
         </RouterLink>
         <button
           type="button"
@@ -99,13 +88,13 @@ const logout = async () => {
           :disabled="loggingOut"
           @click="logout"
         >
-          <LogOut :size="16" />
+          <LogOut :size="15" />
         </button>
       </div>
 
       <RouterLink to="/app/settings" class="sidebar__settings">
-        <Settings :size="15" />
-        设置与偏好
+        <Settings :size="14" />
+        设置
       </RouterLink>
     </div>
   </aside>
@@ -121,155 +110,107 @@ const logout = async () => {
   display: flex;
   flex-direction: column;
   width: var(--sidebar-width);
-  padding: 24px 20px 18px;
+  padding: 22px 16px 18px;
   background: var(--bg);
-  border-right: 1px solid var(--ink);
 }
 
 .sidebar__top {
-  padding-bottom: 28px;
-  border-bottom: 1px solid var(--line);
+  padding: 0 6px 24px;
 }
 
 .sidebar__nav {
   display: flex;
   flex-direction: column;
-  padding-top: 18px;
-}
-
-.sidebar__label {
-  padding-bottom: 8px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  gap: 2px;
 }
 
 .nav-item {
-  position: relative;
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
+  display: flex;
+  align-items: center;
   gap: 10px;
-  align-items: start;
-  padding: 11px 8px 11px 0;
-  border-bottom: 1px solid var(--line);
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
   color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 520;
   transition:
+    background-color var(--duration-fast) var(--ease),
     color var(--duration-fast) var(--ease),
-    background-color var(--duration-fast) var(--ease);
+    box-shadow var(--duration-fast) var(--ease);
 }
 
 .nav-item:hover {
+  background: var(--surface-soft);
   color: var(--ink);
-  background: var(--surface);
 }
 
 .nav-item.is-active {
+  background: var(--surface);
   color: var(--ink);
+  box-shadow: var(--shadow-xs);
+  font-weight: 600;
 }
 
-.nav-item.is-active::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  bottom: 10px;
-  left: -20px;
-  width: 3px;
-  background: var(--accent);
-}
-
-.nav-item__index {
-  padding-top: 1px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.02em;
-}
-
-.nav-item.is-active .nav-item__index {
+.nav-item.is-active :deep(svg) {
   color: var(--accent);
 }
 
-.nav-item__text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.35;
-}
-
 .nav-item__title {
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  font-weight: 560;
-}
-
-.nav-item__caption {
-  margin-top: 1px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7px;
-  letter-spacing: 0.02em;
-}
-
-.nav-item__dot {
-  display: none;
+  white-space: nowrap;
 }
 
 .sidebar__bottom {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin-top: auto;
 }
 
-.ai-card {
-  padding: 14px 0 0;
-  border-top: 1px solid var(--ink);
-}
-
-.ai-card__title {
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 17px;
-  line-height: 1.2;
-  letter-spacing: -0.035em;
-}
-
-.ai-card__text {
-  margin-top: 5px;
-  color: var(--ink-muted);
-  font-size: 10px;
-  line-height: 1.6;
-}
-
-.ai-card__link {
-  display: inline-flex;
+.ai-shortcut {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 9px;
-  padding-bottom: 2px;
-  border-bottom: 1px solid var(--accent);
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 600;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.ai-shortcut:hover {
+  background: var(--accent-soft);
+}
+
+.ai-shortcut__icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--accent-soft);
   color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+}
+
+.ai-shortcut__arrow {
+  margin-left: auto;
+  color: var(--ink-faint);
 }
 
 .user-card {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-top: 13px;
-  border-top: 1px solid var(--line);
+  padding: 10px 8px;
+  border-radius: 12px;
+  background: var(--surface-soft);
 }
 
 .user-card__profile {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
 }
@@ -278,65 +219,50 @@ const logout = async () => {
   display: grid;
   place-items: center;
   flex: none;
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--ink);
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
+  background: var(--surface);
   color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 600;
-}
-
-.user-card__text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.35;
+  font-size: 10px;
+  font-weight: 650;
+  box-shadow: var(--shadow-xs);
 }
 
 .user-card__name {
   overflow: hidden;
-  color: var(--ink);
-  font-size: 11.5px;
-  font-weight: 600;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 550;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.user-card__caption {
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
 }
 
 .user-card__action {
   display: grid;
   place-items: center;
   flex: none;
-  width: 28px;
-  height: 28px;
-  border: 1px solid transparent;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
   color: var(--ink-faint);
   transition:
-    color var(--duration-fast) var(--ease),
-    border-color var(--duration-fast) var(--ease);
+    background-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
 }
 
 .user-card__action:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .sidebar__settings {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 2px 10px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 11.5px;
 }
 
 .sidebar__settings:hover {

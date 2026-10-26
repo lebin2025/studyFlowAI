@@ -21,8 +21,8 @@ Its 18 documents are imported into the local knowledge base (category `网页设
 ## Product rules
 
 - StudyFlow AI is an AI-native learning planner. The primary user task is completing today's study tasks.
-- Primary art mode: **Editorial Loom** — Swiss editorial composition, paper/ink material, one vermilion signal colour, woven path diagrams and oversized serif typography. It applies to Landing, Auth and every working surface. No dark/light theme switch, no glassmorphism as a default, no three-column card grid.
-- Visual motif: **the learning loom** — goals as warp, days as weft, tasks as knots on a route; one small step today.
+- Primary art mode: **Precision Instrument** — warm-neutral, Apple-inspired tech minimalism: modern sans typography, data-first hierarchy, soft surfaces, precise spacing and one restrained brand accent. No editorial serif, no light/dark theme switch, no glassmorphism, no card-grid-by-default.
+- Visual motif: **the learning path** — each plan is a route from goal to today's next executable task. Data graphics carry the story; decoration does not.
 - Do not replace the design system without a stated reason.
 - Do not use fake AI output, fake loading, or unlicensed cultural ornament.
 - Keep the DeepSeek key and database credentials server-side only.

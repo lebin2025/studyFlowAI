@@ -36,12 +36,8 @@ defineProps({
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 32px;
-  padding-top: 12px;
-  padding-bottom: 18px;
-  margin-bottom: 26px;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
+  gap: 28px;
+  margin-bottom: 24px;
 }
 
 .page-header__main {
@@ -49,48 +45,49 @@ defineProps({
 }
 
 .page-header__back {
-  display: inline-flex;
+  display: flex;
+  width: max-content;
   align-items: center;
   gap: 5px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 550;
   transition: color var(--duration-fast) var(--ease);
 }
 
 .page-header__back:hover {
-  color: var(--accent);
+  color: var(--ink);
 }
 
 .page-header__eyebrow {
   color: var(--accent);
+  font-size: 11px;
 }
 
 .page-header__title {
-  max-width: 16ch;
-  margin-top: 10px;
-  font-size: clamp(38px, 5vw, 66px);
-  line-height: 0.96;
-  letter-spacing: -0.06em;
+  max-width: 18ch;
+  margin-top: 6px;
+  font-size: clamp(30px, 3.6vw, 42px);
+  font-weight: 660;
+  line-height: 1.1;
+  letter-spacing: -0.045em;
 }
 
 .page-header__description {
-  max-width: 56ch;
-  margin-top: 12px;
+  max-width: 58ch;
+  margin-top: 8px;
   color: var(--ink-muted);
   font-size: 13px;
-  line-height: 1.75;
+  line-height: 1.65;
 }
 
 .page-header__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 16px;
-  margin-top: 16px;
+  gap: 7px 14px;
+  margin-top: 12px;
 }
 
 .page-header__actions {
@@ -105,16 +102,16 @@ defineProps({
 @media (max-width: 760px) {
   .page-header {
     display: block;
+    margin-bottom: 18px;
   }
 
   .page-header__title {
-    max-width: 12ch;
-    font-size: clamp(34px, 10vw, 48px);
+    font-size: clamp(28px, 8vw, 36px);
   }
 
   .page-header__actions {
     justify-content: flex-start;
-    margin-top: 18px;
+    margin-top: 14px;
   }
 }
 </style>

@@ -1,106 +1,103 @@
 :root {
   color-scheme: light;
 
-  /* Typography ----------------------------------------------------------- */
+  /* Typography: modern sans everywhere. No editorial serif. --------------- */
   --font-sans:
     'Inter', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
-  --font-display:
-    'Songti SC', 'Noto Serif SC', 'STSong', 'SimSun', 'Iowan Old Style',
-    'Palatino Linotype', Georgia, serif;
-  --font-editorial:
-    'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', 'Songti SC', Georgia, serif;
+  --font-display: var(--font-sans);
+  --font-editorial: var(--font-sans);
   --font-mono: 'SFMono-Regular', 'Cascadia Code', Consolas, 'Liberation Mono', monospace;
 
-  /* Paper & ink ---------------------------------------------------------- */
-  --bg: #f1ede4;
-  --bg-deep: #e7e0d3;
-  --surface: #f7f3ea;
-  --surface-soft: #ece6d9;
-  --surface-muted: #e1d8c8;
-  --surface-strong: #d5c9b6;
-  --ink: #13110e;
-  --ink-soft: #3e3932;
-  --ink-muted: #6f665a;
-  --ink-faint: #756b5e;
-  --line: #cec4b3;
-  --line-strong: #a99d89;
+  /* Warm neutral canvas + clean surfaces -------------------------------- */
+  --bg: #f5f2ed;
+  --bg-deep: #ede8e0;
+  --surface: #fffdfa;
+  --surface-soft: #f8f5f0;
+  --surface-muted: #ece7df;
+  --surface-strong: #ded7cc;
+  --ink: #171614;
+  --ink-soft: #3d3a35;
+  --ink-muted: #6d6860;
+  --ink-faint: #918b80;
+  --line: #e5dfd6;
+  --line-strong: #cec6ba;
 
-  /* One signal colour. No gradients. ------------------------------------ */
-  --accent: #b83e27;
-  --accent-deep: #8a2c1b;
-  --accent-soft: #f0d8d0;
-  --accent-ink: #fff8f0;
-  --sage: #5d705d;
-  --sage-soft: #e5e9df;
-  --ochre: #a77b37;
-  --ochre-soft: #f1e6d2;
-  --blue: #385a78;
-  --blue-soft: #e1e9ef;
+  /* One brand accent, used sparingly. ----------------------------------- */
+  --accent: #d0452d;
+  --accent-deep: #a63220;
+  --accent-soft: #faece8;
+  --accent-ink: #fffaf7;
+  --sage: #4f6b5d;
+  --sage-soft: #e8eee9;
+  --ochre: #9a7338;
+  --ochre-soft: #f3eadb;
+  --blue: #3f5f7d;
+  --blue-soft: #e6edf3;
 
-  /* Compatibility aliases used by existing components */
+  /* Compatibility aliases */
   --lav-700: var(--accent-deep);
   --lav-600: var(--accent);
   --lav-500: var(--accent);
-  --lav-300: #d8a195;
+  --lav-300: #e2a99d;
   --lav-100: var(--accent-soft);
-  --lav-50: #f8eee9;
+  --lav-50: #fcf2ef;
 
-  --mint-700: #455944;
+  --mint-700: #3c5446;
   --mint-600: var(--sage);
-  --mint-500: #7b8d78;
+  --mint-500: #6d8777;
   --mint-100: var(--sage-soft);
-  --mint-50: #f3f5ef;
+  --mint-50: #f3f7f3;
 
   --sky-600: var(--blue);
-  --sky-500: #5e7d99;
+  --sky-500: #6b89a3;
   --sky-100: var(--blue-soft);
 
   --peach-600: var(--ochre);
-  --peach-500: #c09454;
+  --peach-500: #b08b51;
   --peach-100: var(--ochre-soft);
 
-  --rose-500: #b25b53;
-  --rose-100: #f2dfdb;
+  --rose-500: #a95a50;
+  --rose-100: #f4e2de;
 
   --gold-600: var(--ochre);
-  --gold-500: #c09454;
+  --gold-500: #b08b51;
   --gold-100: var(--ochre-soft);
 
-  --danger-700: #8f3025;
+  --danger-700: #8f2d20;
   --danger-600: var(--accent);
   --danger-100: var(--accent-soft);
-  --success-700: #455944;
+  --success-700: #3c5446;
   --success-600: var(--sage);
   --success-100: var(--sage-soft);
-  --warning-700: #815a22;
+  --warning-700: #765322;
   --warning-600: var(--ochre);
   --warning-100: var(--ochre-soft);
 
-  /* Minimal compatibility for rare components; not a theme. */
-  --void: var(--ink);
-  --void-2: #1e1b16;
-  --void-3: #2a251e;
-  --void-4: #383128;
-  --on-dark: var(--bg);
-  --on-dark-soft: rgba(241, 237, 228, 0.76);
-  --on-dark-faint: rgba(241, 237, 228, 0.54);
-  --line-dark: rgba(241, 237, 228, 0.2);
-  --line-dark-strong: rgba(241, 237, 228, 0.34);
-  --lumen: var(--bg);
-  --aurora: var(--sage);
-  --ember: var(--accent);
-  --spectral: var(--accent);
-  --spectral-soft: var(--accent-soft);
+  /* Dark compatibility only for rare product surfaces. Not a theme. */
+  --void: #171614;
+  --void-2: #201e1a;
+  --void-3: #2a2722;
+  --void-4: #37332c;
+  --on-dark: #f7f3ec;
+  --on-dark-soft: rgba(247, 243, 236, 0.72);
+  --on-dark-faint: rgba(247, 243, 236, 0.48);
+  --line-dark: rgba(247, 243, 236, 0.14);
+  --line-dark-strong: rgba(247, 243, 236, 0.24);
+  --lumen: #f7f3ec;
+  --aurora: #9eb4a5;
+  --ember: #d0452d;
+  --spectral: #d0452d;
+  --spectral-soft: #faece8;
 
-  /* Semantic ------------------------------------------------------------- */
+  /* Semantic */
   --text: var(--ink);
   --text-secondary: var(--ink-soft);
   --text-muted: var(--ink-muted);
   --accent-soft-bg: var(--accent-soft);
   --border: var(--line);
 
-  /* Spacing -------------------------------------------------------------- */
+  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -118,39 +115,39 @@
   --space-15: 120px;
   --space-16: 160px;
 
-  /* Square geometry. Cards are not the default. ------------------------- */
-  --radius-xs: 0px;
-  --radius-sm: 1px;
-  --radius-md: 2px;
-  --radius-lg: 2px;
-  --radius-xl: 2px;
-  --radius-2xl: 2px;
-  --radius-3xl: 2px;
-  --radius-pill: 0px;
+  /* Precision geometry: restrained, not pill-shaped everywhere. */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 28px;
+  --radius-pill: 999px;
 
-  /* No decorative elevation. Rules do the work. ------------------------- */
-  --shadow-xs: none;
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  --shadow-deep: none;
-  --shadow-accent: none;
-  --shadow-mint: none;
+  /* Soft, product-like elevation instead of decorative borders. */
+  --shadow-xs: 0 1px 2px rgba(23, 22, 20, 0.04);
+  --shadow-sm: 0 1px 2px rgba(23, 22, 20, 0.04), 0 8px 20px -16px rgba(23, 22, 20, 0.16);
+  --shadow-md: 0 1px 2px rgba(23, 22, 20, 0.04), 0 20px 44px -30px rgba(23, 22, 20, 0.24);
+  --shadow-lg: 0 24px 60px -36px rgba(23, 22, 20, 0.28);
+  --shadow-deep: 0 30px 80px -40px rgba(23, 22, 20, 0.42);
+  --shadow-accent: 0 12px 30px -18px rgba(208, 69, 45, 0.5);
+  --shadow-mint: 0 12px 30px -18px rgba(79, 107, 93, 0.4);
 
-  /* Motion --------------------------------------------------------------- */
+  /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --duration-fast: 130ms;
-  --duration: 220ms;
-  --duration-slow: 500ms;
-  --duration-cinematic: 900ms;
+  --duration-fast: 120ms;
+  --duration: 200ms;
+  --duration-slow: 420ms;
+  --duration-cinematic: 700ms;
 
-  /* Layout --------------------------------------------------------------- */
-  --sidebar-width: 232px;
-  --topbar-height: 64px;
-  --content-max: 1320px;
-  --focus-ring: 0 0 0 2px var(--accent);
-  --focus-ring-dark: 0 0 0 2px var(--accent);
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.26'/%3E%3C/svg%3E");
+  /* Layout */
+  --sidebar-width: 224px;
+  --topbar-height: 60px;
+  --content-max: 1280px;
+  --focus-ring: 0 0 0 3px rgba(208, 69, 45, 0.18);
+  --focus-ring-dark: 0 0 0 3px rgba(247, 243, 236, 0.22);
+  --grain: none;
 }

@@ -30,12 +30,12 @@ const emit = defineEmits(['update:modelValue'])
 .segmented {
   display: inline-flex;
   align-items: stretch;
-  gap: 0;
+  gap: 2px;
   max-width: 100%;
+  padding: 3px;
   overflow-x: auto;
-  border: 1px solid var(--ink);
-  border-radius: 0;
-  background: transparent;
+  border-radius: 10px;
+  background: var(--surface-muted);
   scrollbar-width: none;
 }
 
@@ -46,56 +46,51 @@ const emit = defineEmits(['update:modelValue'])
 .segmented__item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   height: 30px;
-  padding: 0 12px;
-  border-right: 1px solid var(--line);
-  border-radius: 0;
+  padding: 0 11px;
+  border-radius: 7px;
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  font-weight: 500;
-  letter-spacing: 0.03em;
+  font-size: 12px;
+  font-weight: 550;
   white-space: nowrap;
   transition:
     background-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
-}
-
-.segmented__item:last-child {
-  border-right: 0;
+    color var(--duration-fast) var(--ease),
+    box-shadow var(--duration-fast) var(--ease);
 }
 
 .segmented__item:hover {
   color: var(--ink);
-  background: var(--surface);
 }
 
 .segmented__item.is-active {
-  color: var(--bg);
-  background: var(--ink);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+  font-weight: 600;
 }
 
 .segmented__count {
   min-width: 16px;
-  padding: 0 3px;
-  border: 1px solid currentColor;
-  border-radius: 0;
-  font-size: 7.5px;
-  line-height: 13px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink-muted);
+  font-size: 10px;
+  line-height: 16px;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
 .segmented__item.is-active .segmented__count {
-  border-color: rgba(241, 237, 228, 0.4);
-  background: transparent;
-  color: var(--bg);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
 .segmented--sm .segmented__item {
   height: 26px;
   padding: 0 9px;
-  font-size: 8px;
+  font-size: 11px;
 }
 </style>

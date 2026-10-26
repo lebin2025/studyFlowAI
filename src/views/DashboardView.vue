@@ -3,18 +3,11 @@ import { computed, onMounted, ref } from 'vue'
 import {
   AlertCircle,
   ArrowRight,
-  CheckCircle2,
-  Clock3,
-  Flame,
-  PartyPopper,
   Plus,
   Sparkles,
-  TrendingUp,
 } from 'lucide-vue-next'
 import AppButton from '@/components/ui/AppButton.vue'
-import AppEmptyState from '@/components/ui/AppEmptyState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
-import StatusPill from '@/components/ui/StatusPill.vue'
 import TaskItem from '@/components/tasks/TaskItem.vue'
 import TaskFormModal from '@/components/tasks/TaskFormModal.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
@@ -61,51 +54,17 @@ const todayProgress = computed(() =>
 const remainingMinutes = computed(() =>
   openToday.value.reduce((sum, task) => sum + Number(task.durationMinutes || 0), 0),
 )
-
-const subtitle = computed(() => {
-  if (loading.value) return '正在整理今天的学习安排…'
-  if (!todayTasks.value.length) return '今天还没有安排。加一个 20 分钟的小任务，或者让 AI 帮你规划。'
-  if (!openToday.value.length) return '今天的任务都完成了，给自己一点掌声。'
-  return `今天还有 ${openToday.value.length} 个任务，先从最重要的一件开始。`
-})
-
-const statCards = computed(() => {
-  const totals = stats.value?.totals || {}
-  return [
-    {
-      key: 'today',
-      label: '今日任务',
-      value: stats.value ? `${doneToday.value.length} / ${todayTasks.value.length}` : '—',
-      hint: '已完成',
-      icon: CheckCircle2,
-      tone: 'mint',
-    },
-    {
-      key: 'time',
-      label: '今日计划',
-      value: stats.value ? formatMinutes(stats.value.today.plannedMinutes) : '—',
-      hint: '预计投入',
-      icon: Clock3,
-      tone: 'lav',
-    },
-    {
-      key: 'streak',
-      label: '连续学习',
-      value: stats.value ? `${stats.value.streak} 天` : '—',
-      hint: stats.value ? `最长 ${stats.value.longestStreak} 天` : '从今天开始',
-      icon: Flame,
-      tone: 'peach',
-    },
-    {
-      key: 'rate',
-      label: '整体完成率',
-      value: stats.value ? `${totals.completionRate ?? 0}%` : '—',
-      hint: stats.value ? `${totals.openTasks ?? 0} 个待完成` : '真实任务统计',
-      icon: TrendingUp,
-      tone: 'sky',
-    },
-  ]
-})
+const plannedMinutes = computed(
+  () =>
+    stats.value?.today?.plannedMinutes ??
+    todayTasks.value.reduce((sum, task) => sum + Number(task.durationMinutes || 0), 0),
+)
+const completionRate = computed(() => stats.value?.totals?.completionRate ?? 0)
+const ringLength = 2 * Math.PI * 52
+const ringOffset = computed(() => ringLength * (1 - todayProgress.value / 100))
+const weekTotal = computed(() =>
+  (stats.value?.trend || []).reduce((sum, row) => sum + Number(row.completed || 0), 0),
+)
 
 const activePlan = computed(() => activePlans.value[0] || null)
 
@@ -222,94 +181,95 @@ const confirmDelete = async () => {
 }
 
 onMounted(load)
-</script>
-
-<template>
+</script><template>
   <div class="dashboard">
     <header class="dashboard-head">
-      <div class="dashboard-head__meta">
-        <span class="mono-label">01 / TODAY</span>
-        <span>{{ formatDate(today, { weekday: true }) }}</span>
+      <div class="dashboard-head__copy">
+        <p class="dashboard-head__date">{{ formatDate(today, { weekday: true }) }}</p>
+        <h1>{{ greetingText }}</h1>
       </div>
-      <div class="dashboard-head__grid">
-        <div>
-          <h1>{{ greetingText }}</h1>
-          <p>{{ subtitle }}</p>
-        </div>
-        <div class="dashboard-head__actions">
-          <AppButton @click="openCreate()">
-            <template #icon><Plus :size="15" /></template>
-            添加任务
-          </AppButton>
-          <AppButton to="/app/plans/new" variant="secondary">
-            <template #icon><Sparkles :size="15" /></template>
-            AI 新计划
-          </AppButton>
-        </div>
+      <div class="dashboard-head__actions">
+        <AppButton to="/app/plans/new" variant="ai">
+          <template #icon><Sparkles :size="15" /></template>
+          AI 计划
+        </AppButton>
+        <AppButton @click="openCreate()">
+          <template #icon><Plus :size="15" /></template>
+          添加任务
+        </AppButton>
       </div>
     </header>
 
     <div v-if="loading" class="dashboard__loading" aria-busy="true" aria-label="正在加载仪表盘">
-      <SkeletonBlock height="82px" radius="0" />
-      <SkeletonBlock height="360px" radius="0" />
+      <SkeletonBlock height="228px" radius="var(--radius-2xl)" />
+      <SkeletonBlock height="320px" radius="var(--radius-2xl)" />
     </div>
 
     <div v-else-if="error" class="dashboard__error">
-      <span class="dashboard__error-icon"><AlertCircle :size="18" /></span>
+      <AlertCircle :size="18" />
       <div>
-        <h2>仪表盘没有加载出来</h2>
+        <strong>加载失败</strong>
         <p>{{ error }}</p>
       </div>
-      <AppButton size="sm" variant="secondary" @click="load()">重新加载</AppButton>
+      <AppButton size="sm" variant="secondary" @click="load()">重试</AppButton>
     </div>
 
     <template v-else>
-      <div class="dashboard-metrics">
-        <div v-for="card in statCards" :key="card.key">
-          <span>{{ card.label }}</span>
-          <strong>{{ card.value }}</strong>
-          <em>{{ card.hint }}</em>
-        </div>
-      </div>
-
-      <section class="today-sheet">
-        <header class="today-sheet__head">
-          <div>
-            <span class="mono-label">今日 / TODAY</span>
-            <h2>{{ !todayTasks.length ? '今天还没有安排' : openToday.length ? '从最重要的一件开始' : '今天已经走完' }}</h2>
-          </div>
-          <div class="today-sheet__count">
-            <strong>{{ doneToday.length }}<span>/{{ todayTasks.length }}</span></strong>
-            <span>已完成</span>
-          </div>
-        </header>
-
-        <div v-if="todayTasks.length" class="today-sheet__body">
-          <div v-if="openToday.length" class="today-group">
-            <p class="today-group__label">待完成 · {{ openToday.length }}</p>
-            <TaskItem
-              v-for="task in openToday"
-              :key="task.id"
-              :task="task"
-              :busy="busyTaskId === task.id"
-              @toggle="(next) => toggleTask(task, next)"
-              @edit="openEdit"
-              @delete="askDelete"
-            />
-          </div>
-
-          <div v-if="!openToday.length" class="today-complete">
-            <span class="today-complete__icon"><PartyPopper :size="17" /></span>
-            <div>
-              <strong>今天的任务都完成了</strong>
-              <p>可以去散个步，或者提前看看明天的安排。</p>
+      <section class="instrument" aria-label="学习数据概览">
+        <div class="instrument__today">
+          <span class="instrument__label">今日完成</span>
+          <div class="instrument__ring-wrap">
+            <svg class="instrument__ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="instrument__ring-track" cx="60" cy="60" r="52" />
+              <circle
+                v-if="todayProgress > 0"
+                class="instrument__ring-value"
+                cx="60"
+                cy="60"
+                r="52"
+                :stroke-dasharray="ringLength"
+                :stroke-dashoffset="ringOffset"
+                transform="rotate(-90 60 60)"
+              />
+            </svg>
+            <div class="instrument__ring-label">
+              <strong>{{ doneToday.length }}</strong>
+              <span>/{{ todayTasks.length }}</span>
             </div>
           </div>
+        </div>
 
-          <div v-if="doneToday.length" class="today-group today-group--done">
-            <p class="today-group__label">已完成 · {{ doneToday.length }}</p>
+        <div class="instrument__metric">
+          <span>计划时长</span>
+          <strong>{{ formatMinutes(plannedMinutes) }}</strong>
+        </div>
+
+        <div class="instrument__metric">
+          <span>连续学习</span>
+          <strong>{{ stats?.streak ?? 0 }}<small>天</small></strong>
+        </div>
+
+        <div class="instrument__metric">
+          <span>完成率</span>
+          <strong>{{ completionRate }}<small>%</small></strong>
+          <div class="instrument__bar" aria-hidden="true">
+            <span :style="{ width: `${completionRate}%` }" />
+          </div>
+        </div>
+      </section>
+
+      <div class="dashboard-grid">
+        <section class="today-card">
+          <header class="section-head">
+            <h2>今日任务</h2>
+            <button type="button" class="icon-button" aria-label="添加任务" @click="openCreate()">
+              <Plus :size="16" />
+            </button>
+          </header>
+
+          <div v-if="todayTasks.length" class="today-list">
             <TaskItem
-              v-for="task in doneToday"
+              v-for="task in [...openToday, ...doneToday]"
               :key="task.id"
               :task="task"
               :busy="busyTaskId === task.id"
@@ -318,147 +278,106 @@ onMounted(load)
               @delete="askDelete"
             />
           </div>
-        </div>
 
-        <AppEmptyState
-          v-else
-          title="今天还没有任务"
-          description="一个 20 分钟的小任务，也足够让今天往前一点。"
-          compact
-        >
-          <AppButton size="sm" @click="openCreate()">
-            <template #icon><Plus :size="14" /></template>
-            添加今日任务
-          </AppButton>
-          <AppButton size="sm" variant="secondary" to="/app/plans/new">
-            让 AI 规划
-          </AppButton>
-        </AppEmptyState>
+          <div v-else class="today-empty">
+            <div class="today-empty__visual" aria-hidden="true">
+              <span /><span /><span />
+            </div>
+            <strong>暂无安排</strong>
+            <AppButton size="sm" variant="secondary" @click="openCreate()">添加任务</AppButton>
+          </div>
 
-        <footer class="today-sheet__foot">
-          <button type="button" class="text-button" @click="openCreate()">
-            <Plus :size="13" />
-            添加任务
-          </button>
+          <footer class="section-foot">
+            <RouterLink to="/app/tasks" class="text-link">
+              查看全部
+              <ArrowRight :size="12" />
+            </RouterLink>
+          </footer>
+        </section>
+
+        <aside class="dashboard-side">
+          <section class="plan-card">
+            <header class="section-head">
+              <h2>当前计划</h2>
+              <RouterLink to="/app/plans" class="icon-button" aria-label="查看学习计划">
+                <ArrowRight :size="15" />
+              </RouterLink>
+            </header>
+
+            <template v-if="activePlan">
+              <div class="plan-card__tags">
+                <span class="chip chip--lav">{{ activePlan.subject }}</span>
+              </div>
+              <RouterLink :to="`/app/plans/${activePlan.id}`" class="plan-card__title">
+                {{ activePlan.title }}
+              </RouterLink>
+              <p class="plan-card__goal">{{ activePlan.goal }}</p>
+              <div class="plan-card__progress">
+                <span :style="{ width: `${activePlan.progress}%` }" />
+              </div>
+              <div class="plan-card__meta">
+                <span>{{ activePlan.progress }}%</span>
+                <span>{{ activePlan.completedTasks }}/{{ activePlan.taskCount }} 项</span>
+                <span>截止 {{ formatDate(activePlan.endDate, { weekday: false }) }}</span>
+              </div>
+            </template>
+
+            <div v-else class="plan-card__empty">
+              <p>暂无计划</p>
+              <AppButton size="sm" to="/app/plans/new">
+                <template #icon><Sparkles :size="13" /></template>
+                创建计划
+              </AppButton>
+            </div>
+          </section>
+
+          <section class="rhythm-card">
+            <header class="section-head">
+              <h2>近 7 天</h2>
+              <span class="rhythm-card__total">{{ weekTotal }} 项</span>
+            </header>
+
+            <div class="rhythm-bars" aria-label="近 7 天完成任务数">
+              <div v-for="row in weekTrend" :key="row.date" class="rhythm-bar">
+                <span class="rhythm-bar__track">
+                  <span
+                    class="rhythm-bar__fill"
+                    :class="{ 'is-empty': !row.completed, 'is-today': row.date === today }"
+                    :style="{ height: `${Math.max(4, (row.completed / weekMax) * 100)}%` }"
+                    :title="`${formatDate(row.date, { weekday: true, year: false })}：${row.completed} 项`"
+                  />
+                </span>
+                <span class="rhythm-bar__label" :class="{ 'is-today': row.date === today }">
+                  {{ weekdayShort(row.date) }}
+                </span>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <section class="upcoming">
+        <header class="section-head">
+          <h2>接下来</h2>
           <RouterLink to="/app/tasks" class="text-link">
             全部任务
             <ArrowRight :size="12" />
           </RouterLink>
-        </footer>
-      </section>
-
-      <div class="dashboard-lower">
-        <section class="plan-ledger">
-          <header class="sheet-head">
-            <span class="mono-label">正在进行 / CURRENT PLAN</span>
-            <StatusPill v-if="activePlan" :value="activePlan.status" />
-          </header>
-
-          <template v-if="activePlan">
-            <div class="plan-ledger__body">
-              <div class="plan-ledger__figure">
-                <strong>{{ activePlan.progress }}</strong>
-                <span>%</span>
-              </div>
-              <div class="plan-ledger__content">
-                <span class="chip chip--lav">{{ activePlan.subject }}</span>
-                <h2>
-                  <RouterLink :to="`/app/plans/${activePlan.id}`">{{ activePlan.title }}</RouterLink>
-                </h2>
-                <p>{{ activePlan.goal }}</p>
-                <div class="plan-progress" aria-hidden="true">
-                  <span :style="{ width: `${activePlan.progress}%` }" />
-                </div>
-                <div class="plan-ledger__meta">
-                  <span>{{ activePlan.completedTasks }} / {{ activePlan.taskCount }} 个任务</span>
-                  <span>截止 {{ formatDate(activePlan.endDate, { weekday: false }) }}</span>
-                  <span>每天 {{ formatMinutes(activePlan.dailyMinutes) }}</span>
-                </div>
-              </div>
-            </div>
-            <footer class="plan-ledger__foot">
-              <AppButton size="sm" variant="secondary" :to="`/app/plans/${activePlan.id}`">
-                查看计划
-              </AppButton>
-              <RouterLink :to="`/app/plans/${activePlan.id}`" class="text-link">
-                用 AI 调整
-                <Sparkles :size="12" />
-              </RouterLink>
-            </footer>
-          </template>
-
-          <div v-else class="plan-ledger__empty">
-            <p>还没有进行中的计划。</p>
-            <AppButton size="sm" to="/app/plans/new">
-              <template #icon><Sparkles :size="14" /></template>
-              生成第一份计划
-            </AppButton>
-          </div>
-        </section>
-
-        <section class="week-ledger">
-          <header class="sheet-head">
-            <span class="mono-label">最近 7 天 / RHYTHM</span>
-            <span class="week-ledger__streak">
-              <Flame :size="11" />
-              {{ stats.streak }} 天
-            </span>
-          </header>
-          <div class="week-bars" aria-hidden="true">
-            <div v-for="row in weekTrend" :key="row.date" class="week-bar">
-              <span class="week-bar__track">
-                <span
-                  class="week-bar__fill"
-                  :class="{ 'is-empty': !row.completed }"
-                  :style="{ height: `${Math.max(4, (row.completed / weekMax) * 100)}%` }"
-                />
-              </span>
-              <span class="week-bar__label" :class="{ 'is-today': row.date === today }">
-                {{ weekdayShort(row.date) }}
-              </span>
-            </div>
-          </div>
-          <p class="week-ledger__caption">
-            最近 7 天已完成 {{ stats.trend.reduce((sum, row) => sum + row.completed, 0) }} 个任务。
-            数据来自真实记录。
-          </p>
-        </section>
-      </div>
-
-      <section class="upcoming-sheet">
-        <header class="sheet-head">
-          <span class="mono-label">接下来 7 天 / NEXT</span>
-          <RouterLink to="/app/tasks" class="text-link">
-            查看全部
-            <ArrowRight :size="12" />
-          </RouterLink>
         </header>
 
-        <div v-if="upcomingGroups.length" class="upcoming-columns">
-          <div v-for="group in upcomingGroups" :key="group.date" class="upcoming-column">
-            <div class="upcoming-column__date">
-              <strong>{{ formatDate(group.date, { weekday: true, year: false }) }}</strong>
-              <span>{{ group.tasks.length }} 个任务</span>
-            </div>
-            <ul>
-              <li v-for="task in group.tasks" :key="task.id">
-                <RouterLink :to="`/app/plans/${task.planId}`" class="upcoming-row">
-                  <span class="upcoming-row__dot" :class="`is-${task.priority}`" />
-                  <span class="upcoming-row__title">{{ task.title }}</span>
-                  <span class="upcoming-row__time">{{ formatMinutes(task.durationMinutes) }}</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </div>
+        <div v-if="upcoming.length" class="upcoming-list">
+          <RouterLink
+            v-for="task in upcoming.slice(0, 5)"
+            :key="task.id"
+            :to="`/app/plans/${task.planId}`"
+            class="upcoming-row"
+          >
+            <span class="upcoming-row__date">{{ formatDate(task.taskDate, { weekday: true, year: false }) }}</span>
+            <span class="upcoming-row__title">{{ task.title }}</span>
+            <span class="upcoming-row__time">{{ formatMinutes(task.durationMinutes) }}</span>
+          </RouterLink>
         </div>
-
-        <div v-else class="upcoming-empty">
-          <p>未来 7 天还没有安排任务。</p>
-          <button type="button" class="text-button" @click="openCreate()">
-            <Plus :size="13" />
-            提前安排一个
-          </button>
-        </div>
+        <p v-else class="upcoming-empty">暂无安排</p>
       </section>
     </template>
 
@@ -481,410 +400,390 @@ onMounted(load)
     />
   </div>
 </template>
-
 <style scoped>
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 24px;
 }
 
-/* Masthead ---------------------------------------------------------------- */
+/* Header ------------------------------------------------------------------ */
 .dashboard-head {
-  padding-top: 2px;
-}
-
-.dashboard-head__meta {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--ink);
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.08em;
+  gap: 24px;
 }
 
-.dashboard-head__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 30px;
-  padding-top: 22px;
+.dashboard-head__date {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .dashboard-head h1 {
-  max-width: 14ch;
-  font-size: clamp(42px, 5.4vw, 76px);
-  line-height: 0.92;
-  letter-spacing: -0.06em;
-}
-
-.dashboard-head p {
-  max-width: 54ch;
-  margin-top: 14px;
-  color: var(--ink-muted);
-  font-size: 13px;
-  line-height: 1.75;
+  margin-top: 4px;
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
 }
 
 .dashboard-head__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  justify-content: flex-end;
+  flex: none;
 }
 
 .dashboard__loading {
   display: grid;
-  gap: 18px;
+  gap: 20px;
 }
 
 .dashboard__error {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 18px 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-}
-
-.dashboard__error-icon {
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
   color: var(--accent);
+  box-shadow: var(--shadow-sm);
 }
 
-.dashboard__error h2 {
-  font-family: var(--font-sans);
-  font-size: 14px;
-  font-weight: 600;
+.dashboard__error div {
+  flex: 1;
+}
+
+.dashboard__error strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
 }
 
 .dashboard__error p {
   color: var(--ink-muted);
-  font-size: 11.5px;
+  font-size: 12px;
 }
 
-/* Metric strip, not cards ------------------------------------------------- */
-.dashboard-metrics {
+/* Data instrument --------------------------------------------------------- */
+.instrument {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
+  grid-template-columns: minmax(180px, 1fr) repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 24px;
+  padding: 26px 30px;
+  border-radius: 26px;
+  background: #1b1a17;
+  color: var(--on-dark);
+  box-shadow: var(--shadow-deep);
 }
 
-.dashboard-metrics > div {
+.instrument__today {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 14px 20px 15px 0;
-  border-right: 1px solid var(--line);
+  gap: 10px;
 }
 
-.dashboard-metrics > div:last-child {
-  border-right: 0;
+.instrument__label,
+.instrument__metric > span {
+  color: var(--on-dark-soft);
+  font-size: 11.5px;
+  font-weight: 500;
 }
 
-.dashboard-metrics span {
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.dashboard-metrics strong {
-  margin-top: 2px;
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 400;
-  font-style: italic;
-  line-height: 1;
-  letter-spacing: -0.05em;
-}
-
-.dashboard-metrics em {
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  font-style: normal;
-}
-
-/* Today sheet -------------------------------------------------------------- */
-.today-sheet {
-  border-top: 2px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-}
-
-.today-sheet__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 16px 0 18px;
-  border-bottom: 1px solid var(--ink);
-}
-
-.today-sheet__head h2 {
-  margin-top: 9px;
-  font-family: var(--font-sans);
-  font-size: clamp(24px, 3vw, 38px);
-  font-weight: 520;
-  letter-spacing: -0.045em;
-}
-
-.today-sheet__count {
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
-  flex: none;
-}
-
-.today-sheet__count strong {
-  font-family: var(--font-display);
-  font-size: clamp(50px, 6vw, 82px);
-  font-style: italic;
-  font-weight: 400;
-  line-height: 0.75;
-  letter-spacing: -0.06em;
-}
-
-.today-sheet__count strong span {
-  color: var(--ink-faint);
-  font-size: 0.45em;
-}
-
-.today-sheet__count > span {
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
-}
-
-.today-sheet__body {
-  padding: 10px 0 4px;
-}
-
-.today-group {
-  padding: 8px 0;
-}
-
-.today-group + .today-group {
-  border-top: 1px solid var(--line);
-}
-
-.today-group__label {
-  padding: 0 0 4px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.today-complete {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.today-complete__icon {
+.instrument__ring-wrap {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--accent);
-  color: var(--accent);
+  width: 132px;
+  height: 132px;
 }
 
-.today-complete strong {
-  display: block;
-  font-family: var(--font-sans);
-  font-size: 12.5px;
+.instrument__ring {
+  width: 132px;
+  height: 132px;
+}
+
+.instrument__ring circle {
+  fill: none;
+  stroke-width: 5;
+  vector-effect: non-scaling-stroke;
+}
+
+.instrument__ring-track {
+  stroke: rgba(247, 243, 236, 0.12);
+}
+
+.instrument__ring-value {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 700ms var(--ease);
+}
+
+.instrument__ring-label {
+  position: absolute;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.instrument__ring-label strong {
+  font-size: 34px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.instrument__ring-label span {
+  color: var(--on-dark-soft);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.instrument__metric {
+  min-width: 0;
+  padding-left: 24px;
+  border-left: 1px solid var(--line-dark);
+}
+
+.instrument__metric strong {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin-top: 10px;
+  font-size: clamp(28px, 3.2vw, 38px);
   font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-.today-complete p {
-  margin-top: 2px;
-  color: var(--ink-muted);
-  font-size: 10.5px;
+.instrument__metric small {
+  color: var(--on-dark-soft);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
-.today-sheet__foot {
+.instrument__bar {
+  width: min(100%, 90px);
+  height: 3px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: rgba(247, 243, 236, 0.14);
+  overflow: hidden;
+}
+
+.instrument__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 700ms var(--ease);
+}
+
+/* Dashboard body ---------------------------------------------------------- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.75fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.today-card,
+.plan-card,
+.rhythm-card {
+  padding: 20px;
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 11px 0 12px;
-  border-top: 1px solid var(--line);
+  margin-bottom: 8px;
 }
 
-.text-button {
-  display: inline-flex;
+.section-head h2 {
+  font-size: 17px;
+  font-weight: 620;
+  letter-spacing: -0.025em;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  color: var(--ink-muted);
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
+}
+
+.icon-button:hover {
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.today-list {
+  margin-top: 4px;
+}
+
+.today-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 34px 0 26px;
+}
+
+.today-empty__visual {
+  display: flex;
   align-items: center;
   gap: 5px;
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
-.text-button:hover {
-  color: var(--accent);
+.today-empty__visual span {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.today-empty__visual span:nth-child(2) {
+  width: 22px;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.today-empty strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.section-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
 }
 
 .text-link {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-/* Lower ledger ------------------------------------------------------------- */
-.dashboard-lower {
-  display: grid;
-  grid-template-columns: minmax(0, 1.34fr) minmax(0, 0.66fr);
-  gap: 30px;
-}
-
-.sheet-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 10px 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-}
-
-.plan-ledger,
-.week-ledger {
-  min-width: 0;
-}
-
-.plan-ledger__body {
-  display: grid;
-  grid-template-columns: 150px minmax(0, 1fr);
-  gap: 20px;
-  padding: 22px 0;
-}
-
-.plan-ledger__figure {
-  display: flex;
-  align-items: flex-start;
-  gap: 2px;
-  border-right: 1px solid var(--line);
-}
-
-.plan-ledger__figure strong {
-  font-family: var(--font-display);
-  font-size: clamp(64px, 8vw, 106px);
-  font-style: italic;
-  font-weight: 400;
-  line-height: 0.7;
-  letter-spacing: -0.08em;
-}
-
-.plan-ledger__figure span {
-  margin-top: 3px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 10px;
-}
-
-.plan-ledger__content {
-  min-width: 0;
-}
-
-.plan-ledger__content h2 {
-  margin-top: 10px;
-  font-family: var(--font-sans);
-  font-size: clamp(20px, 2.2vw, 30px);
-  font-weight: 520;
-  line-height: 1.16;
-  letter-spacing: -0.04em;
-}
-
-.plan-ledger__content h2 a:hover {
-  color: var(--accent);
-}
-
-.plan-ledger__content p {
-  max-width: 52ch;
-  margin-top: 7px;
   color: var(--ink-muted);
-  font-size: 11.5px;
-  line-height: 1.7;
+  font-size: 12px;
+  font-weight: 550;
+  transition: color var(--duration-fast) var(--ease);
 }
 
-.plan-progress {
-  height: 2px;
-  margin-top: 18px;
-  background: var(--line);
+.text-link:hover {
+  color: var(--accent);
 }
 
-.plan-progress span {
+.dashboard-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plan-card__tags {
+  margin-top: 10px;
+}
+
+.plan-card__title {
+  display: block;
+  margin-top: 8px;
+  font-size: 17px;
+  font-weight: 620;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+}
+
+.plan-card__title:hover {
+  color: var(--accent);
+}
+
+.plan-card__goal {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 5px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.plan-card__progress {
+  height: 4px;
+  margin-top: 16px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+
+.plan-card__progress span {
   display: block;
   height: 100%;
+  border-radius: inherit;
   background: var(--accent);
-  transition: width 700ms var(--ease);
+  transition: width 600ms var(--ease);
 }
 
-.plan-ledger__meta {
+.plan-card__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px 16px;
-  margin-top: 10px;
+  gap: 4px 12px;
+  margin-top: 9px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
-.plan-ledger__foot {
+.plan-card__meta span:first-child {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.plan-card__empty {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
+  padding: 18px 0 6px;
 }
 
-.plan-ledger__empty {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 22px 0;
+.plan-card__empty p {
   color: var(--ink-muted);
   font-size: 12px;
 }
 
-/* Week bars ---------------------------------------------------------------- */
-.week-ledger__streak {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 8px;
+.rhythm-card__total {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
-.week-bars {
+.rhythm-bars {
   display: flex;
   align-items: flex-end;
   gap: 7px;
-  height: 188px;
-  padding: 18px 0 8px;
-  border-bottom: 1px solid var(--ink);
+  height: 116px;
+  margin-top: 12px;
 }
 
-.week-bar {
+.rhythm-bar {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -894,240 +793,188 @@ onMounted(load)
   height: 100%;
 }
 
-.week-bar__track {
+.rhythm-bar__track {
   display: flex;
   align-items: flex-end;
   width: 100%;
-  max-width: 20px;
+  max-width: 18px;
   height: 100%;
-  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
 }
 
-.week-bar__fill {
+.rhythm-bar__fill {
   width: 100%;
+  min-height: 4px;
+  border-radius: inherit;
   background: var(--ink);
   transition: height 600ms var(--ease);
 }
 
-.week-bar__fill.is-empty {
+.rhythm-bar__fill.is-empty {
   background: var(--line);
 }
 
-.week-bar__label {
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
-}
-
-.week-bar__label.is-today {
-  color: var(--accent);
-}
-
-.week-ledger__caption {
-  padding-top: 9px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  line-height: 1.7;
-}
-
-/* Upcoming ledger ---------------------------------------------------------- */
-.upcoming-sheet {
-  margin-top: 2px;
-}
-
-.upcoming-columns {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-bottom: 1px solid var(--line);
-}
-
-.upcoming-column {
-  min-width: 0;
-  padding: 14px 18px 12px 0;
-  border-right: 1px solid var(--line);
-}
-
-.upcoming-column:last-child {
-  border-right: 0;
-}
-
-.upcoming-column__date {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid var(--line);
-}
-
-.upcoming-column__date strong {
-  font-family: var(--font-sans);
-  font-size: 11.5px;
-  font-weight: 600;
-}
-
-.upcoming-column__date span {
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-}
-
-.upcoming-column ul {
-  padding-top: 4px;
-}
-
-.upcoming-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 0;
-  border-bottom: 1px solid transparent;
-  color: var(--ink-soft);
-  font-size: 10.5px;
-}
-
-.upcoming-row:hover {
-  border-bottom-color: var(--line);
-  color: var(--ink);
-}
-
-.upcoming-row__dot {
-  flex: none;
-  width: 4px;
-  height: 4px;
-  background: var(--ink-faint);
-}
-
-.upcoming-row__dot.is-high {
+.rhythm-bar__fill.is-today {
   background: var(--accent);
 }
 
-.upcoming-row__dot.is-medium {
-  background: var(--blue);
+.rhythm-bar__label {
+  color: var(--ink-faint);
+  font-size: 10px;
 }
 
-.upcoming-row__dot.is-low {
-  background: var(--sage);
+.rhythm-bar__label.is-today {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Upcoming ---------------------------------------------------------------- */
+.upcoming {
+  margin-top: 4px;
+}
+
+.upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.upcoming-row {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 10px;
+  border-radius: 10px;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.upcoming-row:hover {
+  background: var(--surface);
+}
+
+.upcoming-row__date {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .upcoming-row__title {
-  flex: 1;
-  min-width: 0;
   overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .upcoming-row__time {
-  flex: none;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .upcoming-empty {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 18px 0;
-  border-bottom: 1px solid var(--line);
+  padding: 18px 10px;
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* Responsive --------------------------------------------------------------- */
-@media (max-width: 1120px) {
-  .dashboard-lower {
+@media (max-width: 1080px) {
+  .inline {
+    display: none;
+  }
+
+  .dashboard-grid {
     grid-template-columns: 1fr;
-    gap: 26px;
   }
 
-  .plan-ledger__body {
-    grid-template-columns: 120px minmax(0, 1fr);
-  }
-
-  .upcoming-columns {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .upcoming-column:nth-child(2n) {
-    border-right: 0;
+  .dashboard-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
   }
 }
 
 @media (max-width: 760px) {
-  .dashboard-head__grid {
-    grid-template-columns: 1fr;
-    align-items: start;
-    gap: 18px;
-  }
-
-  .dashboard-head h1 {
-    font-size: clamp(38px, 11vw, 54px);
-  }
-
-  .dashboard-head__actions {
-    justify-content: flex-start;
-  }
-
-  .dashboard-metrics {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .dashboard-metrics > div:nth-child(2n) {
-    border-right: 0;
-  }
-
-  .dashboard-metrics > div:nth-child(-n + 2) {
-    border-bottom: 1px solid var(--line);
-  }
-
-  .today-sheet__head {
+  .dashboard-head {
     display: block;
   }
 
-  .today-sheet__count {
-    margin-top: 14px;
+  .dashboard-head__actions {
+    margin-top: 16px;
   }
 
-  .today-sheet__count strong {
-    font-size: 48px;
+  .instrument {
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 16px;
+    padding: 22px;
+    border-radius: 22px;
   }
 
-  .plan-ledger__body {
+  .instrument__today {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .instrument__ring-wrap,
+  .instrument__ring {
+    width: 104px;
+    height: 104px;
+  }
+
+  .instrument__ring-label strong {
+    font-size: 27px;
+  }
+
+  .instrument__metric {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .instrument__metric:nth-child(3) {
+    padding-left: 16px;
+    border-left: 1px solid var(--line-dark);
+  }
+
+  .instrument__metric strong {
+    font-size: 27px;
+  }
+
+  .dashboard-side {
     grid-template-columns: 1fr;
-    gap: 14px;
   }
 
-  .plan-ledger__figure {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 8px;
+  .upcoming-row {
+    grid-template-columns: 96px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 10px 2px;
   }
 
-  .plan-ledger__figure strong {
-    font-size: 64px;
+  .upcoming-row__date {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 520px) {
+  .instrument__today {
+    display: block;
   }
 
-  .upcoming-columns {
-    grid-template-columns: 1fr;
+  .instrument__ring-wrap {
+    margin-top: 4px;
   }
 
-  .upcoming-column {
-    padding-right: 0;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .upcoming-column:last-child {
-    border-bottom: 0;
-  }
-
-  .today-sheet__foot,
-  .plan-ledger__empty {
-    align-items: flex-start;
-    flex-direction: column;
+  .today-card,
+  .plan-card,
+  .rhythm-card {
+    padding: 16px;
+    border-radius: 18px;
   }
 }
 </style>

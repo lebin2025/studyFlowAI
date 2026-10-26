@@ -273,11 +273,11 @@ watch(() => route.params.id, load)
 
     <template v-else-if="plan">
       <PageHeader
-        :eyebrow="`${plan.subject} · 学习计划`"
+        eyebrow=""
         :title="plan.title"
         :description="plan.goal"
         back-to="/app/plans"
-        back-label="返回学习计划"
+        back-label="返回"
       >
         <template #meta>
           <StatusPill :value="plan.status" />
@@ -298,7 +298,7 @@ watch(() => route.params.id, load)
         </template>
 
         <template #actions>
-          <AppButton variant="soft" @click="adjustOpen = true">
+          <AppButton variant="ai" @click="adjustOpen = true">
             <template #icon><WandSparkles :size="15" /></template>
             AI 调整
           </AppButton>
@@ -374,8 +374,8 @@ watch(() => route.params.id, load)
         <section class="panel tasks-panel">
           <header class="panel__head">
             <div>
-              <p class="panel__eyebrow">任务清单</p>
-              <h2 class="panel__title">每天的一小步</h2>
+
+              <h2 class="panel__title">任务清单</h2>
             </div>
             <div class="panel__head-actions">
               <SegmentedControl
@@ -395,7 +395,7 @@ watch(() => route.params.id, load)
             <AppEmptyState
               compact
               title="这份计划还没有任务"
-              description="添加一个今天能完成的小任务，进度会从这里开始。"
+              description="添加任务后开始记录进度。"
             >
               <AppButton size="sm" @click="openAdd()">添加任务</AppButton>
             </AppEmptyState>
@@ -454,8 +454,8 @@ watch(() => route.params.id, load)
           <section class="panel">
             <header class="panel__head panel__head--tight">
               <div>
-                <p class="panel__eyebrow">学习阶段</p>
-                <h2 class="panel__title panel__title--sm">路径</h2>
+
+                <h2 class="panel__title panel__title--sm">学习阶段</h2>
               </div>
               <Target :size="17" class="panel__head-icon" />
             </header>
@@ -483,8 +483,8 @@ watch(() => route.params.id, load)
           <section v-if="plan.overview" class="panel">
             <header class="panel__head panel__head--tight">
               <div>
-                <p class="panel__eyebrow">计划思路</p>
-                <h2 class="panel__title panel__title--sm">整体策略</h2>
+
+                <h2 class="panel__title panel__title--sm">计划思路</h2>
               </div>
             </header>
             <div class="panel__body">
@@ -495,8 +495,8 @@ watch(() => route.params.id, load)
           <section v-if="plan.risks?.length" class="panel">
             <header class="panel__head panel__head--tight">
               <div>
-                <p class="panel__eyebrow">风险提示</p>
-                <h2 class="panel__title panel__title--sm">可能会卡住的地方</h2>
+
+                <h2 class="panel__title panel__title--sm">风险提示</h2>
               </div>
             </header>
             <div class="panel__body risk-list">
@@ -1096,112 +1096,96 @@ watch(() => route.params.id, load)
 .plan-detail {
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
 
 .detail-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.42fr);
-  gap: 28px;
-  padding: 20px 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.42fr);
+  gap: 24px;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .detail-hero__ring {
   display: none;
 }
 
+.detail-hero__eyebrow,
+.next-card__eyebrow {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
 .detail-hero__main h2 {
   max-width: 18ch;
-  font-family: var(--font-display);
-  font-size: clamp(30px, 4vw, 54px);
-  font-weight: 600;
-  line-height: 0.98;
-  letter-spacing: -0.06em;
+  margin-top: 5px;
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
 }
 
 .detail-hero__main h2 small {
   color: var(--ink-faint);
-  font-size: 0.58em;
-  font-weight: 400;
-}
-
-.detail-hero__eyebrow,
-.next-card__eyebrow {
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.detail-hero__main h2 {
-  margin-top: 7px;
+  font-size: 0.6em;
+  font-weight: 500;
 }
 
 .detail-hero__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px 18px;
-  margin-top: 10px;
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
-}
-
-.detail-hero__main :deep(.progress) {
-  margin-top: 18px;
+  gap: 5px 14px;
+  margin-top: 8px;
+  color: var(--ink-faint);
+  font-size: 11px;
 }
 
 .next-card {
-  padding: 14px 0 0 20px;
+  padding: 14px;
   border: 0;
-  border-left: 1px solid var(--ink);
-  border-radius: 0;
-  background: transparent;
+  border-radius: 14px;
+  background: var(--surface-soft);
 }
 
 .next-card strong {
   display: block;
-  margin-top: 8px;
-  font-family: var(--font-sans);
-  font-size: 15px;
-  font-weight: 560;
-  line-height: 1.35;
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .next-card__meta,
 .next-card__done {
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  line-height: 1.6;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .next-card :deep(.btn) {
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .detail-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.42fr) minmax(0, 0.58fr);
-  gap: 30px;
-  margin-top: 28px;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.55fr);
+  gap: 18px;
   align-items: start;
 }
 
 .panel {
-  padding: 0;
-  border: 1px solid transparent;
-  border-top-color: var(--ink);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  min-width: 0;
+  padding: 18px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
 }
 
 .panel__head {
@@ -1209,25 +1193,19 @@ watch(() => route.params.id, load)
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
-  padding: 10px 0 12px;
-  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
 }
 
 .panel__eyebrow {
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-size: 11px;
 }
 
 .panel__title {
-  margin-top: 5px;
-  font-family: var(--font-display);
-  font-size: clamp(24px, 2.6vw, 34px);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.05em;
+  margin-top: 3px;
+  font-size: 17px;
+  font-weight: 620;
+  letter-spacing: -0.025em;
 }
 
 .panel__head-actions {
@@ -1237,117 +1215,113 @@ watch(() => route.params.id, load)
 }
 
 .panel__body {
-  padding: 14px 0;
+  padding: 8px 0;
 }
 
 .task-groups {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 
 .task-group {
-  display: grid;
-  grid-template-columns: 150px minmax(0, 1fr);
-  border-bottom: 1px solid var(--line);
+  display: block;
+  padding-top: 4px;
 }
 
 .task-group__head {
-  padding: 12px 14px 12px 0;
-  border-right: 1px solid var(--line);
-  background: transparent;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+
+.task-group__date {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
 }
 
 .task-group__day {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-style: italic;
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: -0.05em;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
 }
 
 .task-group__full {
-  display: block;
-  margin-top: 3px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
+  color: var(--ink-muted);
+  font-size: 11px;
 }
 
 .task-group__meta {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 4px 10px;
-  margin-top: 10px;
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
+  color: var(--ink-faint);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
 }
 
 .task-group__list {
-  padding: 2px 0 2px 18px;
+  padding: 0;
+}
+
+.task-group__overdue {
+  color: var(--accent);
+  font-size: 10px;
 }
 
 .detail-aside {
-  position: sticky;
-  top: 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
 }
 
 .stage-list {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .stage-item {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.stage-item:last-child {
-  border-bottom: 0;
+  padding: 0;
 }
 
 .stage-item__index {
   color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 10px;
+  font-weight: 650;
 }
 
 .stage-item__title {
-  margin-top: 3px;
-  font-family: var(--font-sans);
-  font-size: 13px;
+  margin-top: 2px;
+  font-size: 12.5px;
   font-weight: 600;
 }
 
 .stage-item__meta {
-  margin-top: 3px;
+  margin-top: 2px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 10.5px;
 }
 
 .detail-overdue {
   color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .detail-meta {
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .plan-detail__error {
-  padding: 20px 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
 }
 
 @media (max-width: 980px) {
@@ -1356,48 +1330,39 @@ watch(() => route.params.id, load)
   }
 
   .detail-aside {
-    position: static;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
   }
 }
 
 @media (max-width: 700px) {
   .detail-hero {
     grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .next-card {
-    padding: 14px 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--line);
+    padding: 16px;
+    border-radius: 18px;
   }
 
   .detail-hero__main h2 {
-    font-size: 34px;
+    font-size: 30px;
   }
 
-  .task-group {
+  .detail-aside {
     grid-template-columns: 1fr;
   }
 
+  .panel {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
   .task-group__head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 10px 0 7px;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
+    display: block;
   }
 
   .task-group__meta {
-    margin-top: 0;
-    justify-content: flex-end;
-    text-align: right;
-  }
-
-  .task-group__list {
-    padding: 2px 0;
+    justify-content: flex-start;
+    margin-top: 3px;
   }
 }
 </style>

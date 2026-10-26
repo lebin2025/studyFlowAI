@@ -163,11 +163,10 @@ onBeforeUnmount(deactivate)
   max-width: 520px;
   max-height: 90dvh;
   overflow: auto;
-  background: var(--bg);
-  border: 1px solid var(--ink);
-  border-top: 3px solid var(--accent);
-  border-radius: 0;
-  box-shadow: 12px 12px 0 rgba(19, 17, 14, 0.1);
+  background: var(--surface);
+  border: 0;
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
 }
 
 .modal__panel--sm {

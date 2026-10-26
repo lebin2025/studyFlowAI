@@ -69,20 +69,20 @@ const onClick = (event) => {
 
 <style scoped>
 .btn {
-  --btn-height: 44px;
-  --btn-padding: 20px;
+  --btn-height: 40px;
+  --btn-padding: 16px;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
   height: var(--btn-height);
   padding: 0 var(--btn-padding);
-  border: 1px solid var(--ink);
-  border-radius: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
   font-family: var(--font-sans);
   font-size: 12.5px;
-  font-weight: 580;
+  font-weight: 600;
   line-height: 1;
   letter-spacing: -0.005em;
   white-space: nowrap;
@@ -91,12 +91,18 @@ const onClick = (event) => {
   transition:
     background-color var(--duration-fast) var(--ease),
     border-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
+    color var(--duration-fast) var(--ease),
+    box-shadow var(--duration-fast) var(--ease),
+    transform var(--duration-fast) var(--ease);
+}
+
+.btn:active {
+  transform: scale(0.985);
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .btn:disabled,
@@ -107,59 +113,69 @@ const onClick = (event) => {
 
 .btn--primary {
   background: var(--ink);
+  border-color: var(--ink);
   color: var(--bg);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn--primary:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
+  background: #2b2924;
+  border-color: #2b2924;
 }
 
 .btn--secondary {
-  background: transparent;
-  color: var(--ink);
+  background: var(--surface);
+  color: var(--ink-soft);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn--secondary:hover {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--surface-soft);
+  color: var(--ink);
 }
 
 .btn--soft {
-  border-color: var(--line);
-  background: transparent;
-  color: var(--ink-muted);
+  background: var(--surface-soft);
+  color: var(--ink-soft);
 }
 
 .btn--soft:hover {
-  border-color: var(--ink);
+  background: var(--surface-muted);
   color: var(--ink);
 }
 
 .btn--ghost {
   height: auto;
   min-height: 30px;
-  padding: 0;
-  border-color: transparent;
-  border-bottom: 1px solid var(--line-strong);
+  padding: 0 6px;
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 550;
 }
 
 .btn--ghost:hover {
-  border-bottom-color: var(--accent);
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.btn--ai {
+  background: transparent;
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+
+.btn--ai :deep(svg) {
   color: var(--accent);
 }
 
+.btn--ai:hover {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
 .btn--danger {
-  border-color: var(--accent);
-  background: transparent;
-  color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
 .btn--danger:hover {
@@ -168,41 +184,43 @@ const onClick = (event) => {
 }
 
 .btn--inverse {
-  border-color: var(--bg);
   background: var(--bg);
+  border-color: var(--bg);
   color: var(--ink);
 }
 
 .btn--inverse:hover {
-  border-color: var(--accent);
   background: var(--accent);
+  border-color: var(--accent);
   color: var(--accent-ink);
 }
 
 .btn--glass {
-  border-color: rgba(241, 237, 228, 0.34);
   background: transparent;
+  border-color: var(--line-dark-strong);
   color: var(--bg);
 }
 
 .btn--glass:hover {
-  border-color: var(--bg);
   background: var(--bg);
+  border-color: var(--bg);
   color: var(--ink);
 }
 
 .btn--sm {
-  --btn-height: 34px;
-  --btn-padding: 13px;
-  gap: 6px;
-  font-size: 11px;
+  --btn-height: 32px;
+  --btn-padding: 11px;
+  gap: 5px;
+  border-radius: 8px;
+  font-size: 11.5px;
 }
 
 .btn--lg {
-  --btn-height: 50px;
-  --btn-padding: 24px;
-  gap: 9px;
-  font-size: 13px;
+  --btn-height: 46px;
+  --btn-padding: 20px;
+  gap: 8px;
+  border-radius: 11px;
+  font-size: 13.5px;
 }
 
 .btn--block {

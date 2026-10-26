@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Clock3, Sparkles, X } from 'lucide-vue-next'
-import Mascot from '@/components/illustrations/Mascot.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 
 const props = defineProps({
@@ -36,9 +35,8 @@ onBeforeUnmount(() => {
 <template>
   <div class="generating" role="status" aria-live="polite">
     <div class="generating__art">
-      <span class="generating__pulse generating__pulse--one" />
-      <span class="generating__pulse generating__pulse--two" />
-      <Mascot :size="150" variant="thinking" />
+      <span class="generating__spinner" aria-hidden="true" />
+      <Sparkles :size="22" aria-hidden="true" />
     </div>
 
     <span class="generating__badge">
@@ -259,5 +257,47 @@ onBeforeUnmount(() => {
 
 .generating__note {
   font-size: 8.5px;
+}
+</style>
+
+<style scoped>
+.generating__art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  margin: 6px auto 20px;
+  color: var(--accent);
+}
+
+.generating__spinner {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1.1s linear infinite;
+}
+
+.generating__badge {
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.generating__hints {
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.generating__title {
+  font-size: 22px;
+}
+
+.generating__text {
+  color: var(--ink-muted);
 }
 </style>

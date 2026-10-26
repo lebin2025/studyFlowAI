@@ -34,24 +34,18 @@ defineProps({
 
     <aside class="auth__art" aria-hidden="true">
       <div class="auth__art-head">
-        <span>FIG. 02 / LEARNING LOOM</span>
-        <span>目标 × 时间 × 行动</span>
+        <span>学习路径</span>
+        <span>AI 规划</span>
       </div>
 
       <div class="auth__art-copy">
-        <h2>把目标，<br />织成每天<br />的一小步。</h2>
-        <p>
-          AI 根据你的目标、基础和真实时间，拆出今天就能开始的任务。
-          你只需要完成这一小步，剩下的交给节奏。
-        </p>
+        <h2>今天，先完成<br />一件事。</h2>
+        <p>AI 根据你的目标与时间，安排每天的任务。</p>
       </div>
 
-      <StudyLoom compact />
-
-      <blockquote>
-        “不追求今天做完所有事，只追求今天往前一点点。”
-        <cite>StudyFlow 小芽</cite>
-      </blockquote>
+      <div class="auth__art-card">
+        <StudyLoom compact />
+      </div>
     </aside>
   </div>
 </template>
@@ -137,8 +131,7 @@ defineProps({
   justify-content: center;
   min-height: 100vh;
   padding: clamp(30px, 5vw, 70px);
-  border-left: 1px solid var(--ink);
-  background: var(--surface);
+  background: var(--surface-soft);
 }
 
 .auth__art-head {
@@ -146,9 +139,8 @@ defineProps({
   justify-content: space-between;
   gap: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--ink);
   color: var(--ink-faint);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 8px;
   letter-spacing: 0.06em;
 }
@@ -159,9 +151,9 @@ defineProps({
 }
 
 .auth__art-copy h2 {
-  font-size: clamp(38px, 4.6vw, 66px);
-  line-height: 0.94;
-  letter-spacing: -0.065em;
+  font-size: clamp(34px, 3.8vw, 48px);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
 }
 
 .auth__art-copy p {
@@ -172,8 +164,12 @@ defineProps({
   line-height: 1.8;
 }
 
-.auth__art :deep(.loom) {
-  margin-top: 26px;
+.auth__art-card {
+  margin-top: 28px;
+  padding: 16px;
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
 }
 
 .auth__art blockquote {

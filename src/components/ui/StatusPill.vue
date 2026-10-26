@@ -37,42 +37,45 @@ const tone = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 6px;
-  border: 1px solid currentColor;
-  border-radius: 0;
-  background: transparent;
-  font-family: var(--font-mono);
-  font-size: 8px;
-  font-weight: 500;
-  line-height: 1.5;
-  letter-spacing: 0.03em;
+  padding: 3px 7px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.4;
   white-space: nowrap;
 }
 
 .pill__dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
   background: currentColor;
 }
 
 .pill--lav {
-  color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
 .pill--mint {
+  background: var(--sage-soft);
   color: var(--sage);
 }
 
 .pill--sky {
+  background: var(--blue-soft);
   color: var(--blue);
 }
 
 .pill--danger {
-  color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
 .pill--neutral {
-  color: var(--ink-faint);
+  background: var(--surface-soft);
+  color: var(--ink-muted);
 }
 </style>

@@ -94,9 +94,9 @@ onMounted(load)
 <template>
   <div class="stats-page">
     <PageHeader
-      eyebrow="学习统计"
-      title="看见真实的进步"
-      description="这里没有估算出来的努力。每一个数字都来自你实际保存的任务与完成记录。"
+      eyebrow=""
+      title="学习统计"
+      description="完成率、趋势与连续学习天数。"
     >
       <template #actions>
         <SegmentedControl v-model="days" :options="rangeOptions" label="选择统计周期" />
@@ -125,8 +125,8 @@ onMounted(load)
     <template v-else-if="stats">
       <div v-if="!stats.totals.totalTasks" class="stats-empty card">
         <AppEmptyState
-          title="还没有可统计的学习记录"
-          description="完成第一个任务后，这里会出现真实的完成率、学习趋势和连续天数。我们不会用示例数据填满它。"
+          title="暂无数据"
+          description="完成第一个任务后显示统计。"
         >
           <AppButton to="/app/plans/new">生成学习计划</AppButton>
           <AppButton to="/app/tasks" variant="secondary">去添加任务</AppButton>
@@ -138,9 +138,6 @@ onMounted(load)
           <article v-for="card in cards" :key="card.label" class="stat-card">
             <div class="stat-card__top">
               <span class="stat-card__label">{{ card.label }}</span>
-              <span class="stat-card__icon" :class="`stat-card__icon--${card.tone}`">
-                <component :is="card.icon" :size="16" :stroke-width="1.8" />
-              </span>
             </div>
             <strong class="stat-card__value">{{ card.value }}</strong>
             <span class="stat-card__hint">{{ card.hint }}</span>
@@ -151,8 +148,8 @@ onMounted(load)
           <section class="panel trend-panel">
             <header class="panel__head">
               <div>
-                <p class="panel__eyebrow">每日趋势</p>
-                <h2 class="panel__title">这几天，你走得怎么样</h2>
+
+                <h2 class="panel__title">学习趋势</h2>
                 <p class="panel__sub">
                   {{ formatDate(stats.range.from, { weekday: false }) }} —
                   {{ formatDate(stats.range.to, { weekday: false }) }} ·
@@ -160,23 +157,25 @@ onMounted(load)
                 </p>
               </div>
               <span class="trend-panel__badge">
-                <TrendingUp :size="13" />
                 {{ stats.totals.completionRate }}%
               </span>
             </header>
             <div class="panel__body">
-              <TrendChart :data="stats.trend" />
-              <p v-if="!stats.trend.some((row) => row.completed)" class="panel__note">
-                这个周期内还没有完成记录。完成今天的第一个任务后，这里会出现第一条数据。
-              </p>
+              <TrendChart v-if="stats.trend.some((row) => row.completed)" :data="stats.trend" />
+              <div v-else class="chart-empty">
+                <span class="chart-empty__bars" aria-hidden="true">
+                  <i /><i /><i /><i /><i /><i /><i />
+                </span>
+                <p>暂无记录</p>
+              </div>
             </div>
           </section>
 
           <section class="panel">
             <header class="panel__head">
               <div>
-                <p class="panel__eyebrow">节奏</p>
-                <h2 class="panel__title">按星期看习惯</h2>
+
+                <h2 class="panel__title">星期分布</h2>
               </div>
             </header>
             <div class="panel__body">
@@ -189,8 +188,8 @@ onMounted(load)
           <section class="panel">
             <header class="panel__head">
               <div>
-                <p class="panel__eyebrow">科目分布</p>
-                <h2 class="panel__title">时间花在了哪里</h2>
+
+                <h2 class="panel__title">科目分布</h2>
               </div>
               <BookOpenCheck :size="17" class="panel__head-icon" />
             </header>
@@ -202,8 +201,8 @@ onMounted(load)
           <section class="panel overview-panel">
             <header class="panel__head">
               <div>
-                <p class="panel__eyebrow">学习概况</p>
-                <h2 class="panel__title">真实的节奏</h2>
+
+                <h2 class="panel__title">概览</h2>
               </div>
               <span class="overview-panel__streak">
                 <Flame :size="13" />
@@ -246,17 +245,14 @@ onMounted(load)
                   <strong>{{ loggedCoverage }}%</strong>
                 </div>
                 <ProgressBar :value="loggedCoverage" color="var(--mint-500)" :height="5" label="实际用时登记率" />
-                <p>
-                  只有你填写了「实际用时」的任务才会被计入登记率。预计时长不会被冒充成实际时长。
-                </p>
+                <p>仅统计你填写了实际用时的任务。</p>
               </div>
             </div>
           </section>
         </div>
 
         <p class="stats-note">
-          统计口径：已完成任务按任务日期归入当天；预计学习时长为任务预计时长之和，实际用时仅统计你主动登记的数据。
-          连续学习天数也按已完成任务的计划日期计算。当前时区：{{ stats.timezone }}。
+          按任务日期归入当天。时区：{{ stats.timezone }}。
         </p>
       </template>
     </template>
@@ -267,88 +263,73 @@ onMounted(load)
 .stats-page {
   display: flex;
   flex-direction: column;
+  gap: 22px;
 }
 
+/* Metric strip ------------------------------------------------------------ */
 .stats-cards {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 13px;
-  margin-bottom: 18px;
+  grid-template-columns: repeat(4, 1fr);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
 .stat-card {
   display: flex;
   flex-direction: column;
-  padding: 16px 17px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-xs);
+  min-width: 0;
+  padding: 17px 20px 18px;
 }
 
-.stat-card__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+.stat-card + .stat-card {
+  border-left: 1px solid var(--line);
 }
 
 .stat-card__label {
   color: var(--ink-muted);
-  font-size: 10.5px;
-  font-weight: 550;
-}
-
-.stat-card__icon {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-}
-
-.stat-card__icon--lav {
-  background: var(--lav-100);
-  color: var(--lav-700);
-}
-
-.stat-card__icon--mint {
-  background: var(--mint-100);
-  color: var(--mint-700);
-}
-
-.stat-card__icon--sky {
-  background: var(--sky-100);
-  color: var(--sky-600);
-}
-
-.stat-card__icon--peach {
-  background: var(--peach-100);
-  color: var(--peach-600);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .stat-card__value {
   margin-top: 8px;
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 660;
-  letter-spacing: -0.035em;
-  line-height: 1.2;
+  color: var(--ink);
+  font-size: clamp(26px, 2.8vw, 36px);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.045em;
   font-variant-numeric: tabular-nums;
 }
 
 .stat-card__hint {
-  margin-top: 2px;
+  margin-top: 5px;
   color: var(--ink-faint);
-  font-size: 9.5px;
+  font-size: 11px;
+}
+
+/* Panels ------------------------------------------------------------------ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.5fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.stats-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 18px;
+  align-items: start;
 }
 
 .panel {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  min-width: 0;
+  padding: 18px;
+  border-radius: 20px;
   background: var(--surface);
   box-shadow: var(--shadow-xs);
-  overflow: hidden;
 }
 
 .panel__head {
@@ -356,123 +337,87 @@ onMounted(load)
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
-  padding: 18px 20px 6px;
-}
-
-.panel__eyebrow {
-  color: var(--ink-faint);
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
 .panel__title {
-  margin-top: 4px;
   font-size: 17px;
-  font-weight: 650;
+  font-weight: 620;
   letter-spacing: -0.025em;
 }
 
 .panel__sub {
   margin-top: 4px;
   color: var(--ink-faint);
-  font-size: 9.5px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .panel__body {
-  padding: 10px 20px 18px;
+  padding-top: 8px;
 }
 
 .panel__note {
-  margin-top: 8px;
-  padding: 9px 11px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-soft);
-  color: var(--ink-muted);
-  font-size: 10px;
-  line-height: 1.6;
-}
-
-.panel__head-icon {
+  padding: 8px 0 2px;
   color: var(--ink-faint);
+  font-size: 11.5px;
 }
 
 .trend-panel__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
   flex: none;
-  padding: 4px 9px;
-  border-radius: var(--radius-pill);
-  background: var(--mint-50);
-  color: var(--mint-700);
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
-  margin-bottom: 18px;
-}
-
-.stats-bottom {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 18px;
-}
-
-.streak-block {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: var(--radius-md);
-  background: var(--peach-100);
-}
-
-.streak-block__icon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.7);
-  color: var(--peach-600);
-}
-
-.streak-block strong {
-  display: block;
-  font-size: 13px;
-  font-weight: 640;
-}
-
-.streak-block span {
-  color: var(--ink-muted);
-  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 11px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 
 .overview-panel__streak {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  flex: none;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--peach-100);
-  color: var(--peach-600);
-  font-size: 10px;
+  color: var(--accent);
+  font-size: 11px;
   font-weight: 600;
 }
 
-.overview-rows {
+/* Overview ---------------------------------------------------------------- */
+.streak-block {
   display: flex;
-  flex-direction: column;
-  gap: 0;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+}
+
+.streak-block__icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.streak-block strong {
+  display: block;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.streak-block span {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-muted);
+  font-size: 10.5px;
+}
+
+.overview-rows {
   margin: 12px 0 0;
 }
 
@@ -481,355 +426,61 @@ onMounted(load)
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 6px 0;
-  border-bottom: 1px dashed var(--line);
-  font-size: 10.5px;
+  padding: 8px 0;
 }
 
 .overview-rows dt {
   color: var(--ink-muted);
+  font-size: 11.5px;
 }
 
 .overview-rows dd {
   margin: 0;
-  color: var(--ink-soft);
+  color: var(--ink);
+  font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .overview-rows dd.is-warning {
-  color: var(--danger-700);
+  color: var(--accent);
 }
 
-.coverage {
-  margin-top: 12px;
-  padding-top: 11px;
-  border-top: 1px solid var(--line);
-}
-
-.coverage__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 6px;
-  color: var(--ink-muted);
-  font-size: 10px;
-}
-
-.coverage__head strong {
-  color: var(--ink-soft);
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.coverage p {
-  margin-top: 7px;
-  color: var(--ink-faint);
-  font-size: 9px;
-  line-height: 1.6;
-}
-
-.stats-note {
-  margin-top: 16px;
-  color: var(--ink-faint);
-  font-size: 9.5px;
-  line-height: 1.65;
-}
-
+/* Empty / error ----------------------------------------------------------- */
+.stats-error,
 .stats-empty {
-  padding: 20px;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .stats-error {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 22px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px;
 }
 
 .stats-error__icon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 0;
-  background: var(--danger-100);
-  color: var(--danger-600);
+  color: var(--accent);
 }
 
 .stats-error h2 {
   font-size: 14px;
+  font-weight: 600;
 }
 
 .stats-error p {
   margin-top: 3px;
   color: var(--ink-muted);
-  font-size: 11.5px;
-}
-
-.stats-error .btn {
-  margin-left: auto;
-}
-
-@media (max-width: 1100px) {
-  .stats-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .stats-grid,
-  .stats-bottom {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 560px) {
-  .stats-cards {
-    gap: 10px;
-  }
-
-  .stat-card {
-    padding: 13px 14px;
-  }
-
-  .stat-card__value {
-    font-size: 18px;
-  }
-
-  .panel__head {
-    padding: 16px 16px 4px;
-  }
-
-  .panel__body {
-    padding: 8px 16px 16px;
-  }
-
-  .stats-error {
-    flex-wrap: wrap;
-  }
-
-  .stats-error .btn {
-    margin-left: 0;
-    width: 100%;
-  }
-}
-</style>
-<style scoped>
-.stats-page {
-  display: flex;
-  flex-direction: column;
-}
-
-.stats-range {
-  display: flex;
-  gap: 0;
-  border: 1px solid var(--ink);
-  border-radius: 0;
-  overflow: hidden;
-}
-
-.stats-range button {
-  min-width: 52px;
-  padding: 6px 10px;
-  border-right: 1px solid var(--line);
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
-}
-
-.stats-range button:last-child {
-  border-right: 0;
-}
-
-.stats-range button.is-active {
-  background: var(--ink);
-  color: var(--bg);
-}
-
-.stats-cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  margin-top: 0;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-}
-
-.stat-card {
-  display: flex;
-  flex-direction: column;
-  padding: 14px 18px 16px 0;
-  border: 0;
-  border-right: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.stat-card:last-child {
-  border-right: 0;
-}
-
-.stat-card__top {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.stat-card__label {
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.stat-card__icon {
-  color: var(--ink-faint);
-}
-
-.stat-card__value {
-  margin-top: 6px;
-  font-family: var(--font-display);
-  font-size: clamp(30px, 3.4vw, 46px);
-  font-style: italic;
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: -0.06em;
-}
-
-.stat-card__hint {
-  margin-top: 3px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.55fr);
-  gap: 30px;
-  margin-top: 28px;
-}
-
-.stats-grid .panel,
-.stats-bottom .panel {
-  padding: 0;
-  border: 0;
-  border-top: 1px solid var(--ink);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.panel__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 0 12px;
-  border-bottom: 1px solid var(--line);
-}
-
-.panel__eyebrow {
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.panel__title {
-  margin-top: 5px;
-  font-family: var(--font-display);
-  font-size: clamp(24px, 2.6vw, 36px);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.05em;
-}
-
-.panel__sub {
-  margin-top: 5px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
-}
-
-.panel__body {
-  padding: 16px 0 4px;
-}
-
-.panel__note {
-  color: var(--ink-faint);
-  font-size: 11px;
-}
-
-.trend-panel__badge {
-  border: 1px solid var(--accent);
-  border-radius: 0;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 8px;
-}
-
-.stats-bottom {
-  display: grid;
-  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
-  gap: 30px;
-  margin-top: 30px;
-}
-
-.overview-panel {
-  background: transparent;
-}
-
-.overview-panel__streak {
-  border: 1px solid var(--accent);
-  border-radius: 0;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 8px;
-}
-
-.stats-error,
-.stats-empty {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 40px 0;
-  margin-top: 24px;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.stats-error__icon {
-  color: var(--accent);
-}
-
-.stats-error h2,
-.stats-empty h2 {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.stats-error p,
-.stats-empty p {
-  max-width: 50ch;
-  margin-top: 5px;
-  color: var(--ink-muted);
-  font-size: 11.5px;
+  font-size: 12px;
 }
 
 @media (max-width: 980px) {
   .stats-grid,
   .stats-bottom {
     grid-template-columns: 1fr;
-    gap: 26px;
+    gap: 16px;
   }
 }
 
@@ -838,44 +489,82 @@ onMounted(load)
     grid-template-columns: 1fr 1fr;
   }
 
-  .stat-card:nth-child(2n) {
-    border-right: 0;
+  .stat-card {
+    padding: 14px 16px;
   }
 
-  .stat-card:nth-child(-n + 2) {
-    border-bottom: 1px solid var(--line);
+  .stat-card:nth-child(odd) {
+    border-left: 0;
   }
 
-  .stats-range button {
-    flex: 1;
+  .stat-card:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .stat-card__value {
+    font-size: 28px;
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 18px;
   }
 }
 </style>
 <style scoped>
-.stat-card__icon {
-  display: inline-grid !important;
-  place-items: center;
-  width: auto !important;
-  height: auto !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-}
-</style>
-
-<style scoped>
-.streak-block {
-  padding: 0 0 0 12px !important;
-  border: 0 !important;
-  border-left: 2px solid var(--accent) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 128px;
+  color: var(--ink-faint);
 }
 
-.streak-block__icon {
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: var(--accent) !important;
+.chart-empty__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 34px;
+}
+
+.chart-empty__bars i {
+  width: 5px;
+  border-radius: 3px;
+  background: var(--line-strong);
+  opacity: 0.55;
+}
+
+.chart-empty__bars i:nth-child(1),
+.chart-empty__bars i:nth-child(6) {
+  height: 10px;
+}
+
+.chart-empty__bars i:nth-child(2),
+.chart-empty__bars i:nth-child(5) {
+  height: 18px;
+}
+
+.chart-empty__bars i:nth-child(3) {
+  height: 25px;
+}
+
+.chart-empty__bars i:nth-child(4) {
+  height: 14px;
+}
+
+.chart-empty__bars i:nth-child(7) {
+  height: 7px;
+}
+
+.chart-empty p {
+  font-size: 12px;
+}
+
+.stats-note {
+  color: var(--ink-faint);
+  font-size: 10.5px;
+  line-height: 1.6;
 }
 </style>

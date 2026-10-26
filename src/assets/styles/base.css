@@ -19,23 +19,12 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 15.5px;
-  line-height: 1.68;
-  letter-spacing: -0.004em;
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: -0.008em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  pointer-events: none;
-  background-image: var(--grain);
-  opacity: 0.035;
-  mix-blend-mode: multiply;
 }
 
 #app {
@@ -49,10 +38,10 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 600;
-  line-height: 1.06;
-  letter-spacing: -0.04em;
+  font-family: var(--font-sans);
+  font-weight: 650;
+  line-height: 1.12;
+  letter-spacing: -0.038em;
   color: var(--ink);
   text-wrap: balance;
 }
@@ -99,20 +88,14 @@ button:disabled {
   cursor: not-allowed;
 }
 
-input,
-textarea,
-select {
-  border-radius: 0;
-}
-
 ::selection {
   background: var(--accent);
   color: var(--accent-ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 * {
@@ -121,13 +104,14 @@ select {
 }
 
 ::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--line-strong);
-  border: 3px solid transparent;
+  border: 2px solid transparent;
+  border-radius: 999px;
   background-clip: content-box;
 }
 
@@ -138,7 +122,7 @@ select {
   width: 100%;
   max-width: var(--content-max);
   margin-inline: auto;
-  padding-inline: clamp(20px, 4.2vw, 52px);
+  padding-inline: clamp(20px, 4vw, 48px);
 }
 
 .page {
@@ -194,6 +178,7 @@ select {
 .mono {
   font-family: var(--font-mono);
   font-size: 0.92em;
+  font-variant-numeric: tabular-nums;
 }
 
 .truncate {
@@ -230,14 +215,16 @@ select {
 
 .skip-link {
   position: fixed;
-  top: 10px;
-  left: 10px;
+  top: 12px;
+  left: 12px;
   z-index: 300;
-  padding: 10px 16px;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
   background: var(--ink);
   color: var(--bg);
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
   transform: translateY(-200%);
   transition: transform var(--duration) var(--ease);
 }
@@ -247,51 +234,37 @@ select {
 }
 
 /* --------------------------------------------------------------------------
-   Editorial primitives
+   Product primitives
    -------------------------------------------------------------------------- */
-.editorial {
-  font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.055em;
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .mono-label {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 9px;
+  gap: 7px;
+  color: var(--ink-muted);
+  font-family: var(--font-sans);
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 
 .index-number {
-  font-family: var(--font-display);
-  font-size: clamp(38px, 5vw, 76px);
-  font-weight: 400;
-  line-height: 0.85;
-  letter-spacing: -0.06em;
-  color: var(--ink);
-}
-
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 9px;
+  color: var(--ink-faint);
+  font-family: var(--font-sans);
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.eyebrow::before {
-  content: '';
-  width: 18px;
-  height: 1px;
-  background: currentColor;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .hairline {
@@ -317,86 +290,80 @@ select {
   border-bottom: 1px solid var(--line);
 }
 
-/* Default surface is paper, not a floating card. */
+/* Soft product surfaces are available, but not the default for everything. */
 .card {
   position: relative;
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 0;
-  box-shadow: none;
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
 }
 
-.paper-panel {
+.surface {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 0;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
 }
 
 .card-lift {
   transition:
-    border-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease),
+    transform var(--duration) var(--ease),
     background-color var(--duration) var(--ease);
 }
 
 .card-lift:hover {
-  border-color: var(--ink);
-  background: var(--surface);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .section-heading {
-  display: grid;
-  grid-template-columns: 90px minmax(0, 1.25fr) minmax(0, 0.75fr);
-  align-items: start;
-  gap: clamp(18px, 3vw, 46px);
-  padding-top: 14px;
-  margin-bottom: var(--space-10);
-  border-top: 1px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 760px;
+  margin-bottom: var(--space-9);
 }
 
 .section-heading h2 {
-  max-width: none;
-  font-size: clamp(32px, 4vw, 56px);
-  line-height: 1.02;
+  font-size: clamp(30px, 3.2vw, 46px);
+  line-height: 1.08;
 }
 
 .section-heading p {
-  max-width: 42ch;
-  padding-top: 6px;
+  max-width: 56ch;
   color: var(--ink-muted);
-  font-size: 12.5px;
-  line-height: 1.8;
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 7px;
-  border: 1px solid var(--line-strong);
-  border-radius: 0;
-  background: transparent;
-  color: var(--ink-soft);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  font-weight: 600;
-  line-height: 1.5;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--surface-soft);
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.4;
   white-space: nowrap;
 }
 
 .chip--lav {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
 .chip--mint {
-  border-color: var(--sage);
+  background: var(--sage-soft);
   color: var(--sage);
 }
 
 .chip--peach {
-  border-color: var(--ochre);
+  background: var(--ochre-soft);
   color: var(--ochre);
 }
 
@@ -413,6 +380,12 @@ select {
   gap: var(--space-5);
 }
 
+.section-label {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
 /* --------------------------------------------------------------------------
    Motion
    -------------------------------------------------------------------------- */
@@ -422,23 +395,13 @@ select {
   }
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -420px 0;
-  }
+@keyframes pulse-soft {
+  0%,
   100% {
-    background-position: 420px 0;
+    opacity: 0.55;
   }
-}
-
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
+  50% {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -447,14 +410,9 @@ select {
 }
 
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--surface-soft) 25%,
-    var(--surface) 37%,
-    var(--surface-soft) 63%
-  );
-  background-size: 840px 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
+  background: var(--surface-muted);
+  border-radius: var(--radius-sm);
+  animation: pulse-soft 1.4s var(--ease-in-out) infinite;
 }
 
 .page-enter-active,
@@ -466,7 +424,7 @@ select {
 
 .page-enter-from {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(8px);
 }
 
 .page-leave-to {
@@ -485,10 +443,10 @@ select {
 
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(16px);
   transition:
-    opacity 800ms var(--ease-out),
-    transform 800ms var(--ease-out);
+    opacity 600ms var(--ease-out),
+    transform 600ms var(--ease-out);
 }
 
 .reveal.is-visible {
@@ -518,20 +476,19 @@ select {
 
 @media (max-width: 760px) {
   body {
-    font-size: 15px;
+    font-size: 14.5px;
   }
 
   .section-heading {
-    grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 9px;
+    margin-bottom: 26px;
   }
 
   .section-heading h2 {
-    max-width: none;
-    font-size: clamp(32px, 9vw, 48px);
+    font-size: clamp(28px, 8vw, 38px);
   }
 
   .section-heading p {
-    max-width: 40ch;
+    font-size: 13px;
   }
 }

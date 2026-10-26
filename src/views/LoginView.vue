@@ -64,9 +64,9 @@ const submit = async () => {
 
 <template>
   <AuthLayout
-    eyebrow="欢迎回来"
-    title="继续今天的一小步"
-    description="登录后，你的计划、任务和学习进度都在这里。"
+    eyebrow=""
+    title="登录"
+    description="继续你的学习计划。"
   >
     <div v-if="apiError" class="form-alert" role="alert">
       <p class="form-alert__title">{{ apiError.message }}</p>
@@ -115,14 +115,9 @@ const submit = async () => {
     </form>
 
     <p class="auth-switch">
-      还没有账户？
-      <RouterLink to="/register">创建一个，开始规划</RouterLink>
+      没有账户？
+      <RouterLink to="/register">创建账户</RouterLink>
     </p>
-
-    <div class="auth-tip">
-      <span class="auth-tip__icon">🌱</span>
-      <p>第一次使用？注册后告诉 AI 你的目标，它会帮你拆成每天的小任务。</p>
-    </div>
   </AuthLayout>
 </template>
 

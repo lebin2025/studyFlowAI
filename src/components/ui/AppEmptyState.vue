@@ -1,19 +1,14 @@
 <script setup>
-import Mascot from '@/components/illustrations/Mascot.vue'
-
 defineProps({
-  title: { type: String, default: '这里还空空的' },
+  title: { type: String, default: '暂无数据' },
   description: { type: String, default: '' },
   compact: { type: Boolean, default: false },
-  variant: { type: String, default: 'happy' },
 })
 </script>
 
 <template>
   <div class="empty" :class="{ 'empty--compact': compact }">
-    <div class="empty__art">
-      <Mascot :size="compact ? 92 : 124" :variant="variant" :animated="!compact" />
-    </div>
+    <span class="empty__mark" aria-hidden="true"><i /><i /><i /></span>
     <h3 class="empty__title">{{ title }}</h3>
     <p v-if="description" class="empty__description">{{ description }}</p>
     <div v-if="$slots.default" class="empty__actions">
@@ -21,57 +16,66 @@ defineProps({
     </div>
   </div>
 </template>
-
 <style scoped>
 .empty {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
-  padding: 26px 0;
+  padding: 22px 0;
   text-align: left;
 }
 
 .empty--compact {
-  padding: 16px 0;
+  padding: 14px 0;
 }
 
-.empty__art {
-  position: relative;
-  display: grid;
-  place-items: center;
-  margin-bottom: 8px;
-  padding: 0;
+.empty__mark {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 18px;
+  margin-bottom: 12px;
 }
 
-.empty__art::before {
-  display: none;
+.empty__mark i {
+  display: block;
+  width: 5px;
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+
+.empty__mark i:nth-child(1) {
+  height: 7px;
+}
+
+.empty__mark i:nth-child(2) {
+  height: 15px;
+  background: var(--accent);
+}
+
+.empty__mark i:nth-child(3) {
+  height: 10px;
 }
 
 .empty__title {
-  position: relative;
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.045em;
-  line-height: 1.15;
+  font-size: 16px;
+  font-weight: 620;
+  letter-spacing: -0.025em;
 }
 
 .empty--compact .empty__title {
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .empty__description {
-  position: relative;
-  max-width: 40ch;
-  margin-top: 6px;
+  max-width: 42ch;
+  margin-top: 4px;
   color: var(--ink-muted);
-  font-size: 11.5px;
-  line-height: 1.7;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .empty__actions {
-  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

@@ -78,9 +78,9 @@ const submit = async () => {
 
 <template>
   <AuthLayout
-    eyebrow="开始使用"
-    title="给自己一个清晰的开始"
-    description="创建账户后，AI 会根据你的目标、基础和时间，生成第一份学习计划。"
+    eyebrow=""
+    title="创建账户"
+    description="保存你的计划、任务与进度。"
   >
     <div v-if="apiError" class="form-alert" role="alert">
       <p class="form-alert__title">{{ apiError.message }}</p>
