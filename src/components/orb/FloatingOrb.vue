@@ -95,6 +95,13 @@ const orbState = computed(() => {
   return 'idle'
 })
 
+const characterVisible = computed(
+  () =>
+    hovered.value ||
+    open.value ||
+    ['processing', 'success', 'rest', 'error'].includes(orbState.value),
+)
+
 const stateLabel = computed(() => {
   if (orbState.value === 'processing') return '正在生成'
   if (orbState.value === 'rest') return '需要休息'
@@ -424,10 +431,7 @@ onBeforeUnmount(() => {
       >
         <header class="orb-panel__head">
           <div class="orb-panel__status">
-            <span class="orb-panel__avatar">
-              <Mascot :size="38" :variant="mascotVariant" :animated="false" />
-              <span class="orb-status-dot" :class="`is-${orbState}`" />
-            </span>
+            <span class="orb-status-dot" :class="`is-${orbState}`" />
             <div>
               <strong>{{ stateLabel }}</strong>
               <span>{{ stateDetail }}</span>
@@ -502,17 +506,13 @@ onBeforeUnmount(() => {
           </div>
           <div class="orb-modes">
             <button
-              v-for="mode in [
-                { id: 'focus', label: '专注' },
-                { id: 'relax', label: '放松' },
-                { id: 'minimal', label: '静音' },
-              ]"
-              :key="mode.id"
+              v-for="track in ambience.tracks"
+              :key="track.id"
               type="button"
-              :class="{ 'is-active': ambience.mode === mode.id }"
-              @click="selectAmbience(mode.id)"
+              :class="{ 'is-active': ambience.mode === track.id }"
+              @click="selectAmbience(track.id)"
             >
-              {{ mode.label }}
+              {{ track.label }}
             </button>
             <button type="button" class="orb-mode-play" :aria-label="ambience.playing ? '暂停环境音' : '播放环境音'" @click="toggleAmbience">
               <Pause v-if="ambience.playing" :size="13" />
@@ -537,22 +537,19 @@ onBeforeUnmount(() => {
 
         <footer class="orb-panel__foot">
           <Waves :size="12" />
-          <span>合成环境音 · 不自动播放</span>
+          <span>真实环境音 · 不自动播放</span>
         </footer>
       </section>
-    </Transition>
-
-    <Transition name="orb-character">
-      <span v-if="hovered && !open" class="orb-character" aria-hidden="true">
-        <Mascot :size="58" :variant="mascotVariant" :animated="false" />
-      </span>
     </Transition>
 
     <button
       ref="orbButton"
       type="button"
       class="orb"
-      :class="[`is-${orbState}`, { 'is-open': open, 'is-dragging': dragging }]"
+      :class="[
+        `is-${orbState}`,
+        { 'is-open': open, 'is-dragging': dragging, 'is-character': characterVisible },
+      ]"
       :aria-expanded="open"
       :aria-controls="open ? panelId : undefined"
       aria-label="打开 StudyFlow 快捷中心"
@@ -567,8 +564,13 @@ onBeforeUnmount(() => {
       @keydown="onOrbKeydown"
     >
       <span class="orb__aura" aria-hidden="true" />
-      <span class="orb__core" aria-hidden="true">
-        <Sparkles :size="19" />
+      <span class="orb__sphere" aria-hidden="true">
+        <span class="orb__core">
+          <Sparkles :size="19" />
+        </span>
+      </span>
+      <span class="orb__character" aria-hidden="true">
+        <Mascot :size="66" :variant="mascotVariant" :animated="false" />
       </span>
       <span class="orb__state">{{ stateLabel }}</span>
     </button>
@@ -598,23 +600,17 @@ onBeforeUnmount(() => {
   place-items: center;
   width: 66px;
   height: 66px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 0;
+  border: 0;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.34), transparent 24%),
-    radial-gradient(circle at 70% 75%, rgba(208, 69, 45, 0.5), transparent 54%),
-    radial-gradient(circle at 50% 50%, #2e2a25, #141311 72%);
-  box-shadow:
-    0 20px 50px -22px rgba(23, 22, 20, 0.75),
-    inset 0 1px 1px rgba(255, 255, 255, 0.28);
+  background: transparent;
   color: var(--on-dark);
   cursor: grab;
   touch-action: none;
   user-select: none;
   transition:
     transform 220ms var(--ease),
-    opacity 180ms var(--ease),
-    box-shadow 220ms var(--ease);
+    opacity 180ms var(--ease);
   animation: orb-breathe 5.5s var(--ease-in-out) infinite;
 }
 
@@ -625,13 +621,41 @@ onBeforeUnmount(() => {
 .orb:hover,
 .orb.is-open {
   transform: scale(1.045);
+}
+
+.orb:active {
+  transform: scale(0.97);
+}
+
+.orb__sphere {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.34), transparent 24%),
+    radial-gradient(circle at 70% 75%, rgba(208, 69, 45, 0.5), transparent 54%),
+    radial-gradient(circle at 50% 50%, #2e2a25, #141311 72%);
+  box-shadow:
+    0 20px 50px -22px rgba(23, 22, 20, 0.75),
+    inset 0 1px 1px rgba(255, 255, 255, 0.28);
+  transition:
+    opacity 180ms var(--ease),
+    transform 320ms var(--ease-spring);
+}
+
+.orb:hover .orb__sphere,
+.orb.is-open .orb__sphere {
   box-shadow:
     0 26px 62px -22px rgba(23, 22, 20, 0.82),
     inset 0 1px 1px rgba(255, 255, 255, 0.34);
 }
 
-.orb:active {
-  transform: scale(0.97);
+.orb.is-character .orb__sphere {
+  opacity: 0;
+  transform: scale(0.55) rotate(-6deg);
 }
 
 .orb__aura {
@@ -658,27 +682,34 @@ onBeforeUnmount(() => {
   backdrop-filter: blur(4px);
 }
 
-.orb-character {
+.orb__character {
   position: absolute;
-  right: -2px;
-  bottom: 52px;
-  display: block;
+  inset: -1px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  opacity: 0;
   pointer-events: none;
-  filter: drop-shadow(0 8px 12px rgba(23, 22, 20, 0.18));
+  filter: drop-shadow(0 10px 14px rgba(23, 22, 20, 0.2));
+  transform: translateY(7px) scale(0.55) rotate(-5deg);
   transform-origin: bottom center;
-}
-
-.orb-character-enter-active,
-.orb-character-leave-active {
   transition:
     opacity 180ms var(--ease),
-    transform 320ms var(--ease-spring);
+    transform 340ms var(--ease-spring);
 }
 
-.orb-character-enter-from,
-.orb-character-leave-to {
-  opacity: 0;
-  transform: translateY(8px) scale(0.6) rotate(-4deg);
+.orb__character :deep(svg) {
+  width: 100%;
+  height: 100%;
+}
+
+.orb.is-character .orb__character {
+  opacity: 1;
+  transform: none;
+}
+
+.orb.is-character .orb__aura {
+  opacity: 0.34;
 }
 
 .orb__state {
@@ -1111,10 +1142,10 @@ onBeforeUnmount(() => {
   .orb-panel {
     position: fixed;
     right: 10px;
-    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(146px + env(safe-area-inset-bottom, 0px));
     left: 10px;
     width: auto;
-    max-height: min(72dvh, 620px);
+    max-height: min(72dvh, 560px);
     border-radius: 20px;
   }
 
@@ -1147,25 +1178,6 @@ onBeforeUnmount(() => {
 @media (prefers-reduced-motion: reduce) {
   .orb-panel-enter-active,
   .orb-panel-leave-active {
-    transition: none;
-  }
-}
-</style>
-
-<style scoped>
-@media (max-width: 900px) {
-  .orb-root.is-expanded .orb {
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.9);
-  }
-}
-</style>
-
-<style scoped>
-@media (prefers-reduced-motion: reduce) {
-  .orb-character-enter-active,
-  .orb-character-leave-active {
     transition: none;
   }
 }

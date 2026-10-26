@@ -221,17 +221,13 @@ onBeforeUnmount(() => {
             </div>
             <div class="focus-ambience__row">
               <button
-                v-for="mode in [
-                  { id: 'focus', label: '专注' },
-                  { id: 'relax', label: '放松' },
-                  { id: 'minimal', label: '静音' },
-                ]"
-                :key="mode.id"
+                v-for="track in ambience.tracks"
+                :key="track.id"
                 type="button"
-                :class="{ 'is-active': ambience.mode === mode.id }"
-                @click="setMode(mode.id)"
+                :class="{ 'is-active': ambience.mode === track.id }"
+                @click="setMode(track.id)"
               >
-                {{ mode.label }}
+                {{ track.label }}
               </button>
               <button type="button" class="focus-play" @click="ambience.toggle">
                 <Pause v-if="ambience.playing" :size="13" />

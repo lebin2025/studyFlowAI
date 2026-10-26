@@ -1,93 +1,102 @@
 import { defineStore } from 'pinia'
 
-const KEY = 'studyflow:ambience:v1'
-let context = null
-let source = null
-let filter = null
-let gain = null
-let stopTimer = null
+const KEY = 'studyflow:ambience:v2'
+
+export const TRACKS = [
+  { id: 'forest', label: '森林', caption: '专注', src: '/audio/forest.mp3' },
+  { id: 'moon', label: '月光', caption: '放松', src: '/audio/moon.mp3' },
+  { id: 'snow', label: '雪', caption: '安静', src: '/audio/snow.mp3' },
+  { id: 'sunset', label: '日落', caption: '松弛', src: '/audio/sunset.mp3' },
+  { id: 'minimal', label: '静音', caption: '关闭', src: '' },
+]
+
+const TRACK_MAP = new Map(TRACKS.map((track) => [track.id, track]))
 
 const read = () => {
   try {
     const data = JSON.parse(localStorage.getItem(KEY) || '{}')
     return {
-      mode: ['focus', 'relax', 'minimal'].includes(data.mode) ? data.mode : 'minimal',
+      mode: TRACK_MAP.has(data.mode) ? data.mode : 'forest',
       volume: Math.min(1, Math.max(0, Number(data.volume ?? 0.35))),
     }
   } catch {
-    return { mode: 'minimal', volume: 0.35 }
+    return { mode: 'forest', volume: 0.35 }
   }
 }
 
-const createNoise = (ctx) => {
-  const length = Math.floor(ctx.sampleRate * 2)
-  const buffer = ctx.createBuffer(1, length, ctx.sampleRate)
-  const data = buffer.getChannelData(0)
-  let b0 = 0
-  let b1 = 0
-  let b2 = 0
-  let b3 = 0
-  let b4 = 0
-  let b5 = 0
-  let b6 = 0
-  for (let i = 0; i < length; i += 1) {
-    const white = Math.random() * 2 - 1
-    b0 = 0.99886 * b0 + white * 0.0555179
-    b1 = 0.99332 * b1 + white * 0.0750759
-    b2 = 0.969 * b2 + white * 0.153852
-    b3 = 0.8665 * b3 + white * 0.3104856
-    b4 = 0.55 * b4 + white * 0.5329522
-    b5 = -0.7616 * b5 - white * 0.016898
-    data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11
-    b6 = white * 0.115926
-  }
-  return buffer
+let audio = null
+let fadeFrame = null
+let playToken = 0
+
+const cancelFade = () => {
+  if (fadeFrame) cancelAnimationFrame(fadeFrame)
+  fadeFrame = null
 }
+
+const fadeTo = (target, duration = 220) =>
+  new Promise((resolve) => {
+    if (!audio) {
+      resolve()
+      return
+    }
+    cancelFade()
+    const start = audio.volume
+    const startedAt = performance.now()
+    const step = (now) => {
+      const progress = Math.min(1, (now - startedAt) / duration)
+      const eased = 1 - (1 - progress) ** 2
+      audio.volume = start + (target - start) * eased
+      if (progress < 1) {
+        fadeFrame = requestAnimationFrame(step)
+      } else {
+        fadeFrame = null
+        resolve()
+      }
+    }
+    fadeFrame = requestAnimationFrame(step)
+  })
 
 export const useAmbienceStore = defineStore('ambience', {
   state: () => {
     const saved = read()
     return {
+      tracks: TRACKS,
       mode: saved.mode,
       volume: saved.volume,
       playing: false,
-      supported: typeof window !== 'undefined' && Boolean(window.AudioContext || window.webkitAudioContext),
+      loading: false,
+      supported: typeof window !== 'undefined' && typeof window.Audio !== 'undefined',
       error: '',
     }
   },
 
   getters: {
-    label: (state) => ({ focus: '专注', relax: '放松', minimal: '静音' })[state.mode],
-    modeLabel: (state) =>
-      ({ focus: '专注白噪音', relax: '放松环境音', minimal: '静音' })[state.mode],
+    currentTrack: (state) => TRACK_MAP.get(state.mode) || TRACK_MAP.get('forest'),
+    label: (state) => TRACK_MAP.get(state.mode)?.label || '静音',
+    modeLabel: (state) => {
+      const track = TRACK_MAP.get(state.mode)
+      return track && track.id !== 'minimal' ? `${track.label}环境音` : '静音'
+    },
+    isMuted: (state) => state.mode === 'minimal',
   },
 
   actions: {
-    ensureContext() {
+    ensureAudio() {
       if (!this.supported) {
-        this.error = '当前浏览器不支持环境音。'
+        this.error = '当前浏览器不支持音频播放。'
         return null
       }
-      if (!context) {
-        const AudioCtor = window.AudioContext || window.webkitAudioContext
-        context = new AudioCtor()
-        filter = context.createBiquadFilter()
-        filter.type = 'lowpass'
-        filter.frequency.value = 720
-        filter.Q.value = 0.7
-        gain = context.createGain()
-        gain.gain.value = 0
-        filter.connect(gain)
-        gain.connect(context.destination)
+      if (!audio) {
+        audio = new Audio()
+        audio.loop = true
+        audio.preload = 'none'
+        audio.volume = this.volume
+        audio.addEventListener('error', () => {
+          this.error = '音频加载失败，请检查 public/audio 文件。'
+          this.playing = false
+        })
       }
-      return context
-    },
-
-    applyTone() {
-      if (!filter) return
-      filter.type = this.mode === 'relax' ? 'bandpass' : 'lowpass'
-      filter.frequency.value = this.mode === 'relax' ? 1450 : 720
-      filter.Q.value = this.mode === 'relax' ? 0.45 : 0.7
+      return audio
     },
 
     async play(mode = this.mode) {
@@ -97,66 +106,58 @@ export const useAmbienceStore = defineStore('ambience', {
         return
       }
       this.mode = mode
-      const ctx = this.ensureContext()
-      if (!ctx) return
+      const track = TRACK_MAP.get(mode)
+      if (!track?.src) {
+        this.error = '这个环境音没有配置文件。'
+        return
+      }
+      const element = this.ensureAudio()
+      if (!element) return
+      this.error = ''
+      this.loading = true
+      const token = ++playToken
       try {
-        if (ctx.state === 'suspended') await ctx.resume()
-        this.applyTone()
-        if (stopTimer) {
-          window.clearTimeout(stopTimer)
-          stopTimer = null
+        if (element.src && element.src !== window.location.origin + track.src) {
+          await fadeTo(0, 180)
+          element.pause()
         }
-        if (source) {
-          try {
-            source.stop()
-          } catch {
-            /* already stopped */
-          }
-          source.disconnect()
-          source = null
+        if (element.src !== window.location.origin + track.src) {
+          element.src = track.src
+          element.load()
         }
-        source = ctx.createBufferSource()
-        source.buffer = createNoise(ctx)
-        source.loop = true
-        source.connect(filter)
-        source.start()
-        gain.gain.cancelScheduledValues(ctx.currentTime)
-        gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime)
-        gain.gain.linearRampToValueAtTime(this.volume, ctx.currentTime + 0.25)
+        element.volume = 0
+        await element.play()
+        if (token !== playToken) {
+          element.pause()
+          return
+        }
         this.playing = true
-        this.error = ''
+        this.loading = false
+        await fadeTo(this.volume, 260)
         this.persist()
       } catch {
-        this.error = '环境音播放失败，请检查浏览器音频权限。'
+        this.error = '音频播放失败，请检查浏览器音频权限。'
         this.playing = false
+        this.loading = false
       }
     },
 
     pause() {
-      if (!context || !gain) {
-        this.playing = false
-        return
-      }
-      const ctx = context
-      try {
-        gain.gain.cancelScheduledValues(ctx.currentTime)
-        gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime)
-        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2)
-        if (stopTimer) window.clearTimeout(stopTimer)
-        stopTimer = window.setTimeout(() => {
-          try {
-            source?.stop()
-          } catch {
-            /* already stopped */
-          }
-          source?.disconnect()
-          source = null
-        }, 260)
-      } catch {
-        /* ignore */
-      }
+      playToken += 1
       this.playing = false
+      this.loading = false
       this.persist()
+      if (!audio) return
+      cancelFade()
+      const token = playToken
+      fadeTo(0, 180).then(() => {
+        if (token !== playToken) return
+        try {
+          audio.pause()
+        } catch {
+          /* ignore */
+        }
+      })
     },
 
     async toggle() {
@@ -164,11 +165,11 @@ export const useAmbienceStore = defineStore('ambience', {
         this.pause()
         return
       }
-      await this.play(this.mode === 'minimal' ? 'focus' : this.mode)
+      await this.play(this.mode === 'minimal' ? 'forest' : this.mode)
     },
 
     async setMode(mode) {
-      if (!['focus', 'relax', 'minimal'].includes(mode)) return
+      if (!TRACK_MAP.has(mode)) return
       this.mode = mode
       this.persist()
       if (mode === 'minimal') {
@@ -180,10 +181,7 @@ export const useAmbienceStore = defineStore('ambience', {
 
     setVolume(value) {
       this.volume = Math.min(1, Math.max(0, Number(value) || 0))
-      if (gain && context) {
-        gain.gain.cancelScheduledValues(context.currentTime)
-        gain.gain.linearRampToValueAtTime(this.volume, context.currentTime + 0.08)
-      }
+      if (audio) audio.volume = this.volume
       this.persist()
     },
 
@@ -191,28 +189,29 @@ export const useAmbienceStore = defineStore('ambience', {
       try {
         localStorage.setItem(KEY, JSON.stringify({ mode: this.mode, volume: this.volume }))
       } catch {
-        /* ignore */
+        /* storage is best-effort */
       }
     },
 
     reset() {
       this.pause()
-      this.mode = 'minimal'
+      this.mode = 'forest'
       this.volume = 0.35
       this.persist()
     },
 
     dispose() {
-      this.pause()
+      playToken += 1
+      cancelFade()
+      if (!audio) return
       try {
-        context?.close()
+        audio.pause()
+        audio.src = ''
+        audio.load()
       } catch {
         /* ignore */
       }
-      context = null
-      filter = null
-      gain = null
-      source = null
+      audio = null
     },
   },
 })
