@@ -29,14 +29,13 @@ const emit = defineEmits(['update:modelValue'])
 <style scoped>
 .segmented {
   display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
-  background: var(--surface-muted);
+  align-items: stretch;
+  gap: 0;
   max-width: 100%;
   overflow-x: auto;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
   scrollbar-width: none;
 }
 
@@ -48,49 +47,55 @@ const emit = defineEmits(['update:modelValue'])
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 34px;
-  padding: 0 14px;
-  border-radius: var(--radius-pill);
+  height: 30px;
+  padding: 0 12px;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
   color: var(--ink-muted);
-  font-size: 13px;
-  font-weight: 560;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   white-space: nowrap;
   transition:
     background-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease),
-    box-shadow var(--duration-fast) var(--ease);
+    color var(--duration-fast) var(--ease);
+}
+
+.segmented__item:last-child {
+  border-right: 0;
 }
 
 .segmented__item:hover {
   color: var(--ink);
+  background: var(--surface);
 }
 
 .segmented__item.is-active {
-  color: var(--ink);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
+  color: var(--bg);
+  background: var(--ink);
 }
 
 .segmented__count {
-  min-width: 18px;
-  padding: 0 5px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-muted);
-  color: var(--ink-muted);
-  font-size: 11px;
-  line-height: 18px;
+  min-width: 16px;
+  padding: 0 3px;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  font-size: 7.5px;
+  line-height: 13px;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
 .segmented__item.is-active .segmented__count {
-  background: var(--lav-100);
-  color: var(--lav-700);
+  border-color: rgba(241, 237, 228, 0.4);
+  background: transparent;
+  color: var(--bg);
 }
 
 .segmented--sm .segmented__item {
-  height: 28px;
-  padding: 0 11px;
-  font-size: 12px;
+  height: 26px;
+  padding: 0 9px;
+  font-size: 8px;
 }
 </style>

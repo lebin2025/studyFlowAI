@@ -227,3 +227,37 @@ onBeforeUnmount(() => {
   }
 }
 </style>
+
+<style scoped>
+.generating__badge {
+  padding: 3px 7px;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.generating__pulse {
+  display: none;
+}
+
+.generating__hints {
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.generating__meta {
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.generating__note {
+  font-size: 8.5px;
+}
+</style>

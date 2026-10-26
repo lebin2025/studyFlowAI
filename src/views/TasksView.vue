@@ -626,7 +626,7 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
   flex: none;
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--danger-100);
   color: var(--danger-600);
 }
@@ -704,172 +704,196 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
   }
 }
 </style>
-
 <style scoped>
-/* 2026 / task ledger */
 .tasks-page {
-  gap: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .tasks-toolbar {
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: rgba(252, 249, 243, 0.66);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(18px);
-}
-
-.tasks-toolbar__search {
-  width: 100%;
-  max-width: none;
+  padding: 14px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .tasks-toolbar__row {
-  gap: 8px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
 }
 
-.tasks-count {
-  margin: 14px 2px 12px;
+.tasks-toolbar__row + .tasks-toolbar__row {
+  margin-top: 10px;
+}
+
+.tasks-toolbar__search {
+  flex: 1;
+  min-width: 220px;
+}
+
+.tasks-toolbar__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tasks-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
   color: var(--ink-faint);
   font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.tasks-count__clear {
-  color: var(--lav-700);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 8px;
+  letter-spacing: 0.04em;
 }
 
 .task-groups {
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 0;
 }
 
 .task-group {
   display: grid;
   grid-template-columns: 190px minmax(0, 1fr);
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.task-group + .task-group {
+  border-top: 0;
 }
 
 .task-group__head {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 10px;
-  padding: 24px 20px;
-  color: var(--on-dark);
-  border-right: 1px solid var(--line-dark);
-  border-bottom: 0;
-  background:
-    radial-gradient(100% 100% at 0% 0%, rgba(215, 201, 255, 0.16), transparent 58%),
-    linear-gradient(155deg, #1a1429, #0c0a12);
-}
-
-.task-group__date {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  justify-content: space-between;
+  padding: 16px 18px 14px 0;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
 }
 
 .task-group__day {
-  color: var(--on-dark);
-  font-family: var(--font-editorial);
-  font-size: 26px;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.8vw, 38px);
   font-style: italic;
   font-weight: 400;
-  line-height: 1;
-  letter-spacing: -0.04em;
+  line-height: 0.9;
+  letter-spacing: -0.06em;
 }
 
-.task-group__full {
-  color: var(--on-dark-faint);
+.task-group__date {
+  margin-top: 5px;
+  color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: 8px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 .task-group__meta {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  margin-top: auto;
-  color: var(--on-dark-faint);
-  font-family: var(--font-mono);
-  font-size: 8px;
-}
-
-.task-group__minutes {
-  color: var(--lumen);
-}
-
-.task-group__overdue {
-  background: rgba(194, 86, 92, 0.16);
-  color: #ffb3b5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 22px;
+  color: var(--ink-muted);
   font-family: var(--font-mono);
   font-size: 7.5px;
 }
 
 .task-group__list {
-  grid-column: 2;
-  padding: 8px 18px 12px;
+  padding: 8px 0 8px 22px;
 }
 
-.tasks-empty,
+.tasks-empty {
+  padding: 34px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  border-radius: 0;
+}
+
 .tasks-error {
-  padding: 24px;
-  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.tasks-error__icon {
+  color: var(--accent);
+}
+
+.tasks-error h2 {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tasks-error p {
+  margin-top: 3px;
+  color: var(--ink-muted);
+  font-size: 11.5px;
 }
 
 .tasks-more {
-  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 760px) {
+  .tasks-toolbar__row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-toolbar__search {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .tasks-toolbar__filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
   .task-group {
     grid-template-columns: 1fr;
   }
 
   .task-group__head {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 18px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    padding: 12px 0 9px;
     border-right: 0;
-    border-bottom: 1px solid var(--line-dark);
-  }
-
-  .task-group__date {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 8px;
-  }
-
-  .task-group__day {
-    font-size: 20px;
+    border-bottom: 1px solid var(--line);
   }
 
   .task-group__meta {
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
     margin-top: 0;
+    justify-content: flex-end;
+    text-align: right;
   }
 
   .task-group__list {
-    grid-column: 1;
-    padding: 6px 10px 10px;
-  }
-
-  .tasks-toolbar {
-    padding: 10px;
+    padding: 4px 0;
   }
 }
 </style>

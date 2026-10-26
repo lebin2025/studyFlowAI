@@ -25,11 +25,11 @@ const router = useRouter()
         可能是链接过期了，或者我们把它移到别处了。回到学习空间，继续今天的计划吧。
       </p>
       <div class="not-found__actions">
-        <AppButton to="/app" variant="inverse">
+        <AppButton to="/app">
           <template #icon><House :size="15" /></template>
           回到学习空间
         </AppButton>
-        <AppButton variant="glass" @click="router.back()">
+        <AppButton variant="secondary" @click="router.back()">
           返回上一页
           <template #trailing><ArrowRight :size="15" /></template>
         </AppButton>
@@ -43,134 +43,129 @@ const router = useRouter()
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
 }
 
 .not-found__header {
   padding-top: 24px;
   padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
 }
 
 .not-found__main {
-  display: flex;
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  grid-template-areas:
+    'art eyebrow'
+    'art title'
+    'art text'
+    'art actions';
+  align-content: center;
+  align-items: start;
+  gap: 12px 6vw;
   flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 24px 80px;
-  text-align: center;
+  padding: 48px clamp(20px, 4.2vw, 52px) 72px;
 }
 
 .not-found__art {
+  grid-area: art;
   position: relative;
-  display: grid;
-  place-items: center;
-  margin-bottom: 6px;
-}
-
-.not-found__code {
-  position: absolute;
-  top: -8px;
-  right: -34px;
-  font-family: var(--font-display);
-  font-size: 84px;
-  font-weight: 720;
-  letter-spacing: -0.06em;
-  color: rgba(130, 114, 239, 0.1);
-  line-height: 1;
-  pointer-events: none;
-}
-
-.not-found h1 {
-  margin-top: 8px;
-  font-size: clamp(28px, 4vw, 38px);
-  font-weight: 670;
-  letter-spacing: -0.04em;
-}
-
-.not-found__text {
-  max-width: 40ch;
-  margin-top: 10px;
-  color: var(--ink-muted);
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.not-found__actions {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 9px;
-  margin-top: 24px;
-}
-</style>
-
-<style scoped>
-.not-found {
-  min-height: 100vh;
-  color: var(--on-dark);
-  background:
-    radial-gradient(70rem 50rem at 70% 18%, rgba(101, 82, 210, 0.22), transparent 60%),
-    radial-gradient(40rem 30rem at 20% 90%, rgba(55, 140, 115, 0.12), transparent 58%),
-    var(--void);
-  overflow: hidden;
-}
-
-.not-found__header {
-  padding-top: 26px;
-}
-
-.not-found__main {
-  position: relative;
-  isolation: isolate;
-}
-
-.not-found__main::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: -1;
-  width: min(72vw, 720px);
-  height: min(72vw, 720px);
-  border: 1px solid rgba(215, 201, 255, 0.12);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow:
-    0 0 0 80px rgba(215, 201, 255, 0.025),
-    0 0 0 160px rgba(215, 201, 255, 0.016);
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  min-height: 360px;
+  border-right: 1px solid var(--ink);
 }
 
 .not-found__code {
-  top: -38px;
-  right: -80px;
   color: transparent;
-  font-family: var(--font-editorial);
-  font-size: clamp(150px, 22vw, 300px);
+  font-family: var(--font-display);
+  font-size: clamp(180px, 26vw, 360px);
   font-style: italic;
   font-weight: 400;
-  line-height: 1;
-  -webkit-text-stroke: 1px rgba(215, 201, 255, 0.16);
-}
-
-.not-found h1 {
-  max-width: 14ch;
-  color: var(--on-dark);
-  font-size: clamp(38px, 5.6vw, 72px);
-  line-height: 0.98;
-  letter-spacing: -0.06em;
-}
-
-.not-found .eyebrow {
-  color: var(--lumen);
-}
-
-.not-found__text {
-  max-width: 38ch;
-  color: var(--on-dark-soft);
-  font-size: 13.5px;
+  line-height: 0.7;
+  letter-spacing: -0.1em;
+  -webkit-text-stroke: 1px var(--ink);
 }
 
 .not-found__art :deep(svg) {
-  filter: drop-shadow(0 26px 40px rgba(0, 0, 0, 0.5));
+  width: 150px;
+  margin-left: -36px;
+  margin-top: 150px;
+}
+
+.not-found .eyebrow {
+  grid-area: eyebrow;
+  align-self: end;
+  color: var(--accent);
+}
+
+.not-found h1 {
+  grid-area: title;
+  max-width: 12ch;
+  font-size: clamp(40px, 5.6vw, 76px);
+  line-height: 0.94;
+  letter-spacing: -0.065em;
+}
+
+.not-found__text {
+  grid-area: text;
+  max-width: 40ch;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.not-found__actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+@media (max-width: 860px) {
+  .not-found__main {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-top: 30px;
+    overflow: hidden;
+  }
+
+  .not-found__art {
+    width: 100%;
+    min-height: 220px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+  }
+
+  .not-found__code {
+    font-size: clamp(150px, 55vw, 260px);
+  }
+
+  .not-found__art :deep(svg) {
+    width: 100px;
+    margin-left: -18px;
+    margin-top: 90px;
+  }
+
+  .not-found h1 {
+    margin-top: 6px;
+    font-size: clamp(38px, 12vw, 56px);
+  }
+}
+</style>
+<style scoped>
+@media (max-width: 860px) {
+  .not-found .eyebrow {
+    align-self: flex-start;
+  }
 }
 </style>

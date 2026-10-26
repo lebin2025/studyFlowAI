@@ -48,19 +48,7 @@ const dateLabel = computed(() => formatDate(todayISO(), { weekday: true }))
   position: relative;
   min-height: 100vh;
   margin-left: var(--sidebar-width);
-  padding: 38px clamp(24px, 3.6vw, 52px) 88px;
-}
-
-.shell__body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: var(--sidebar-width);
-  z-index: 30;
-  height: 1px;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(133, 114, 239, 0.3), rgba(114, 201, 173, 0.22), transparent);
+  padding: 30px clamp(24px, 4vw, 56px) 70px;
 }
 
 .shell__content {
@@ -77,11 +65,7 @@ const dateLabel = computed(() => formatDate(todayISO(), { weekday: true }))
 @media (max-width: 900px) {
   .shell__body {
     margin-left: 0;
-    padding: 0 16px calc(102px + env(safe-area-inset-bottom, 0px));
-  }
-
-  .shell__body::before {
-    left: 0;
+    padding: 0 18px calc(92px + env(safe-area-inset-bottom, 0px));
   }
 
   .mobile-bar {
@@ -91,50 +75,38 @@ const dateLabel = computed(() => formatDate(todayISO(), { weekday: true }))
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 62px;
-    margin: 0 -16px 20px;
-    padding: 0 16px;
-    color: var(--on-dark);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent),
-      rgba(8, 7, 13, 0.9);
-    border-bottom: 1px solid var(--line-dark);
-    backdrop-filter: blur(22px) saturate(150%);
-    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    height: 58px;
+    margin: 0 -18px 22px;
+    padding: 0 18px;
+    color: var(--ink);
+    background: var(--bg);
+    border-bottom: 1px solid var(--ink);
   }
 
   .mobile-bar__right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
 
   .mobile-bar__date {
-    color: var(--on-dark-faint);
+    color: var(--ink-faint);
     font-family: var(--font-mono);
-    font-size: 9.5px;
+    font-size: 8px;
     letter-spacing: 0.04em;
   }
 
   .mobile-bar__avatar {
     display: grid;
     place-items: center;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--ink);
     border-radius: 50%;
-    background:
-      radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.8), transparent 42%),
-      linear-gradient(135deg, var(--lav-500), var(--mint-500));
-    color: #171321;
-    font-size: 11px;
-    font-weight: 760;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  }
-}
-
-@media (max-width: 1100px) and (min-width: 901px) {
-  .shell__body {
-    padding-inline: 30px;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 600;
   }
 }
 </style>

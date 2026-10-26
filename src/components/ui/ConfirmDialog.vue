@@ -62,13 +62,14 @@ const emit = defineEmits(['update:modelValue', 'confirm'])
   flex: none;
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  background: var(--warning-100);
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: transparent;
   color: var(--warning-600);
 }
 
 .confirm__icon--danger {
-  background: var(--danger-100);
+  background: transparent;
   color: var(--danger-600);
 }
 

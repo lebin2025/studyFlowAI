@@ -530,7 +530,7 @@ onMounted(loadAi)
   flex: none;
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .settings-card__icon--lav {
@@ -916,210 +916,283 @@ onMounted(loadAi)
   }
 }
 </style>
-
 <style scoped>
-/* 2026 / settings as a quiet control room */
+.settings-page {
+  display: flex;
+  flex-direction: column;
+}
+
 .settings-grid {
-  gap: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.34fr) minmax(0, 0.66fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.settings-main {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
 .settings-card {
-  border: 1px solid var(--line);
-  border-radius: 26px;
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .settings-card__head {
-  padding: 22px 24px 14px;
-}
-
-.settings-card__head h2 {
-  font-size: 21px;
-  letter-spacing: -0.04em;
-}
-
-.settings-card__head p {
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.03em;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0 14px;
+  border-bottom: 1px solid var(--line);
 }
 
 .settings-card__icon {
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: transparent;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+}
+
+.settings-card__head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.3vw, 30px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.settings-card__head p {
+  margin-top: 4px;
+  color: var(--ink-muted);
+  font-size: 10.5px;
+  line-height: 1.5;
 }
 
 .settings-card__body {
-  padding: 8px 24px 24px;
+  padding: 18px 0 14px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .settings-card__actions {
-  border-top-color: var(--line);
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
 }
 
-.quick-chip {
-  border-color: var(--line);
-  background: transparent;
+.quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.quick-chip,
+.weekday {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--ink-muted);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 8px;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
 }
 
-.quick-chip.is-active {
-  border-color: rgba(133, 114, 239, 0.26);
-  background: var(--lav-100);
-  color: var(--lav-700);
+.quick-chip:hover,
+.weekday:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.quick-chip.is-active,
+.weekday.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.weekday-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .weekday {
-  border-color: var(--line);
-  background: transparent;
-  font-family: var(--font-mono);
-  font-size: 9px;
+  width: 36px;
+  text-align: center;
 }
 
-.weekday.is-active {
-  border-color: rgba(133, 114, 239, 0.26);
-  background: var(--lav-100);
-  color: var(--lav-700);
-}
-
-.refresh-button {
-  border: 1px solid var(--line);
-  background: transparent;
-}
-
-.settings-aside .settings-card:first-child {
-  --ink: var(--on-dark);
-  --ink-soft: var(--on-dark-soft);
-  --ink-muted: var(--on-dark-soft);
-  --ink-faint: var(--on-dark-faint);
-  --line: var(--line-dark);
-  --surface: rgba(255, 255, 255, 0.06);
-  color: var(--on-dark);
-  border-color: rgba(215, 201, 255, 0.16);
-  background:
-    radial-gradient(100% 100% at 100% 0%, rgba(215, 201, 255, 0.18), transparent 56%),
-    linear-gradient(150deg, #1a1429 0%, #0e0b16 58%, #09080e 100%);
-  box-shadow: var(--shadow-deep);
-}
-
-.settings-aside .settings-card:first-child .settings-card__head h2 {
-  color: var(--on-dark);
-}
-
-.settings-aside .settings-card:first-child .settings-card__head p {
-  color: var(--on-dark-faint);
-}
-
-.settings-aside .settings-card:first-child .settings-card__icon {
-  border-color: rgba(215, 201, 255, 0.2);
-  color: var(--lumen);
-}
-
-.ai-status.is-ready {
-  border: 1px solid rgba(157, 232, 203, 0.16);
-  background: rgba(157, 232, 203, 0.08);
-  color: var(--aurora);
-}
-
-.ai-status.is-ready strong {
-  color: var(--aurora);
-}
-
-.ai-status.is-ready p {
-  color: var(--on-dark-soft);
-}
-
-.ai-status__dot {
-  background: var(--aurora);
-  box-shadow: 0 0 12px rgba(157, 232, 203, 0.6);
-}
-
-.account-rows > div {
-  border-bottom-color: var(--line-dark);
-}
-
-.account-rows dt {
-  color: var(--on-dark-faint);
+.weekday-hint {
+  margin-top: 7px;
+  color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: 8px;
 }
 
-.account-rows dd {
-  color: var(--on-dark);
-  font-size: 10.5px;
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.account-note {
-  color: var(--on-dark-faint);
-  font-size: 9px;
+.settings-aside {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.settings-aside .settings-card:first-child :deep(.btn--secondary) {
-  color: var(--on-dark);
-  background: rgba(255, 255, 255, 0.06);
-  border-color: var(--line-dark-strong);
+.settings-aside .settings-card {
+  padding: 0;
+  background: transparent;
 }
 
-@media (max-width: 720px) {
-  .settings-card__head {
-    padding: 18px 18px 10px;
-  }
-
-  .settings-card__body {
-    padding: 6px 18px 20px;
-  }
-}
-</style>
-
-<style scoped>
-/* Keep the account card in the daylight palette. */
-.settings-aside .settings-card:nth-child(2) .account-rows > div {
+.settings-aside .settings-card__head {
   border-bottom-color: var(--line);
 }
 
-.settings-aside .settings-card:nth-child(2) .account-rows dt {
-  color: var(--ink-faint);
+.settings-aside .settings-card:nth-child(2) {
+  border-top-color: var(--line);
 }
 
-.settings-aside .settings-card:nth-child(2) .account-rows dd {
+.usage-grid {
+  border-color: var(--line);
+  border-radius: 0;
+  background: var(--line);
+}
+
+.usage-grid > div {
+  background: transparent;
+}
+
+.usage-grid strong {
   color: var(--ink);
 }
 
-.settings-aside .settings-card:nth-child(2) .account-note {
+.usage-grid span,
+.usage-empty,
+.usage-note,
+.usage-list__title {
   color: var(--ink-faint);
+}
+
+.account-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+}
+
+.account-row:last-child {
+  border-bottom: 0;
+}
+
+.account-row dt,
+.account-row span:first-child {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.account-row dd,
+.account-row span:last-child {
+  color: var(--ink);
+  font-size: 10.5px;
+  text-align: right;
+}
+
+@media (max-width: 980px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-aside {
+    position: static;
+  }
+}
+
+@media (max-width: 620px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-grid {
+    gap: 24px;
+  }
+
+  .settings-card__head h2 {
+    font-size: 24px;
+  }
+}
+</style>
+<style scoped>
+.usage-grid {
+  gap: 0;
+  border: 0 !important;
+  border-top: 1px solid var(--line) !important;
+  border-bottom: 1px solid var(--line) !important;
+  background: transparent !important;
+}
+
+.usage-grid > div {
+  padding: 9px 12px 9px 0;
+  border-right: 1px solid var(--line);
+  background: transparent !important;
+}
+
+.usage-grid > div:last-child {
+  border-right: 0;
+}
+
+.ai-status,
+.ai-status__dot {
+  border-radius: 0;
+}
+
+.ai-status {
+  border: 0;
+  border-left: 2px solid var(--sage);
+  background: transparent;
 }
 </style>
 
 <style scoped>
-.settings-aside .settings-card:first-child .usage-grid {
-  border-color: var(--line-dark);
-  background: var(--line-dark);
+.ai-status {
+  padding: 8px 0 8px 12px !important;
+  border: 0 !important;
+  border-left: 2px solid var(--sage) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
 }
 
-.settings-aside .settings-card:first-child .usage-grid > div {
-  background: rgba(255, 255, 255, 0.055);
-}
-
-.settings-aside .settings-card:first-child .usage-grid strong {
-  color: var(--on-dark);
-}
-
-.settings-aside .settings-card:first-child .usage-grid span {
-  color: var(--on-dark-faint);
-}
-
-.settings-aside .settings-card:first-child .usage-empty,
-.settings-aside .settings-card:first-child .usage-note {
-  color: var(--on-dark-faint);
-}
-
-.settings-aside .settings-card:first-child .usage-list__title {
-  color: var(--on-dark-faint);
+.ai-status__dot {
+  border-radius: 0 !important;
+  background: var(--sage) !important;
 }
 </style>

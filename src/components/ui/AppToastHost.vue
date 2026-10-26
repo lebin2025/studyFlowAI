@@ -79,7 +79,7 @@ const icons = {
   width: 30px;
   height: 30px;
   margin-top: 1px;
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .toast--success .toast__icon {

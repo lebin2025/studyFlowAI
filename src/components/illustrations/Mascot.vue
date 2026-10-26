@@ -23,19 +23,19 @@ defineProps({
 
     <path
       d="M94 44c-2-14 5-25 17-30 2 13-5 24-17 30Z"
-      fill="#6FC3A8"
-      stroke="#58AE92"
+      fill="#5D705D"
+      stroke="#455944"
       stroke-width="1.5"
       stroke-linejoin="round"
     />
     <path
       d="M96 45C84 36 72 37 63 44c9 9 21 11 33 1Z"
-      fill="#8272EF"
-      stroke="#6A58DF"
+      fill="#B83E27"
+      stroke="#8A2C1B"
       stroke-width="1.5"
       stroke-linejoin="round"
     />
-    <path d="M96 47c0-5 1-9 2-13" stroke="#58AE92" stroke-width="2.4" stroke-linecap="round" />
+    <path d="M96 47c0-5 1-9 2-13" stroke="#455944" stroke-width="2.4" stroke-linecap="round" />
 
     <path
       d="M100 48c30-1 55 21 57 50 2 30-22 55-57 56-35 1-59-24-57-54 2-30 27-51 57-52Z"
@@ -79,12 +79,12 @@ defineProps({
         width="78"
         height="35"
         rx="9"
-        fill="#EDE9FF"
-        stroke="#D8D0F7"
+        fill="#F7F3EA"
+        stroke="#CEC4B3"
         stroke-width="2"
       />
-      <path d="M100 132v31" stroke="#D8D0F7" stroke-width="2" />
-      <path d="M71 140h20M71 148h20M109 140h20M109 148h20" stroke="#B9AEF3" stroke-width="2.4" stroke-linecap="round" opacity=".8" />
+      <path d="M100 132v31" stroke="#CEC4B3" stroke-width="2" />
+      <path d="M71 140h20M71 148h20M109 140h20M109 148h20" stroke="#A99D89" stroke-width="2.4" stroke-linecap="round" opacity=".8" />
       <path d="M100 147c2.4-3.2 7-2.6 7 1.3 0 2.4-3.4 4.5-7 7-3.6-2.5-7-4.6-7-7 0-3.9 4.6-4.5 7-1.3Z" fill="#F2B3A0" opacity=".85" />
     </g>
 
@@ -92,11 +92,11 @@ defineProps({
     <circle cx="137" cy="134" r="5.2" fill="#FFF8EC" stroke="#E7DCC9" stroke-width="2" />
 
     <g v-if="variant === 'cheer'" class="mascot__sparkles">
-      <path d="M44 66l2.4 6.2L53 75l-6.6 2.6L44 84l-2.4-6.4L35 75l6.6-2.8L44 66Z" fill="#F0B77E" />
-      <path d="M156 48l1.8 4.8 4.9 1.9-4.9 2-1.8 4.7-1.9-4.7-4.8-2 4.8-1.9L156 48Z" fill="#B5AAF7" />
+      <path d="M44 66l2.4 6.2L53 75l-6.6 2.6L44 84l-2.4-6.4L35 75l6.6-2.8L44 66Z" fill="#A77B37" />
+      <path d="M156 48l1.8 4.8 4.9 1.9-4.9 2-1.8 4.7-1.9-4.7-4.8-2 4.8-1.9L156 48Z" fill="#B83E27" />
     </g>
     <g v-else>
-      <path d="M48 70l1.6 4.3 4.4 1.7-4.4 1.7-1.6 4.3-1.7-4.3-4.3-1.7 4.3-1.7L48 70Z" fill="#D9D2F7" />
+      <path d="M48 70l1.6 4.3 4.4 1.7-4.4 1.7-1.6 4.3-1.7-4.3-4.3-1.7 4.3-1.7L48 70Z" fill="#F0D8D0" />
       <circle cx="153" cy="73" r="3.2" fill="#F4C9A9" />
     </g>
   </svg>

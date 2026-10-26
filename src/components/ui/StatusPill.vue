@@ -36,50 +36,43 @@ const tone = computed(() => {
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  border: 1px solid transparent;
-  font-size: 11.5px;
-  font-weight: 580;
+  gap: 5px;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
   line-height: 1.5;
+  letter-spacing: 0.03em;
   white-space: nowrap;
 }
 
 .pill__dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 0;
   background: currentColor;
 }
 
 .pill--lav {
-  color: var(--lav-700);
-  background: var(--lav-50);
-  border-color: rgba(130, 114, 239, 0.16);
+  color: var(--accent);
 }
 
 .pill--mint {
-  color: var(--mint-700);
-  background: var(--mint-50);
-  border-color: rgba(63, 157, 130, 0.18);
+  color: var(--sage);
 }
 
 .pill--sky {
-  color: var(--sky-600);
-  background: var(--sky-100);
-  border-color: rgba(93, 136, 201, 0.15);
+  color: var(--blue);
 }
 
 .pill--danger {
-  color: var(--danger-700);
-  background: var(--danger-100);
-  border-color: rgba(201, 88, 88, 0.14);
+  color: var(--accent);
 }
 
 .pill--neutral {
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-  border-color: var(--line);
+  color: var(--ink-faint);
 }
 </style>

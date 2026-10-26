@@ -26,14 +26,14 @@ defineProps({
 .empty {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 40px 24px 44px;
-  text-align: center;
+  padding: 26px 0;
+  text-align: left;
 }
 
 .empty--compact {
-  padding: 22px 18px;
+  padding: 16px 0;
 }
 
 .empty__art {
@@ -41,48 +41,40 @@ defineProps({
   display: grid;
   place-items: center;
   margin-bottom: 8px;
+  padding: 0;
 }
 
 .empty__art::before {
-  content: '';
-  position: absolute;
-  width: 118px;
-  height: 118px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(130, 114, 239, 0.1), transparent 68%);
-}
-
-.empty--compact .empty__art::before {
-  width: 88px;
-  height: 88px;
+  display: none;
 }
 
 .empty__title {
   position: relative;
-  font-size: 16.5px;
-  font-weight: 640;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.15;
 }
 
 .empty--compact .empty__title {
-  font-size: 14.5px;
+  font-size: 18px;
 }
 
 .empty__description {
   position: relative;
-  max-width: 38ch;
+  max-width: 40ch;
   margin-top: 6px;
   color: var(--ink-muted);
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 11.5px;
+  line-height: 1.7;
 }
 
 .empty__actions {
   position: relative;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 9px;
-  margin-top: 18px;
+  gap: 8px;
+  margin-top: 14px;
 }
 </style>

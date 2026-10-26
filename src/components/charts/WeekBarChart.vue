@@ -86,7 +86,7 @@ const rows = computed(() =>
   position: absolute;
   bottom: 0;
   width: 100%;
-  border-radius: 5px 5px 3px 3px;
+  border-radius: 0;
   background: var(--surface-muted);
   transition: height 600ms var(--ease);
 }
@@ -95,8 +95,8 @@ const rows = computed(() =>
   position: absolute;
   bottom: 0;
   width: 100%;
-  border-radius: 5px 5px 3px 3px;
-  background: linear-gradient(180deg, var(--mint-500), var(--mint-600));
+  border-radius: 0;
+  background: var(--accent);
   transition: height 600ms var(--ease);
 }
 

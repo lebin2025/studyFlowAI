@@ -21,10 +21,10 @@ const ui = useUiStore()
 const loggingOut = ref(false)
 
 const items = [
-  { name: 'dashboard', label: '仪表盘', caption: '今天学什么', icon: LayoutDashboard, to: '/app' },
-  { name: 'plans', label: '学习计划', caption: '目标与阶段', icon: NotebookPen, to: '/app/plans' },
-  { name: 'tasks', label: '学习任务', caption: '每天的小步', icon: ListChecks, to: '/app/tasks' },
-  { name: 'stats', label: '学习统计', caption: '真实的进度', icon: ChartNoAxesColumnIncreasing, to: '/app/stats' },
+  { name: 'dashboard', label: '仪表盘', caption: '今天学什么', to: '/app' },
+  { name: 'plans', label: '学习计划', caption: '目标与阶段', to: '/app/plans' },
+  { name: 'tasks', label: '学习任务', caption: '每天的小步', to: '/app/tasks' },
+  { name: 'stats', label: '学习统计', caption: '真实的进度', to: '/app/stats' },
 ]
 
 const isActive = (item) => {
@@ -56,18 +56,16 @@ const logout = async () => {
     </div>
 
     <nav class="sidebar__nav" aria-label="主导航">
-      <p class="sidebar__label">学习空间</p>
+      <p class="sidebar__label">INDEX / 学习空间</p>
       <RouterLink
-        v-for="item in items"
+        v-for="(item, index) in items"
         :key="item.name"
         :to="item.to"
         class="nav-item"
         :class="{ 'is-active': isActive(item) }"
         :aria-current="isActive(item) ? 'page' : undefined"
       >
-        <span class="nav-item__icon">
-          <component :is="item.icon" :size="18" :stroke-width="1.8" />
-        </span>
+        <span class="nav-item__index">0{{ index + 1 }}</span>
         <span class="nav-item__text">
           <span class="nav-item__title">{{ item.label }}</span>
           <span class="nav-item__caption">{{ item.caption }}</span>
@@ -78,11 +76,8 @@ const logout = async () => {
 
     <div class="sidebar__bottom">
       <div class="ai-card">
-        <div class="ai-card__icon">
-          <Sparkles :size="17" />
-        </div>
-        <p class="ai-card__title">把计划交给 AI</p>
-        <p class="ai-card__text">说说你的目标和时间，剩下的交给 StudyFlow。</p>
+        <p class="ai-card__title">把目标交给 AI</p>
+        <p class="ai-card__text">说出你想学什么、有多少时间。剩下的，交给 StudyFlow。</p>
         <RouterLink to="/app/plans/new" class="ai-card__link">
           生成新计划
           <span aria-hidden="true">→</span>
@@ -126,125 +121,75 @@ const logout = async () => {
   display: flex;
   flex-direction: column;
   width: var(--sidebar-width);
-  padding: 24px 16px 18px;
-  color: var(--on-dark);
-  background:
-    radial-gradient(120% 55% at 18% 0%, rgba(133, 114, 239, 0.2), transparent 62%),
-    radial-gradient(90% 40% at 100% 100%, rgba(114, 201, 173, 0.1), transparent 64%),
-    linear-gradient(180deg, #0b0a11 0%, #0a0910 58%, #08080d 100%);
-  border-right: 1px solid var(--line-dark);
-  overflow: hidden;
-}
-
-.sidebar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: var(--grain);
-  opacity: 0.03;
-}
-
-.sidebar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 18px;
-  left: 18px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(215, 201, 255, 0.5), transparent);
-}
-
-.sidebar > * {
-  position: relative;
-  z-index: 1;
+  padding: 24px 20px 18px;
+  background: var(--bg);
+  border-right: 1px solid var(--ink);
 }
 
 .sidebar__top {
-  padding: 0 8px 30px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--line);
 }
 
 .sidebar__nav {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  padding-top: 18px;
 }
 
 .sidebar__label {
-  padding: 0 12px 10px;
-  color: var(--on-dark-faint);
+  padding-bottom: 8px;
+  color: var(--ink-faint);
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 7.5px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .nav-item {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 10px 11px;
-  border: 1px solid transparent;
-  border-radius: 15px;
-  color: var(--on-dark-soft);
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 11px 8px 11px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-muted);
   transition:
-    background-color var(--duration-fast) var(--ease),
-    border-color var(--duration-fast) var(--ease),
     color var(--duration-fast) var(--ease),
-    transform var(--duration-fast) var(--ease);
+    background-color var(--duration-fast) var(--ease);
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.055);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: var(--on-dark);
-  transform: translateX(2px);
+  color: var(--ink);
+  background: var(--surface);
 }
 
 .nav-item.is-active {
-  color: var(--on-dark);
-  background:
-    linear-gradient(105deg, rgba(215, 201, 255, 0.16), rgba(255, 255, 255, 0.045)),
-    rgba(255, 255, 255, 0.04);
-  border-color: rgba(215, 201, 255, 0.2);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 18px 40px -30px rgba(0, 0, 0, 0.9);
+  color: var(--ink);
 }
 
 .nav-item.is-active::before {
   content: '';
   position: absolute;
-  top: 12px;
-  bottom: 12px;
-  left: -1px;
-  width: 2px;
-  border-radius: 99px;
-  background: linear-gradient(180deg, var(--lumen), var(--aurora));
+  top: 10px;
+  bottom: 10px;
+  left: -20px;
+  width: 3px;
+  background: var(--accent);
 }
 
-.nav-item__icon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 34px;
-  height: 34px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.045);
-  color: var(--on-dark-soft);
-  transition:
-    background-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
+.nav-item__index {
+  padding-top: 1px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.02em;
 }
 
-.nav-item.is-active .nav-item__icon {
-  background: rgba(215, 201, 255, 0.16);
-  border-color: rgba(215, 201, 255, 0.24);
-  color: var(--lumen);
-  box-shadow: inset 0 0 18px rgba(215, 201, 255, 0.12);
+.nav-item.is-active .nav-item__index {
+  color: var(--accent);
 }
 
 .nav-item__text {
@@ -255,110 +200,70 @@ const logout = async () => {
 }
 
 .nav-item__title {
-  font-size: 13px;
-  font-weight: 570;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 560;
 }
 
 .nav-item__caption {
-  font-size: 10px;
-  color: var(--on-dark-faint);
+  margin-top: 1px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.02em;
 }
 
 .nav-item__dot {
-  position: absolute;
-  right: 13px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--aurora);
-  box-shadow: 0 0 12px rgba(157, 232, 203, 0.9);
+  display: none;
 }
 
 .sidebar__bottom {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   margin-top: auto;
 }
 
 .ai-card {
-  position: relative;
-  padding: 17px;
-  border: 1px solid rgba(215, 201, 255, 0.16);
-  border-radius: 20px;
-  background:
-    radial-gradient(120% 100% at 100% 0%, rgba(215, 201, 255, 0.18), transparent 55%),
-    linear-gradient(155deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 24px 50px -36px rgba(0, 0, 0, 0.9);
-  overflow: hidden;
-}
-
-.ai-card::after {
-  content: '';
-  position: absolute;
-  top: -42px;
-  right: -34px;
-  width: 110px;
-  height: 110px;
-  border: 1px solid rgba(215, 201, 255, 0.18);
-  border-radius: 50%;
-  box-shadow: 0 0 50px rgba(133, 114, 239, 0.12) inset;
-}
-
-.ai-card__icon {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  margin-bottom: 11px;
-  border: 1px solid rgba(215, 201, 255, 0.2);
-  border-radius: 10px;
-  background: rgba(215, 201, 255, 0.1);
-  color: var(--lumen);
+  padding: 14px 0 0;
+  border-top: 1px solid var(--ink);
 }
 
 .ai-card__title {
-  font-size: 13px;
-  font-weight: 630;
-  color: var(--on-dark);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
 }
 
 .ai-card__text {
-  margin-top: 4px;
-  font-size: 11px;
+  margin-top: 5px;
+  color: var(--ink-muted);
+  font-size: 10px;
   line-height: 1.6;
-  color: var(--on-dark-soft);
 }
 
 .ai-card__link {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  margin-top: 12px;
-  color: var(--lumen);
+  gap: 6px;
+  margin-top: 9px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--accent);
+  color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.ai-card__link:hover {
-  color: #fff;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .user-card {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px;
-  border-radius: 14px;
-  transition: background-color var(--duration-fast) var(--ease);
-}
-
-.user-card:hover {
-  background: rgba(255, 255, 255, 0.05);
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
 }
 
 .user-card__profile {
@@ -373,16 +278,14 @@ const logout = async () => {
   display: grid;
   place-items: center;
   flex: none;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--ink);
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.75), transparent 42%),
-    linear-gradient(135deg, var(--lav-500), var(--mint-500));
-  color: #171321;
-  font-size: 12px;
-  font-weight: 760;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
 }
 
 .user-card__text {
@@ -393,49 +296,51 @@ const logout = async () => {
 }
 
 .user-card__name {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--on-dark);
   overflow: hidden;
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .user-card__caption {
-  font-size: 10px;
-  color: var(--on-dark-faint);
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 7.5px;
 }
 
 .user-card__action {
   display: grid;
   place-items: center;
   flex: none;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  color: var(--on-dark-faint);
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  color: var(--ink-faint);
   transition:
-    background-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
+    color var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease);
 }
 
 .user-card__action:hover {
-  background: rgba(194, 86, 92, 0.18);
-  color: #ffb7b9;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .sidebar__settings {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 2px 10px;
-  color: var(--on-dark-faint);
-  font-size: 11px;
-  transition: color var(--duration-fast) var(--ease);
+  gap: 6px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .sidebar__settings:hover {
-  color: var(--on-dark);
+  color: var(--ink);
 }
 
 @media (max-width: 900px) {

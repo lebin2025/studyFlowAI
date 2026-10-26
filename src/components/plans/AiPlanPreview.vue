@@ -1391,3 +1391,182 @@ const save = () => {
   }
 }
 </style>
+
+<style scoped>
+.preview {
+  padding-bottom: 0;
+}
+
+.preview__badge {
+  padding: 3px 7px;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
+
+.preview__head h1 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.preview__head p {
+  font-size: 11.5px;
+}
+
+.preview__alert {
+  padding: 9px 0 9px 12px;
+  border: 0;
+  border-left: 2px solid var(--accent);
+  border-radius: 0;
+  background: transparent;
+  font-size: 10.5px;
+}
+
+.preview__layout {
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 0.36fr);
+  gap: 30px;
+}
+
+.preview__main {
+  gap: 24px;
+}
+
+.edit-card {
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.edit-card__head {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.edit-card__head h2 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+
+.edit-card__body {
+  padding: 14px 0;
+}
+
+.edit-title {
+  padding: 2px 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+
+.edit-title:hover,
+.edit-title:focus {
+  border-bottom-color: var(--accent);
+  background: transparent;
+}
+
+.edit-textarea {
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: transparent;
+  font-size: 12px;
+}
+
+.edit-textarea:focus {
+  border-bottom-color: var(--accent);
+  box-shadow: none;
+}
+
+.stage-edit {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.stage-edit__index {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.stage-edit__title {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stage-edit__objective {
+  color: var(--ink-muted);
+  font-size: 10.5px;
+}
+
+.stage-edit__dates {
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.add-task-button {
+  border: 1px dashed var(--line-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.add-task-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.task-group {
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.task-group__head {
+  background: transparent;
+}
+
+.task-group__day {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-style: italic;
+}
+
+.task-edit {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.task-edit:hover {
+  background: var(--surface);
+}
+
+@media (max-width: 900px) {
+  .preview__layout {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

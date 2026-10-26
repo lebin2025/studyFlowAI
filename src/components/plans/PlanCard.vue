@@ -77,60 +77,55 @@ const barColor = computed(() => {
 <style scoped>
 .plan-card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-xs);
-  transition:
-    transform var(--duration) var(--ease),
-    box-shadow var(--duration) var(--ease),
-    border-color var(--duration) var(--ease);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  grid-template-areas:
+    'head progress'
+    'title progress'
+    'goal progress'
+    'foot progress';
+  gap: 0 24px;
+  padding: 18px 0;
+  border-top: 1px solid var(--ink);
+  background: transparent;
+  transition: background-color var(--duration) var(--ease);
 }
 
 .plan-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--line-strong);
-  box-shadow: var(--shadow-md);
+  background: var(--surface);
 }
 
 .plan-card:focus-within {
-  border-color: var(--lav-300);
+  background: var(--surface);
 }
 
 .plan-card__overlay {
   position: absolute;
   inset: 0;
   z-index: 1;
-  border-radius: inherit;
-}
-
-.plan-card__overlay:focus-visible {
-  outline: 2px solid var(--lav-500);
-  outline-offset: -2px;
 }
 
 .plan-card__head {
+  grid-area: head;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
+  padding-bottom: 6px;
 }
 
 .plan-card__tags {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  min-width: 0;
+  align-items: center;
+  gap: 5px;
 }
 
 .plan-card__overdue {
-  color: var(--warning-700);
-  font-size: 9.5px;
-  font-weight: 600;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.04em;
 }
 
 .plan-card__delete {
@@ -138,17 +133,13 @@ const barColor = computed(() => {
   z-index: 2;
   display: grid;
   place-items: center;
-  flex: none;
-  width: 28px;
-  height: 28px;
-  margin: -4px -4px 0 0;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
   color: var(--ink-faint);
   opacity: 0;
   transition:
-    opacity var(--duration-fast) var(--ease),
-    background-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
+    color var(--duration-fast) var(--ease),
+    opacity var(--duration-fast) var(--ease);
 }
 
 .plan-card:hover .plan-card__delete,
@@ -157,196 +148,108 @@ const barColor = computed(() => {
 }
 
 .plan-card__delete:hover {
-  background: var(--danger-100);
-  color: var(--danger-700);
+  color: var(--accent);
 }
 
 .plan-card__title {
-  margin-top: 13px;
-  font-size: 17px;
-  font-weight: 640;
-  letter-spacing: -0.025em;
-  line-height: 1.4;
-}
-
-.plan-card__goal {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-top: 6px;
-  color: var(--ink-muted);
-  font-size: 11.5px;
-  line-height: 1.65;
-  min-height: 38px;
-}
-
-.plan-card__progress {
-  margin-top: 16px;
-}
-
-.plan-card__progress-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-  color: var(--ink-faint);
-  font-size: 10.5px;
-}
-
-.plan-card__progress-head strong {
-  color: var(--ink-soft);
-  font-size: 11.5px;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-}
-
-.plan-card__foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px 10px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
-  color: var(--ink-faint);
-  font-size: 9.5px;
-}
-
-.plan-card__meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.plan-card__ai {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  margin-left: auto;
-  color: var(--lav-700);
-  font-size: 9px;
-  font-weight: 550;
-}
-
-@media (hover: none) {
-  .plan-card__delete {
-    opacity: 1;
-  }
-}
-</style>
-
-<style scoped>
-/* 2026 / editorial plan index card */
-.plan-card {
-  min-height: 286px;
-  padding: 24px;
-  border: 1px solid var(--line);
-  border-radius: 26px;
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgba(215, 201, 255, 0.16), transparent 54%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.65), transparent 46%),
-    var(--surface);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-
-.plan-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 24px;
-  left: 24px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(133, 114, 239, 0.5), transparent);
-}
-
-.plan-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(133, 114, 239, 0.28);
-  box-shadow: var(--shadow-md);
-}
-
-.plan-card__overlay:focus-visible {
-  outline: 2px solid var(--lav-500);
-  outline-offset: -3px;
-  border-radius: 25px;
-}
-
-.plan-card__tags {
-  gap: 7px;
-}
-
-.plan-card__tags .chip {
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.plan-card__title {
-  max-width: 18ch;
-  margin-top: 18px;
-  font-size: 21px;
-  font-weight: 640;
-  line-height: 1.22;
+  grid-area: title;
+  max-width: 26ch;
+  margin-top: 3px;
+  font-size: clamp(21px, 2.2vw, 30px);
+  line-height: 1.14;
   letter-spacing: -0.04em;
 }
 
 .plan-card__goal {
-  min-height: 40px;
-  margin-top: 8px;
+  grid-area: goal;
+  max-width: 60ch;
+  margin-top: 5px;
   color: var(--ink-muted);
-  font-size: 12px;
-  line-height: 1.7;
+  font-size: 11.5px;
+  line-height: 1.65;
 }
 
 .plan-card__progress {
-  margin-top: auto;
-  padding-top: 22px;
+  grid-area: progress;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding-left: 20px;
+  border-left: 1px solid var(--line);
 }
 
 .plan-card__progress-head {
-  margin-bottom: 8px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 5px;
+}
+
+.plan-card__progress-head span {
   color: var(--ink-faint);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 7.5px;
+  line-height: 1.4;
 }
 
 .plan-card__progress-head strong {
-  color: var(--ink);
-  font-family: var(--font-editorial);
-  font-size: 18px;
+  font-family: var(--font-display);
+  font-size: 28px;
   font-style: italic;
   font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.05em;
 }
 
 .plan-card__foot {
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top-color: var(--line);
+  grid-area: foot;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 14px;
+  margin-top: 10px;
   color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: 8px;
-  letter-spacing: 0.01em;
+}
+
+.plan-card__meta,
+.plan-card__ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .plan-card__ai {
-  color: var(--lav-700);
-  font-family: var(--font-mono);
-  font-size: 8px;
+  color: var(--accent);
 }
 
-.plan-card__delete {
-  border: 1px solid transparent;
-}
+@media (max-width: 680px) {
+  .plan-card {
+    grid-template-columns: minmax(0, 1fr) 92px;
+    gap: 0 14px;
+  }
 
-.plan-card__delete:hover {
-  border-color: rgba(194, 86, 92, 0.16);
-}
+  .plan-card__title {
+    font-size: 20px;
+  }
 
-@media (hover: none) {
+  .plan-card__progress {
+    padding-left: 12px;
+  }
+
+  .plan-card__progress-head {
+    display: block;
+  }
+
+  .plan-card__progress-head strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 23px;
+  }
+
   .plan-card__delete {
     opacity: 1;
   }

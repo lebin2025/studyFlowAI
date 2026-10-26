@@ -14,8 +14,8 @@
 
 ## B. 艺术指导
 
-- 主风格：**B. Cinematic Product Theater**（Landing / Auth）
-- 辅助风格：**D. Human Warmth / Soft Technology**（应用内部）、**A. Quiet Precision**（全站）
+- 主风格：**Editorial Loom / 学习织机**（全站）
+- 辅助语言：**Quiet Precision**（数据与操作）、**Human Warmth**（文案与节奏）
 - 核心视觉母题：**成长轨迹 / 今天向前一小步 / 轨道式学习空间**
 - 情绪关键词：平静、可信、温和、专注、有掌控感
 - 文化或艺术参考：当前不绑定特定文化符号；如引入文化参考，必须按 `02` 的四步法研究、抽象、转译、校验。

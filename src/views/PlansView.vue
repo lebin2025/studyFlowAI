@@ -250,8 +250,10 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
       />
       <RouterLink to="/app/plans/new" class="plan-add">
         <span class="plan-add__icon"><Plus :size="20" /></span>
-        <strong>新建 AI 学习计划</strong>
-        <span>告诉 AI 你的目标与时间，它会把计划拆到每一天。</span>
+        <span class="plan-add__text">
+          <strong>新建 AI 学习计划</strong>
+          <span>告诉 AI 你的目标与时间，它会把计划拆到每一天。</span>
+        </span>
       </RouterLink>
     </div>
 
@@ -393,7 +395,7 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
   flex: none;
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--danger-100);
   color: var(--danger-600);
 }
@@ -456,133 +458,199 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
   }
 }
 </style>
-
 <style scoped>
-/* 2026 / plan library */
+.plans-page {
+  display: flex;
+  flex-direction: column;
+}
+
 .plans-toolbar {
-  padding: 14px;
-  margin-bottom: 14px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: rgba(252, 249, 243, 0.66);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(18px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .plans-toolbar__search {
-  width: min(100%, 400px);
+  width: min(100%, 360px);
 }
 
 .plans-toolbar__filters {
-  gap: 7px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.plans-toolbar__select {
+  min-width: 120px;
 }
 
 .plans-count {
-  margin: 0 2px 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
   color: var(--ink-faint);
   font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--line);
 }
 
 .plans-count__clear {
-  color: var(--lav-700);
+  color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 8px;
 }
 
 .plans-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.plans-empty,
-.plans-error {
-  padding: 26px;
-  border-radius: 26px;
-}
-
-.plan-add {
-  position: relative;
   display: flex;
   flex-direction: column;
+  gap: 0;
+  padding-top: 0;
+}
+
+.plans-error,
+.plans-empty {
+  display: flex;
   align-items: flex-start;
-  justify-content: center;
-  min-height: 286px;
-  padding: 28px;
-  border: 1px dashed var(--line-strong);
-  border-radius: 26px;
-  color: var(--ink);
-  background:
-    radial-gradient(100% 100% at 100% 100%, rgba(157, 232, 203, 0.08), transparent 56%),
-    transparent;
-  transition:
-    border-color var(--duration) var(--ease),
-    background-color var(--duration) var(--ease),
-    transform var(--duration) var(--ease);
+  gap: 14px;
+  padding: 34px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
-.plan-add:hover {
-  border-color: rgba(133, 114, 239, 0.38);
-  background: rgba(252, 249, 243, 0.5);
-  transform: translateY(-3px);
+.plans-error__icon {
+  color: var(--accent);
 }
 
-.plan-add__icon {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border: 1px solid rgba(133, 114, 239, 0.2);
-  border-radius: 50%;
-  background: rgba(133, 114, 239, 0.08);
-  color: var(--lav-700);
+.plans-error h2,
+.plans-empty h2 {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.plan-add strong {
-  margin-top: 20px;
-  font-size: 18px;
-  font-weight: 620;
-  letter-spacing: -0.03em;
-}
-
-.plan-add > span:last-child {
-  max-width: 28ch;
-  margin-top: 8px;
+.plans-error p,
+.plans-empty p {
+  max-width: 50ch;
+  margin-top: 5px;
   color: var(--ink-muted);
   font-size: 11.5px;
   line-height: 1.7;
 }
 
-@media (max-width: 1080px) {
-  .plans-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.plans-empty {
+  display: block;
+  padding: 52px 0;
 }
 
-@media (max-width: 720px) {
+.plans-empty :deep(.empty-state) {
+  border: 0;
+  background: transparent;
+}
+
+.plan-add {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  min-height: 0;
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.plan-add:hover {
+  background: var(--surface);
+}
+
+.plan-add__icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+
+.plan-add__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plan-add__text strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.plan-add__text span {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.plan-add > svg {
+  color: var(--accent);
+}
+
+@media (max-width: 760px) {
   .plans-toolbar {
-    padding: 10px;
+    display: block;
+  }
+
+  .plans-toolbar__search {
+    width: 100%;
   }
 
   .plans-toolbar__filters {
-    width: 100%;
+    margin-top: 12px;
   }
 
   .plans-toolbar__select {
     flex: 1;
-    width: auto;
-  }
-
-  .plans-grid {
-    grid-template-columns: 1fr;
+    min-width: 0;
   }
 
   .plan-add {
-    min-height: 220px;
-    padding: 24px;
+    grid-template-columns: 38px 1fr;
+    gap: 12px;
   }
+
+  .plan-add > svg {
+    display: none;
+  }
+}
+</style>
+<style scoped>
+.plan-add {
+  width: 100%;
+  max-width: none;
+}
+
+.plan-add__text {
+  min-width: 0;
+}
+
+.plan-add__text strong {
+  white-space: nowrap;
 }
 </style>

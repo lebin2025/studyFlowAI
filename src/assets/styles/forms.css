@@ -1,9 +1,9 @@
-/* Shared form field styling used by AppInput / AppTextarea / AppSelect. */
+/* Editorial underline fields. No boxed SaaS inputs. */
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
   min-width: 0;
 }
 
@@ -11,60 +11,55 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  font-weight: 620;
-  letter-spacing: -0.005em;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   line-height: 1.4;
-  color: var(--ink-soft);
+  text-transform: uppercase;
 }
 
 .field__required {
-  color: var(--danger-600);
+  color: var(--accent);
   font-weight: 500;
 }
 
 .field__control {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 50px;
-  padding: 0 15px;
-  background: rgba(252, 249, 243, 0.74);
-  border: 1px solid var(--line-strong);
-  border-radius: 14px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  gap: 9px;
+  min-height: 46px;
+  padding: 0 2px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
   transition:
     border-color var(--duration-fast) var(--ease),
-    box-shadow var(--duration-fast) var(--ease),
     background-color var(--duration-fast) var(--ease);
 }
 
 .field__control:hover {
-  border-color: rgba(27, 24, 33, 0.28);
-  background: rgba(255, 252, 246, 0.9);
+  border-bottom-color: var(--ink-muted);
 }
 
 .field__control:focus-within {
-  border-color: var(--lav-500);
-  background: var(--surface);
-  box-shadow:
-    var(--focus-ring),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-bottom-color: var(--accent);
+  box-shadow: inset 0 -1px 0 var(--accent);
 }
 
 .field--error .field__control {
-  border-color: rgba(201, 88, 88, 0.55);
-  background: #fffdfd;
+  border-bottom-color: var(--danger-600);
 }
 
 .field--error .field__control:focus-within {
-  box-shadow: 0 0 0 3px rgba(201, 88, 88, 0.16);
+  border-bottom-color: var(--danger-600);
+  box-shadow: inset 0 -1px 0 var(--danger-600);
 }
 
 .field--disabled .field__control {
-  background: var(--surface-muted);
-  opacity: 0.7;
+  opacity: 0.55;
 }
 
 .field__icon {
@@ -78,7 +73,7 @@
 .field__input {
   flex: 1;
   min-width: 0;
-  height: 48px;
+  height: 44px;
   padding: 0;
   border: 0;
   outline: none;
@@ -95,26 +90,26 @@
 
 .field__input:-webkit-autofill {
   -webkit-text-fill-color: var(--ink);
-  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
 }
 
 .field__textarea {
   flex: 1;
   width: 100%;
-  min-height: 110px;
-  padding: 11px 0;
+  min-height: 108px;
+  padding: 10px 0;
   border: 0;
   outline: none;
   background: transparent;
   color: var(--ink);
-  font-size: 14.5px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.72;
   resize: vertical;
 }
 
 .field__control--area {
   align-items: stretch;
-  padding: 0 13px;
+  padding: 0 2px;
 }
 
 .field__reveal {
@@ -123,32 +118,27 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  margin-right: -4px;
-  border-radius: 8px;
   color: var(--ink-faint);
-  transition:
-    background-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
+  transition: color var(--duration-fast) var(--ease);
 }
 
 .field__reveal:hover {
-  background: var(--surface-muted);
-  color: var(--ink-soft);
+  color: var(--ink);
 }
 
 .field__hint {
-  font-size: 12.5px;
-  line-height: 1.5;
   color: var(--ink-muted);
+  font-size: 11.5px;
+  line-height: 1.55;
 }
 
 .field__error {
   display: flex;
   align-items: flex-start;
   gap: 5px;
-  font-size: 12.5px;
-  line-height: 1.5;
   color: var(--danger-700);
+  font-size: 11.5px;
+  line-height: 1.5;
 }
 
 .field__error svg {
@@ -158,15 +148,17 @@
 
 .field__counter {
   align-self: flex-end;
-  font-size: 11.5px;
   color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
 }
 
 .field__select {
   flex: 1;
   min-width: 0;
-  height: 48px;
+  height: 44px;
   padding: 0 24px 0 0;
   border: 0;
   outline: none;
@@ -190,4 +182,8 @@
   right: 1px;
   pointer-events: none;
   color: var(--ink-faint);
+}
+
+textarea {
+  scrollbar-width: thin;
 }
