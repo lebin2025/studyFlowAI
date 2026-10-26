@@ -439,6 +439,8 @@ node server/index.js
 ## 12. 文档索引
 
 - [架构与技术决策](docs/architecture.md)
+- [设计知识库使用规范](docs/design-kb.md)
+- [StudyFlow AI 设计简报](docs/design-brief.md)
 - [API 文档](docs/api.md)
 - [部署指南](docs/deployment.md)
 - [Supabase + Render 免费部署（推荐）](docs/supabase.md)
