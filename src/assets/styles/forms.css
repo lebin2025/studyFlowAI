@@ -3,7 +3,7 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -11,8 +11,10 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 13px;
-  font-weight: 600;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 620;
+  letter-spacing: -0.005em;
   line-height: 1.4;
   color: var(--ink-soft);
 }
@@ -25,12 +27,13 @@
 .field__control {
   display: flex;
   align-items: center;
-  gap: 9px;
-  min-height: 46px;
-  padding: 0 13px;
-  background: var(--surface);
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 15px;
+  background: rgba(252, 249, 243, 0.74);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
   transition:
     border-color var(--duration-fast) var(--ease),
     box-shadow var(--duration-fast) var(--ease),
@@ -38,12 +41,16 @@
 }
 
 .field__control:hover {
-  border-color: #d3c8b8;
+  border-color: rgba(27, 24, 33, 0.28);
+  background: rgba(255, 252, 246, 0.9);
 }
 
 .field__control:focus-within {
-  border-color: var(--lav-400, #9a8df2);
-  box-shadow: var(--focus-ring);
+  border-color: var(--lav-500);
+  background: var(--surface);
+  box-shadow:
+    var(--focus-ring),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .field--error .field__control {
@@ -71,13 +78,13 @@
 .field__input {
   flex: 1;
   min-width: 0;
-  height: 44px;
+  height: 48px;
   padding: 0;
   border: 0;
   outline: none;
   background: transparent;
   color: var(--ink);
-  font-size: 14.5px;
+  font-size: 15px;
   line-height: 1.4;
 }
 
@@ -159,13 +166,13 @@
 .field__select {
   flex: 1;
   min-width: 0;
-  height: 44px;
+  height: 48px;
   padding: 0 24px 0 0;
   border: 0;
   outline: none;
   background: transparent;
   color: var(--ink);
-  font-size: 14.5px;
+  font-size: 15px;
   appearance: none;
   cursor: pointer;
 }

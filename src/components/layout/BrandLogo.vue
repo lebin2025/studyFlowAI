@@ -39,19 +39,27 @@ const tag = computed(() => (props.to ? RouterLink : 'span'))
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   min-width: 0;
-  color: var(--ink);
+  color: inherit;
 }
 
 .brand__mark {
+  position: relative;
   display: grid;
   place-items: center;
   flex: none;
-  border-radius: 11px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-xs);
+  border-radius: 12px;
+  background: rgba(252, 249, 243, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 10px 24px -14px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: transform var(--duration) var(--ease);
+}
+
+.brand:hover .brand__mark {
+  transform: rotate(-4deg) scale(1.03);
 }
 
 .brand__mark svg {
@@ -70,18 +78,19 @@ const tag = computed(() => (props.to ? RouterLink : 'span'))
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 680;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.045em;
   line-height: 1;
 }
 
 .brand__ai {
   padding: 2px 4px;
-  border-radius: 5px;
-  background: var(--lav-100);
+  border-radius: 4px;
+  background: rgba(133, 114, 239, 0.16);
   color: var(--lav-700);
-  font-size: 8.5px;
+  font-family: var(--font-mono);
+  font-size: 8px;
   font-weight: 750;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   line-height: 1;
   transform: translateY(-1px);
 }

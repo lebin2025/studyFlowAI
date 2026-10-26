@@ -456,3 +456,133 @@ onBeforeUnmount(() => window.clearTimeout(debounceTimer))
   }
 }
 </style>
+
+<style scoped>
+/* 2026 / plan library */
+.plans-toolbar {
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(252, 249, 243, 0.66);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(18px);
+}
+
+.plans-toolbar__search {
+  width: min(100%, 400px);
+}
+
+.plans-toolbar__filters {
+  gap: 7px;
+}
+
+.plans-count {
+  margin: 0 2px 16px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.plans-count__clear {
+  color: var(--lav-700);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.plans-empty,
+.plans-error {
+  padding: 26px;
+  border-radius: 26px;
+}
+
+.plan-add {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 286px;
+  padding: 28px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 26px;
+  color: var(--ink);
+  background:
+    radial-gradient(100% 100% at 100% 100%, rgba(157, 232, 203, 0.08), transparent 56%),
+    transparent;
+  transition:
+    border-color var(--duration) var(--ease),
+    background-color var(--duration) var(--ease),
+    transform var(--duration) var(--ease);
+}
+
+.plan-add:hover {
+  border-color: rgba(133, 114, 239, 0.38);
+  background: rgba(252, 249, 243, 0.5);
+  transform: translateY(-3px);
+}
+
+.plan-add__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(133, 114, 239, 0.2);
+  border-radius: 50%;
+  background: rgba(133, 114, 239, 0.08);
+  color: var(--lav-700);
+}
+
+.plan-add strong {
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: 620;
+  letter-spacing: -0.03em;
+}
+
+.plan-add > span:last-child {
+  max-width: 28ch;
+  margin-top: 8px;
+  color: var(--ink-muted);
+  font-size: 11.5px;
+  line-height: 1.7;
+}
+
+@media (max-width: 1080px) {
+  .plans-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .plans-toolbar {
+    padding: 10px;
+  }
+
+  .plans-toolbar__filters {
+    width: 100%;
+  }
+
+  .plans-toolbar__select {
+    flex: 1;
+    width: auto;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-add {
+    min-height: 220px;
+    padding: 24px;
+  }
+}
+</style>

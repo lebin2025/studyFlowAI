@@ -323,3 +323,67 @@ onBeforeUnmount(deactivate)
   }
 }
 </style>
+
+<style scoped>
+.modal {
+  background: rgba(5, 5, 9, 0.58);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+}
+
+.modal__panel {
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 28px;
+  background:
+    radial-gradient(80% 60% at 100% 0%, rgba(215, 201, 255, 0.12), transparent 56%),
+    var(--surface);
+  box-shadow:
+    0 50px 120px -40px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.modal__header {
+  padding: 28px 30px 18px;
+}
+
+.modal__title {
+  font-size: 26px;
+  font-weight: 640;
+  letter-spacing: -0.045em;
+}
+
+.modal__description {
+  max-width: 52ch;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+}
+
+.modal__close {
+  border: 1px solid var(--line);
+  background: transparent;
+}
+
+.modal__body {
+  padding: 4px 30px 28px;
+}
+
+.modal__footer {
+  padding: 18px 30px;
+  border-top-color: var(--line);
+  background: var(--surface-soft);
+}
+
+@media (max-width: 640px) {
+  .modal__panel {
+    border-radius: 28px 28px 0 0;
+  }
+
+  .modal__header {
+    padding: 26px 20px 14px;
+  }
+
+  .modal__body {
+    padding: 2px 20px 22px;
+  }
+}
+</style>

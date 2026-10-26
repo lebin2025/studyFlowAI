@@ -115,3 +115,71 @@ defineProps({
   }
 }
 </style>
+
+<style scoped>
+/* 2026 / editorial page masthead */
+.page-header {
+  position: relative;
+  margin-bottom: 30px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.page-header::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  width: 96px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--lav-500));
+}
+
+.page-header__back {
+  margin-bottom: 14px;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+}
+
+.page-header__eyebrow {
+  margin-bottom: 10px;
+  font-size: 9px;
+}
+
+.page-header__title {
+  max-width: 18ch;
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.page-header__description {
+  max-width: 58ch;
+  margin-top: 12px;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.page-header__actions {
+  gap: 9px;
+}
+
+@media (max-width: 760px) {
+  .page-header {
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+  }
+
+  .page-header__title {
+    font-size: clamp(30px, 8vw, 40px);
+  }
+
+  .page-header__actions :deep(.btn) {
+    flex: 1;
+  }
+}
+</style>

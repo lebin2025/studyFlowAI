@@ -45,9 +45,22 @@ const dateLabel = computed(() => formatDate(todayISO(), { weekday: true }))
 }
 
 .shell__body {
+  position: relative;
   min-height: 100vh;
   margin-left: var(--sidebar-width);
-  padding: 34px clamp(24px, 3.6vw, 46px) 72px;
+  padding: 38px clamp(24px, 3.6vw, 52px) 88px;
+}
+
+.shell__body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: var(--sidebar-width);
+  z-index: 30;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(133, 114, 239, 0.3), rgba(114, 201, 173, 0.22), transparent);
 }
 
 .shell__content {
@@ -64,7 +77,11 @@ const dateLabel = computed(() => formatDate(todayISO(), { weekday: true }))
 @media (max-width: 900px) {
   .shell__body {
     margin-left: 0;
-    padding: 0 16px calc(94px + env(safe-area-inset-bottom, 0px));
+    padding: 0 16px calc(102px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .shell__body::before {
+    left: 0;
   }
 
   .mobile-bar {
@@ -74,12 +91,16 @@ const dateLabel = computed(() => formatDate(todayISO(), { weekday: true }))
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 60px;
-    margin: 0 -16px 18px;
+    height: 62px;
+    margin: 0 -16px 20px;
     padding: 0 16px;
-    background: rgba(251, 248, 243, 0.92);
-    border-bottom: 1px solid rgba(236, 229, 218, 0.75);
-    backdrop-filter: blur(12px);
+    color: var(--on-dark);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent),
+      rgba(8, 7, 13, 0.9);
+    border-bottom: 1px solid var(--line-dark);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
   }
 
   .mobile-bar__right {
@@ -89,8 +110,10 @@ const dateLabel = computed(() => formatDate(todayISO(), { weekday: true }))
   }
 
   .mobile-bar__date {
-    color: var(--ink-muted);
-    font-size: 11.5px;
+    color: var(--on-dark-faint);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
   }
 
   .mobile-bar__avatar {
@@ -99,16 +122,19 @@ const dateLabel = computed(() => formatDate(todayISO(), { weekday: true }))
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--lav-100);
-    color: var(--lav-700);
-    font-size: 12px;
-    font-weight: 680;
+    background:
+      radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.8), transparent 42%),
+      linear-gradient(135deg, var(--lav-500), var(--mint-500));
+    color: #171321;
+    font-size: 11px;
+    font-weight: 760;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
   }
 }
 
 @media (max-width: 1100px) and (min-width: 901px) {
   .shell__body {
-    padding-inline: 28px;
+    padding-inline: 30px;
   }
 }
 </style>

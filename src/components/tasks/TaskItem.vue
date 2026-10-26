@@ -325,3 +325,133 @@ const priorityLabel = computed(() => {
   }
 }
 </style>
+
+<style scoped>
+/* 2026 / precision task row */
+.task-item {
+  position: relative;
+  gap: 12px;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    opacity var(--duration-fast) var(--ease);
+}
+
+.task-item:last-child {
+  border-bottom: 0;
+}
+
+.task-item:hover {
+  background: rgba(252, 249, 243, 0.72);
+}
+
+.task-item--compact {
+  padding: 10px 8px;
+}
+
+.task-check {
+  width: 24px;
+  height: 24px;
+  margin-top: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  background: transparent;
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.task-check:hover {
+  border-color: var(--mint-600);
+  background: var(--mint-50);
+}
+
+.task-item.is-done .task-check {
+  border-color: transparent;
+  background: linear-gradient(145deg, var(--mint-500), var(--mint-700));
+  box-shadow: 0 8px 18px -10px rgba(55, 140, 115, 0.6);
+}
+
+.task-title {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 540;
+  letter-spacing: -0.012em;
+}
+
+.task-item.is-done .task-title {
+  color: var(--ink-faint);
+}
+
+.task-tag {
+  padding: 2px 7px;
+  border: 1px solid rgba(55, 140, 115, 0.16);
+  background: var(--mint-50);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.task-priority {
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: rgba(252, 249, 243, 0.6);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.02em;
+}
+
+.task-priority__dot {
+  width: 4px;
+  height: 4px;
+}
+
+.task-description {
+  font-size: 12px;
+}
+
+.task-meta {
+  margin-top: 5px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.01em;
+}
+
+.task-plan {
+  color: var(--lav-700);
+}
+
+.task-action {
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+}
+
+.task-action:hover {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.task-action--danger:hover {
+  border-color: rgba(194, 86, 92, 0.18);
+  background: var(--danger-100);
+  color: var(--danger-700);
+}
+
+@media (max-width: 760px) {
+  .task-item {
+    padding: 14px 6px;
+  }
+
+  .task-action {
+    width: 34px;
+    height: 34px;
+  }
+}
+</style>

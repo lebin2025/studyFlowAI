@@ -236,3 +236,119 @@ const barColor = computed(() => {
   }
 }
 </style>
+
+<style scoped>
+/* 2026 / editorial plan index card */
+.plan-card {
+  min-height: 286px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(215, 201, 255, 0.16), transparent 54%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.65), transparent 46%),
+    var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.plan-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 24px;
+  left: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(133, 114, 239, 0.5), transparent);
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(133, 114, 239, 0.28);
+  box-shadow: var(--shadow-md);
+}
+
+.plan-card__overlay:focus-visible {
+  outline: 2px solid var(--lav-500);
+  outline-offset: -3px;
+  border-radius: 25px;
+}
+
+.plan-card__tags {
+  gap: 7px;
+}
+
+.plan-card__tags .chip {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.plan-card__title {
+  max-width: 18ch;
+  margin-top: 18px;
+  font-size: 21px;
+  font-weight: 640;
+  line-height: 1.22;
+  letter-spacing: -0.04em;
+}
+
+.plan-card__goal {
+  min-height: 40px;
+  margin-top: 8px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.plan-card__progress {
+  margin-top: auto;
+  padding-top: 22px;
+}
+
+.plan-card__progress-head {
+  margin-bottom: 8px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+}
+
+.plan-card__progress-head strong {
+  color: var(--ink);
+  font-family: var(--font-editorial);
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.plan-card__foot {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top-color: var(--line);
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.01em;
+}
+
+.plan-card__ai {
+  color: var(--lav-700);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.plan-card__delete {
+  border: 1px solid transparent;
+}
+
+.plan-card__delete:hover {
+  border-color: rgba(194, 86, 92, 0.16);
+}
+
+@media (hover: none) {
+  .plan-card__delete {
+    opacity: 1;
+  }
+}
+</style>

@@ -21,7 +21,7 @@ Its 18 documents are imported into the local knowledge base (category `网页设
 ## Product rules
 
 - StudyFlow AI is an AI-native learning planner. The primary user task is completing today's study tasks.
-- Primary art mode: **Human Warmth / Soft Technology**; supporting: **Quiet Precision** and **AI-native Interface**.
+- Primary art mode: **B. Cinematic Product Theater** for Landing / Auth; **D. Human Warmth / Soft Technology** for working surfaces; **A. Quiet Precision** shared across both. This is one product narrative (deep space → daylight workspace), not two unrelated sites.
 - Visual motif: **growth path / one small step today**.
 - Do not replace the design system without a stated reason.
 - Do not use fake AI output, fake loading, or unlicensed cultural ornament.

@@ -25,11 +25,11 @@ const router = useRouter()
         可能是链接过期了，或者我们把它移到别处了。回到学习空间，继续今天的计划吧。
       </p>
       <div class="not-found__actions">
-        <AppButton to="/app">
+        <AppButton to="/app" variant="inverse">
           <template #icon><House :size="15" /></template>
           回到学习空间
         </AppButton>
-        <AppButton variant="secondary" @click="router.back()">
+        <AppButton variant="glass" @click="router.back()">
           返回上一页
           <template #trailing><ArrowRight :size="15" /></template>
         </AppButton>
@@ -101,5 +101,76 @@ const router = useRouter()
   justify-content: center;
   gap: 9px;
   margin-top: 24px;
+}
+</style>
+
+<style scoped>
+.not-found {
+  min-height: 100vh;
+  color: var(--on-dark);
+  background:
+    radial-gradient(70rem 50rem at 70% 18%, rgba(101, 82, 210, 0.22), transparent 60%),
+    radial-gradient(40rem 30rem at 20% 90%, rgba(55, 140, 115, 0.12), transparent 58%),
+    var(--void);
+  overflow: hidden;
+}
+
+.not-found__header {
+  padding-top: 26px;
+}
+
+.not-found__main {
+  position: relative;
+  isolation: isolate;
+}
+
+.not-found__main::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: min(72vw, 720px);
+  height: min(72vw, 720px);
+  border: 1px solid rgba(215, 201, 255, 0.12);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 0 80px rgba(215, 201, 255, 0.025),
+    0 0 0 160px rgba(215, 201, 255, 0.016);
+}
+
+.not-found__code {
+  top: -38px;
+  right: -80px;
+  color: transparent;
+  font-family: var(--font-editorial);
+  font-size: clamp(150px, 22vw, 300px);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-text-stroke: 1px rgba(215, 201, 255, 0.16);
+}
+
+.not-found h1 {
+  max-width: 14ch;
+  color: var(--on-dark);
+  font-size: clamp(38px, 5.6vw, 72px);
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+
+.not-found .eyebrow {
+  color: var(--lumen);
+}
+
+.not-found__text {
+  max-width: 38ch;
+  color: var(--on-dark-soft);
+  font-size: 13.5px;
+}
+
+.not-found__art :deep(svg) {
+  filter: drop-shadow(0 26px 40px rgba(0, 0, 0, 0.5));
 }
 </style>

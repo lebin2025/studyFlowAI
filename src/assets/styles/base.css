@@ -31,12 +31,23 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  background-image: var(--grain);
+  opacity: 0.028;
+  mix-blend-mode: multiply;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(56rem 46rem at 88% -12%, rgba(130, 114, 239, 0.1), transparent 62%),
-    radial-gradient(38rem 34rem at -8% 8%, rgba(111, 195, 168, 0.08), transparent 64%),
-    radial-gradient(48rem 40rem at 46% 112%, rgba(237, 165, 127, 0.08), transparent 62%);
+    radial-gradient(52rem 42rem at 88% -10%, rgba(133, 114, 239, 0.1), transparent 64%),
+    radial-gradient(44rem 38rem at -8% 12%, rgba(114, 201, 173, 0.09), transparent 66%),
+    radial-gradient(50rem 38rem at 52% 108%, rgba(229, 155, 114, 0.08), transparent 64%);
 }
 
 #app {
@@ -51,9 +62,9 @@ h5,
 h6 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 640;
-  line-height: 1.18;
-  letter-spacing: -0.025em;
+  font-weight: 650;
+  line-height: 1.14;
+  letter-spacing: -0.032em;
   color: var(--ink);
   text-wrap: balance;
 }
@@ -107,13 +118,13 @@ select {
 }
 
 ::selection {
-  background: rgba(130, 114, 239, 0.22);
+  background: rgba(133, 114, 239, 0.26);
   color: var(--ink);
 }
 
 :focus-visible {
   outline: 2px solid var(--lav-500);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 * {
@@ -140,7 +151,7 @@ select {
   width: 100%;
   max-width: var(--content-max);
   margin-inline: auto;
-  padding-inline: clamp(20px, 4vw, 40px);
+  padding-inline: clamp(20px, 4.2vw, 48px);
 }
 
 .page {
@@ -249,13 +260,96 @@ select {
 }
 
 /* --------------------------------------------------------------------------
+   Editorial & luminous primitives
+   -------------------------------------------------------------------------- */
+.editorial {
+  font-family: var(--font-editorial);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+}
+
+.mono-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.dark-stage {
+  --text: var(--on-dark);
+  --text-secondary: var(--on-dark-soft);
+  --text-muted: var(--on-dark-soft);
+  --accent: var(--lumen);
+  --accent-soft: rgba(215, 201, 255, 0.12);
+  --border: var(--line-dark);
+  color: var(--on-dark);
+  background: var(--void);
+}
+
+.dark-stage h1,
+.dark-stage h2,
+.dark-stage h3,
+.dark-stage h4 {
+  color: var(--on-dark);
+}
+
+.glass-dark {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035)),
+    rgba(17, 14, 25, 0.62);
+  border: 1px solid var(--line-dark);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    0 28px 80px -40px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(26px) saturate(135%);
+  -webkit-backdrop-filter: blur(26px) saturate(135%);
+}
+
+.glass-light {
+  background: rgba(252, 249, 243, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 24px 64px -38px rgba(23, 19, 29, 0.4);
+  backdrop-filter: blur(24px) saturate(130%);
+  -webkit-backdrop-filter: blur(24px) saturate(130%);
+}
+
+.spectral-text {
+  background: var(--spectral);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hairline {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: var(--line);
+}
+
+.hairline-dark {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: var(--line-dark);
+}
+
+/* --------------------------------------------------------------------------
    Surfaces & typography
    -------------------------------------------------------------------------- */
 .card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
 }
 
 .card-lift {
@@ -266,7 +360,7 @@ select {
 }
 
 .card-lift:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: var(--line-strong);
   box-shadow: var(--shadow-md);
 }
@@ -274,28 +368,35 @@ select {
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 620;
-  letter-spacing: 0.12em;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--lav-600);
+  color: var(--lav-700);
+}
+
+.dark-stage .eyebrow {
+  color: var(--lumen);
 }
 
 .section-heading {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  gap: var(--space-7);
+  margin-bottom: var(--space-8);
 }
 
 .section-heading h2 {
-  font-size: clamp(24px, 3vw, 32px);
+  font-size: clamp(28px, 3.6vw, 46px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
 }
 
 .section-heading p {
-  margin-top: 8px;
+  margin-top: 12px;
   color: var(--ink-muted);
   font-size: 15px;
   max-width: 56ch;
@@ -305,33 +406,39 @@ select {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 5px 11px;
   border-radius: var(--radius-pill);
   background: var(--surface-muted);
   border: 1px solid var(--line);
   color: var(--ink-soft);
-  font-size: 12px;
-  font-weight: 550;
+  font-size: 11.5px;
+  font-weight: 560;
   line-height: 1.5;
   white-space: nowrap;
 }
 
 .chip--lav {
   background: var(--lav-50);
-  border-color: rgba(130, 114, 239, 0.18);
+  border-color: rgba(133, 114, 239, 0.18);
   color: var(--lav-700);
 }
 
 .chip--mint {
   background: var(--mint-50);
-  border-color: rgba(63, 157, 130, 0.18);
+  border-color: rgba(55, 140, 115, 0.18);
   color: var(--mint-700);
 }
 
 .chip--peach {
   background: var(--peach-100);
-  border-color: rgba(208, 133, 94, 0.16);
+  border-color: rgba(185, 108, 69, 0.16);
   color: var(--peach-600);
+}
+
+.chip--gold {
+  background: var(--gold-100);
+  border-color: rgba(169, 124, 60, 0.18);
+  color: var(--gold-600);
 }
 
 .divider {
@@ -346,12 +453,12 @@ select {
    -------------------------------------------------------------------------- */
 .grid-auto {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: var(--space-5);
 }
 
 /* --------------------------------------------------------------------------
-   Animations
+   Motion primitives
    -------------------------------------------------------------------------- */
 @keyframes spin {
   to {
@@ -374,14 +481,14 @@ select {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-10px);
   }
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -398,6 +505,31 @@ select {
   50% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes orbit-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes aura-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, -3%, 0) scale(1.06);
+  }
+}
+
+@keyframes sheen {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(220%) skewX(-18deg);
   }
 }
 
@@ -422,17 +554,17 @@ select {
 .page-leave-active {
   transition:
     opacity var(--duration) var(--ease),
-    transform var(--duration) var(--ease);
+    transform var(--duration-slow) var(--ease);
 }
 
 .page-enter-from {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(14px);
 }
 
 .page-leave-to {
   opacity: 0;
-  transform: translateY(-4px);
+  transform: translateY(-6px);
 }
 
 .fade-enter-active,
@@ -448,10 +580,10 @@ select {
 /* Scroll-in reveal (progressive enhancement) */
 .reveal {
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(26px);
   transition:
-    opacity 600ms var(--ease),
-    transform 600ms var(--ease);
+    opacity 800ms var(--ease-out),
+    transform 800ms var(--ease-out);
 }
 
 .reveal.is-visible {

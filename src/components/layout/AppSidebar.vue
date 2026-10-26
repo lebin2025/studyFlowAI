@@ -126,27 +126,57 @@ const logout = async () => {
   display: flex;
   flex-direction: column;
   width: var(--sidebar-width);
-  padding: 22px 16px 18px;
-  background: rgba(253, 250, 245, 0.9);
-  border-right: 1px solid var(--line);
+  padding: 24px 16px 18px;
+  color: var(--on-dark);
+  background:
+    radial-gradient(120% 55% at 18% 0%, rgba(133, 114, 239, 0.2), transparent 62%),
+    radial-gradient(90% 40% at 100% 100%, rgba(114, 201, 173, 0.1), transparent 64%),
+    linear-gradient(180deg, #0b0a11 0%, #0a0910 58%, #08080d 100%);
+  border-right: 1px solid var(--line-dark);
+  overflow: hidden;
+}
+
+.sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--grain);
+  opacity: 0.03;
+}
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 18px;
+  left: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(215, 201, 255, 0.5), transparent);
+}
+
+.sidebar > * {
+  position: relative;
+  z-index: 1;
 }
 
 .sidebar__top {
-  padding: 0 8px 26px;
+  padding: 0 8px 30px;
 }
 
 .sidebar__nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .sidebar__label {
-  padding: 0 12px 8px;
-  color: var(--ink-faint);
-  font-size: 10.5px;
-  font-weight: 650;
-  letter-spacing: 0.12em;
+  padding: 0 12px 10px;
+  color: var(--on-dark-faint);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -155,23 +185,44 @@ const logout = async () => {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  color: var(--ink-soft);
+  padding: 10px 11px;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  color: var(--on-dark-soft);
   transition:
     background-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
+    border-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease),
+    transform var(--duration-fast) var(--ease);
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.75);
-  color: var(--ink);
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--on-dark);
+  transform: translateX(2px);
 }
 
 .nav-item.is-active {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: var(--shadow-xs);
+  color: var(--on-dark);
+  background:
+    linear-gradient(105deg, rgba(215, 201, 255, 0.16), rgba(255, 255, 255, 0.045)),
+    rgba(255, 255, 255, 0.04);
+  border-color: rgba(215, 201, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 18px 40px -30px rgba(0, 0, 0, 0.9);
+}
+
+.nav-item.is-active::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: -1px;
+  width: 2px;
+  border-radius: 99px;
+  background: linear-gradient(180deg, var(--lumen), var(--aurora));
 }
 
 .nav-item__icon {
@@ -180,17 +231,20 @@ const logout = async () => {
   flex: none;
   width: 34px;
   height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
-  background: var(--surface-muted);
-  color: var(--ink-muted);
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--on-dark-soft);
   transition:
     background-color var(--duration-fast) var(--ease),
     color var(--duration-fast) var(--ease);
 }
 
 .nav-item.is-active .nav-item__icon {
-  background: var(--lav-100);
-  color: var(--lav-700);
+  background: rgba(215, 201, 255, 0.16);
+  border-color: rgba(215, 201, 255, 0.24);
+  color: var(--lumen);
+  box-shadow: inset 0 0 18px rgba(215, 201, 255, 0.12);
 }
 
 .nav-item__text {
@@ -201,22 +255,23 @@ const logout = async () => {
 }
 
 .nav-item__title {
-  font-size: 13.5px;
-  font-weight: 590;
+  font-size: 13px;
+  font-weight: 570;
 }
 
 .nav-item__caption {
-  font-size: 10.5px;
-  color: var(--ink-faint);
+  font-size: 10px;
+  color: var(--on-dark-faint);
 }
 
 .nav-item__dot {
   position: absolute;
-  right: 12px;
-  width: 5px;
-  height: 5px;
+  right: 13px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
-  background: var(--lav-500);
+  background: var(--aurora);
+  box-shadow: 0 0 12px rgba(157, 232, 203, 0.9);
 }
 
 .sidebar__bottom {
@@ -228,61 +283,69 @@ const logout = async () => {
 
 .ai-card {
   position: relative;
-  padding: 15px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(155deg, var(--lav-50), #fbf9ff 55%, var(--mint-50));
-  border: 1px solid rgba(130, 114, 239, 0.13);
+  padding: 17px;
+  border: 1px solid rgba(215, 201, 255, 0.16);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 100% at 100% 0%, rgba(215, 201, 255, 0.18), transparent 55%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 24px 50px -36px rgba(0, 0, 0, 0.9);
   overflow: hidden;
 }
 
 .ai-card::after {
   content: '';
   position: absolute;
-  top: -26px;
-  right: -22px;
-  width: 74px;
-  height: 74px;
+  top: -42px;
+  right: -34px;
+  width: 110px;
+  height: 110px;
+  border: 1px solid rgba(215, 201, 255, 0.18);
   border-radius: 50%;
-  background: rgba(130, 114, 239, 0.12);
+  box-shadow: 0 0 50px rgba(133, 114, 239, 0.12) inset;
 }
 
 .ai-card__icon {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  margin-bottom: 9px;
-  border-radius: 9px;
-  background: var(--surface);
-  color: var(--lav-700);
-  box-shadow: var(--shadow-xs);
+  width: 32px;
+  height: 32px;
+  margin-bottom: 11px;
+  border: 1px solid rgba(215, 201, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(215, 201, 255, 0.1);
+  color: var(--lumen);
 }
 
 .ai-card__title {
   font-size: 13px;
-  font-weight: 640;
+  font-weight: 630;
+  color: var(--on-dark);
 }
 
 .ai-card__text {
-  margin-top: 3px;
-  font-size: 11.5px;
-  line-height: 1.55;
-  color: var(--ink-muted);
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--on-dark-soft);
 }
 
 .ai-card__link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-  color: var(--lav-700);
-  font-size: 11.5px;
-  font-weight: 620;
+  gap: 7px;
+  margin-top: 12px;
+  color: var(--lumen);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .ai-card__link:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: #fff;
 }
 
 .user-card {
@@ -290,12 +353,12 @@ const logout = async () => {
   align-items: center;
   gap: 8px;
   padding: 8px;
-  border-radius: var(--radius-md);
+  border-radius: 14px;
   transition: background-color var(--duration-fast) var(--ease);
 }
 
 .user-card:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .user-card__profile {
@@ -313,10 +376,13 @@ const logout = async () => {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: var(--lav-100);
-  color: var(--lav-700);
-  font-size: 13px;
-  font-weight: 680;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.75), transparent 42%),
+    linear-gradient(135deg, var(--lav-500), var(--mint-500));
+  color: #171321;
+  font-size: 12px;
+  font-weight: 760;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .user-card__text {
@@ -328,15 +394,16 @@ const logout = async () => {
 
 .user-card__name {
   font-size: 12.5px;
-  font-weight: 620;
+  font-weight: 600;
+  color: var(--on-dark);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .user-card__caption {
-  font-size: 10.5px;
-  color: var(--ink-faint);
+  font-size: 10px;
+  color: var(--on-dark-faint);
 }
 
 .user-card__action {
@@ -345,16 +412,16 @@ const logout = async () => {
   flex: none;
   width: 30px;
   height: 30px;
-  border-radius: 8px;
-  color: var(--ink-faint);
+  border-radius: 9px;
+  color: var(--on-dark-faint);
   transition:
     background-color var(--duration-fast) var(--ease),
     color var(--duration-fast) var(--ease);
 }
 
 .user-card__action:hover {
-  background: var(--danger-100);
-  color: var(--danger-700);
+  background: rgba(194, 86, 92, 0.18);
+  color: #ffb7b9;
 }
 
 .sidebar__settings {
@@ -362,13 +429,13 @@ const logout = async () => {
   align-items: center;
   gap: 7px;
   padding: 2px 10px;
-  color: var(--ink-faint);
-  font-size: 11.5px;
+  color: var(--on-dark-faint);
+  font-size: 11px;
   transition: color var(--duration-fast) var(--ease);
 }
 
 .sidebar__settings:hover {
-  color: var(--ink);
+  color: var(--on-dark);
 }
 
 @media (max-width: 900px) {

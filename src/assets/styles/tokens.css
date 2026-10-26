@@ -8,55 +8,86 @@
   --font-display:
     'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  --font-editorial:
+    'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', 'Songti SC', Georgia, serif;
   --font-mono: 'SFMono-Regular', 'Cascadia Code', Consolas, 'Liberation Mono', monospace;
 
-  /* Warm neutrals -------------------------------------------------------- */
-  --bg: #fbf8f3;
-  --bg-deep: #f5f0e7;
-  --surface: #ffffff;
-  --surface-soft: #fdfbf7;
-  --surface-muted: #f7f3ec;
-  --ink: #292531;
-  --ink-soft: #464050;
-  --ink-muted: #7c7586;
-  --ink-faint: #a49dad;
-  --line: #ece5da;
-  --line-strong: #ddd4c6;
+  /* Daylight workspace -------------------------------------------------- */
+  --bg: #f3eee6;
+  --bg-deep: #eae3d8;
+  --surface: #fcf9f3;
+  --surface-soft: #f8f3ea;
+  --surface-muted: #efe8dd;
+  --surface-strong: #e6ddd0;
+  --ink: #1b1821;
+  --ink-soft: #403a49;
+  --ink-muted: #665e70;
+  --ink-faint: #7f7688;
+  --line: rgba(27, 24, 33, 0.1);
+  --line-strong: rgba(27, 24, 33, 0.18);
 
-  /* Accents (low saturation, healing) ----------------------------------- */
-  --lav-700: #5846c9;
-  --lav-600: #6a58df;
-  --lav-500: #8272ef;
-  --lav-300: #b5aaf7;
-  --lav-100: #efecff;
-  --lav-50: #f6f4ff;
+  /* Deep-space stage ---------------------------------------------------- */
+  --void: #07070c;
+  --void-2: #0d0b14;
+  --void-3: #15111f;
+  --void-4: #211a2f;
+  --void-soft: #2b2340;
+  --on-dark: #f8f2e9;
+  --on-dark-soft: rgba(248, 242, 233, 0.76);
+  --on-dark-faint: rgba(248, 242, 233, 0.56);
+  --line-dark: rgba(248, 242, 233, 0.12);
+  --line-dark-strong: rgba(248, 242, 233, 0.22);
 
-  --mint-700: #2f7d66;
-  --mint-600: #3f9d82;
-  --mint-500: #6fc3a8;
-  --mint-100: #e6f6f0;
-  --mint-50: #f2fbf7;
+  /* Accents -------------------------------------------------------------- */
+  --lav-700: #4e3fae;
+  --lav-600: #6552d2;
+  --lav-500: #8572ef;
+  --lav-300: #bdb1fb;
+  --lav-100: #ebe6ff;
+  --lav-50: #f4f0ff;
 
-  --sky-600: #5d88c9;
-  --sky-500: #7ea9e6;
-  --sky-100: #eaf2fd;
+  --mint-700: #216c58;
+  --mint-600: #378c73;
+  --mint-500: #72c9ad;
+  --mint-100: #e3f5ee;
+  --mint-50: #f1fbf7;
 
-  --peach-600: #d0855e;
-  --peach-500: #eda57f;
-  --peach-100: #fdf0e8;
+  --sky-600: #4f79b8;
+  --sky-500: #7aa5e0;
+  --sky-100: #e8f1fd;
 
-  --rose-500: #e291a1;
-  --rose-100: #fceef1;
+  --peach-600: #b96c45;
+  --peach-500: #e59b72;
+  --peach-100: #fbeadf;
 
-  --danger-700: #a94444;
-  --danger-600: #c95858;
-  --danger-100: #fdeeee;
-  --success-700: #2f7d66;
-  --success-600: #3f8f74;
-  --success-100: #e8f6ef;
-  --warning-700: #986522;
-  --warning-600: #b57a2e;
-  --warning-100: #fdf4e5;
+  --rose-500: #d78094;
+  --rose-100: #f9e8ed;
+
+  --gold-600: #a97c3c;
+  --gold-500: #d7ad6a;
+  --gold-100: #f6ead4;
+
+  --danger-700: #9f3f45;
+  --danger-600: #c2565c;
+  --danger-100: #fbe8e8;
+  --success-700: #216c58;
+  --success-600: #378c73;
+  --success-100: #e3f5ee;
+  --warning-700: #8a5b1d;
+  --warning-600: #ad752f;
+  --warning-100: #fbf0dc;
+
+  /* Luminous accents for dark surfaces ---------------------------------- */
+  --lumen: #d7c9ff;
+  --aurora: #9de8cb;
+  --ember: #ffc09a;
+  --spectral: linear-gradient(115deg, #d7c9ff 0%, #9de8cb 48%, #ffc09a 100%);
+  --spectral-soft: linear-gradient(
+    115deg,
+    rgba(215, 201, 255, 0.24) 0%,
+    rgba(157, 232, 203, 0.16) 50%,
+    rgba(255, 192, 154, 0.16) 100%
+  );
 
   /* Semantic ------------------------------------------------------------- */
   --text: var(--ink);
@@ -66,7 +97,7 @@
   --accent-soft: var(--lav-100);
   --border: var(--line);
 
-  /* Spacing scale -------------------------------------------------------- */
+  /* Spacing -------------------------------------------------------------- */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -81,37 +112,46 @@
   --space-12: 64px;
   --space-13: 80px;
   --space-14: 96px;
+  --space-15: 120px;
+  --space-16: 160px;
 
   /* Radii ---------------------------------------------------------------- */
-  --radius-xs: 8px;
+  --radius-xs: 7px;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
-  --radius-xl: 26px;
-  --radius-2xl: 32px;
+  --radius-xl: 28px;
+  --radius-2xl: 36px;
+  --radius-3xl: 48px;
   --radius-pill: 999px;
 
   /* Shadows -------------------------------------------------------------- */
-  --shadow-xs: 0 1px 2px rgba(41, 37, 49, 0.04);
+  --shadow-xs: 0 1px 2px rgba(23, 19, 29, 0.04);
   --shadow-sm:
-    0 1px 2px rgba(41, 37, 49, 0.03), 0 6px 18px -12px rgba(41, 37, 49, 0.18);
+    0 1px 2px rgba(23, 19, 29, 0.04), 0 10px 24px -18px rgba(23, 19, 29, 0.28);
   --shadow-md:
-    0 2px 6px rgba(41, 37, 49, 0.03), 0 18px 40px -24px rgba(41, 37, 49, 0.28);
+    0 2px 6px rgba(23, 19, 29, 0.04), 0 24px 50px -30px rgba(23, 19, 29, 0.38);
   --shadow-lg:
-    0 4px 12px rgba(41, 37, 49, 0.04), 0 32px 64px -32px rgba(41, 37, 49, 0.3);
-  --shadow-accent: 0 14px 30px -16px rgba(106, 88, 223, 0.55);
-  --shadow-mint: 0 14px 30px -18px rgba(63, 157, 130, 0.5);
+    0 8px 22px rgba(7, 7, 12, 0.08), 0 42px 90px -46px rgba(7, 7, 12, 0.45);
+  --shadow-deep:
+    0 30px 90px -40px rgba(0, 0, 0, 0.7), 0 2px 0 rgba(255, 255, 255, 0.08) inset;
+  --shadow-accent: 0 18px 38px -18px rgba(101, 82, 210, 0.58);
+  --shadow-mint: 0 18px 38px -20px rgba(55, 140, 115, 0.5);
 
   /* Motion --------------------------------------------------------------- */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --duration-fast: 140ms;
-  --duration: 200ms;
-  --duration-slow: 380ms;
+  --duration: 220ms;
+  --duration-slow: 480ms;
+  --duration-cinematic: 900ms;
 
   /* Layout --------------------------------------------------------------- */
-  --sidebar-width: 258px;
+  --sidebar-width: 264px;
   --topbar-height: 68px;
-  --content-max: 1180px;
-  --focus-ring: 0 0 0 3px rgba(106, 88, 223, 0.24);
+  --content-max: 1220px;
+  --focus-ring: 0 0 0 3px rgba(133, 114, 239, 0.28);
+  --focus-ring-dark: 0 0 0 3px rgba(215, 201, 255, 0.38);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E");
 }

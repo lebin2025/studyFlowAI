@@ -57,12 +57,18 @@ Swiss
 
 ### 主艺术方向
 
-**D. Human Warmth / Soft Technology**（来自 `16`）
+本次整站升级采用**分场景主方向、共享一套视觉系统**：
+
+- **Landing / Auth：B. Cinematic Product Theater**（来自 `16`）——深空舞台、巨型排版、轨道式视觉母题、精密玻璃与金属光感。
+- **应用内部：D. Human Warmth / Soft Technology**——暖纸阅读面、低饱和、可长时间使用的平静界面。
+- **贯穿：A. Quiet Precision**——所有页面共享网格、字号层级、间距、边框、状态与动效。
+
+不是两套网站，而是同一种“从深空进入工作台”的产品叙事：营销页负责建立想象，应用页负责把今天的事做完。
 
 辅助：
 
-- **Quiet Precision**：标题、排版、间距与状态要精确
 - **AI-native Interface**：输入、生成中、可编辑结果、失败重试都要清楚
+- **Quiet Precision**：标题、排版、间距与状态要精确
 
 ### 视觉母题
 
