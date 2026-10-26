@@ -276,8 +276,12 @@ const onClick = (event) => {
   z-index: 1;
 }
 
+.btn:hover {
+  transform: translateY(-1px);
+}
+
 .btn:active {
-  transform: scale(0.975);
+  transform: translateY(0) scale(0.975);
   transition-duration: 80ms;
 }
 
@@ -305,6 +309,7 @@ const onClick = (event) => {
     transition: none;
   }
 
+  .btn:hover,
   .btn:active {
     transform: none;
   }

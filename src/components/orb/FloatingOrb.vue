@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowRight,
@@ -22,6 +22,7 @@ import { useAmbienceStore } from '@/stores/ambience.js'
 import { useDraftsStore } from '@/stores/drafts.js'
 import { useFocusStore } from '@/stores/focus.js'
 import { useUiStore } from '@/stores/ui.js'
+import Mascot from '@/components/illustrations/Mascot.vue'
 import FocusRing from '@/components/focus/FocusRing.vue'
 
 const auth = useAuthStore()
@@ -41,6 +42,34 @@ const hovered = ref(false)
 const completionPulse = ref(false)
 const panelId = 'studyflow-orb-panel'
 let completionTimer = null
+const initialMobile = typeof window !== 'undefined' && window.innerWidth <= 900
+const position = reactive({
+  right: initialMobile ? 14 : 24,
+  bottom: initialMobile ? 80 : 24,
+})
+const isMobile = ref(initialMobile)
+const panelLeft = ref(0)
+const panelTop = ref(0)
+const dragging = ref(false)
+let dragState = null
+let suppressClick = false
+
+const orbSize = () => (window.innerWidth <= 900 ? 56 : 66)
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
+
+const positionKey = computed(() => `studyflow:orb:v1:${auth.user?.id || 'guest'}`)
+
+const panelStyle = computed(() =>
+  isMobile.value ? {} : { left: `${panelLeft.value}px`, top: `${panelTop.value}px` },
+)
+
+const mascotVariant = computed(() => {
+  if (orbState.value === 'rest') return 'sleepy'
+  if (orbState.value === 'processing') return 'thinking'
+  if (orbState.value === 'success') return 'cheer'
+  if (orbState.value === 'error') return 'thinking'
+  return 'happy'
+})
 
 watch(
   () => focus.completionToken,
@@ -93,6 +122,144 @@ const stateDetail = computed(() => {
 const displayTime = computed(() =>
   focus.status === 'idle' ? `${String(focus.durationMinutes).padStart(2, '0')}:00` : focus.formattedRemaining,
 )
+
+const loadPosition = () => {
+  isMobile.value = window.innerWidth <= 900
+  let saved = null
+  try {
+    saved = JSON.parse(localStorage.getItem(positionKey.value) || 'null')
+  } catch {
+    saved = null
+  }
+  const size = orbSize()
+  const min = 8
+  const maxRight = Math.max(min, window.innerWidth - size - min)
+  const minBottom = isMobile.value ? 72 : min
+  const maxBottom = Math.max(minBottom, window.innerHeight - size - minBottom)
+  const fallbackRight = isMobile.value ? 14 : 24
+  const fallbackBottom = isMobile.value ? 80 : 24
+  position.right = clamp(Number(saved?.right) || fallbackRight, min, maxRight)
+  position.bottom = clamp(Number(saved?.bottom) || fallbackBottom, minBottom, maxBottom)
+}
+
+const savePosition = () => {
+  try {
+    localStorage.setItem(
+      positionKey.value,
+      JSON.stringify({ right: position.right, bottom: position.bottom }),
+    )
+  } catch {
+    /* position persistence is best-effort */
+  }
+}
+
+const updatePanelPosition = () => {
+  if (!open.value || isMobile.value || !panel.value || !orbButton.value) return
+  const orbRect = orbButton.value.getBoundingClientRect()
+  const width = panel.value.offsetWidth || 370
+  const height = panel.value.offsetHeight || 520
+  const left =
+    orbRect.left + orbRect.width / 2 < window.innerWidth / 2
+      ? orbRect.left
+      : orbRect.right - width
+  panelLeft.value = clamp(left, 12, Math.max(12, window.innerWidth - width - 12))
+  let top = orbRect.top - height - 12
+  if (top < 12) top = orbRect.bottom + 12
+  panelTop.value = clamp(top, 12, Math.max(12, window.innerHeight - height - 12))
+}
+
+const onResize = () => {
+  loadPosition()
+  if (open.value) nextTick(updatePanelPosition)
+}
+
+const onOrbPointerDown = (event) => {
+  if (event.button !== undefined && event.button !== 0) return
+  dragState = {
+    pointerId: event.pointerId,
+    x: event.clientX,
+    y: event.clientY,
+    right: position.right,
+    bottom: position.bottom,
+    moved: false,
+    previousUserSelect: document.body.style.userSelect,
+  }
+  dragging.value = true
+  document.body.style.userSelect = 'none'
+  orbButton.value?.setPointerCapture?.(event.pointerId)
+}
+
+const onOrbPointerMove = (event) => {
+  if (!dragState || event.pointerId !== dragState.pointerId) return
+  const dx = event.clientX - dragState.x
+  const dy = event.clientY - dragState.y
+  if (!dragState.moved && Math.hypot(dx, dy) < 4) return
+  dragState.moved = true
+  const size = orbSize()
+  const maxRight = Math.max(8, window.innerWidth - size - 8)
+  const maxBottom = Math.max(8, window.innerHeight - size - 8)
+  position.right = clamp(dragState.right - dx, 8, maxRight)
+  position.bottom = clamp(dragState.bottom - dy, isMobile.value ? 72 : 8, maxBottom)
+  hovered.value = false
+  if (open.value) updatePanelPosition()
+}
+
+const onOrbPointerUp = (event) => {
+  if (!dragState || event.pointerId !== dragState.pointerId) return
+  const moved = dragState.moved
+  document.body.style.userSelect = dragState.previousUserSelect || ''
+  if (moved) window.getSelection?.()?.removeAllRanges()
+  dragging.value = false
+  try {
+    orbButton.value?.releasePointerCapture?.(event.pointerId)
+  } catch {
+    /* pointer capture may already be released */
+  }
+  dragState = null
+  if (moved) {
+    suppressClick = true
+    savePosition()
+    window.setTimeout(() => {
+      suppressClick = false
+    }, 260)
+  }
+}
+
+const onOrbClick = (event) => {
+  if (suppressClick) {
+    event.preventDefault()
+    event.stopPropagation()
+    return
+  }
+  toggle()
+}
+
+const onOrbKeydown = (event) => {
+  const amount = event.shiftKey ? 24 : 8
+  const moves = {
+    ArrowUp: [0, amount],
+    ArrowDown: [0, -amount],
+    ArrowLeft: [amount, 0],
+    ArrowRight: [-amount, 0],
+  }
+  if (!moves[event.key]) return
+  event.preventDefault()
+  const [rightDelta, bottomDelta] = moves[event.key]
+  const size = orbSize()
+  const minBottom = isMobile.value ? 72 : 8
+  position.right = clamp(
+    position.right + rightDelta,
+    8,
+    Math.max(8, window.innerWidth - size - 8),
+  )
+  position.bottom = clamp(
+    position.bottom + bottomDelta,
+    minBottom,
+    Math.max(minBottom, window.innerHeight - size - 8),
+  )
+  savePosition()
+  if (open.value) updatePanelPosition()
+}
 
 const durationOptions = [15, 25, 45, 60]
 
@@ -193,6 +360,7 @@ const onPointerDown = (event) => {
 const openPanel = async () => {
   open.value = true
   await nextTick()
+  updatePanelPosition()
   panel.value?.querySelector('button, a, input')?.focus()
 }
 
@@ -213,32 +381,53 @@ watch(
   () => close(),
 )
 
+watch(
+  () => auth.user?.id,
+  () => {
+    loadPosition()
+    if (open.value) nextTick(updatePanelPosition)
+  },
+)
+
 onMounted(() => {
+  loadPosition()
   document.addEventListener('keydown', onKeydown, true)
   document.addEventListener('pointerdown', onPointerDown, true)
+  window.addEventListener('resize', onResize)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', onKeydown, true)
   document.removeEventListener('pointerdown', onPointerDown, true)
+  window.removeEventListener('resize', onResize)
+  if (dragState) document.body.style.userSelect = dragState.previousUserSelect || ''
   if (completionTimer) window.clearTimeout(completionTimer)
 })
 </script>
 
 <template>
-  <div ref="root" class="orb-root" :class="{ 'is-expanded': open }">
+  <div
+    ref="root"
+    class="orb-root"
+    :class="{ 'is-expanded': open }"
+    :style="{ right: `${position.right}px`, bottom: `${position.bottom}px` }"
+  >
     <Transition name="orb-panel">
       <section
         v-if="open"
         :id="panelId"
         ref="panel"
         class="orb-panel"
+        :style="panelStyle"
         role="dialog"
         aria-label="StudyFlow 快捷中心"
       >
         <header class="orb-panel__head">
           <div class="orb-panel__status">
-            <span class="orb-status-dot" :class="`is-${orbState}`" />
+            <span class="orb-panel__avatar">
+              <Mascot :size="38" :variant="mascotVariant" :animated="false" />
+              <span class="orb-status-dot" :class="`is-${orbState}`" />
+            </span>
             <div>
               <strong>{{ stateLabel }}</strong>
               <span>{{ stateDetail }}</span>
@@ -353,17 +542,29 @@ onBeforeUnmount(() => {
       </section>
     </Transition>
 
+    <Transition name="orb-character">
+      <span v-if="hovered && !open" class="orb-character" aria-hidden="true">
+        <Mascot :size="58" :variant="mascotVariant" :animated="false" />
+      </span>
+    </Transition>
+
     <button
       ref="orbButton"
       type="button"
       class="orb"
-      :class="[`is-${orbState}`, { 'is-open': open }]"
+      :class="[`is-${orbState}`, { 'is-open': open, 'is-dragging': dragging }]"
       :aria-expanded="open"
       :aria-controls="open ? panelId : undefined"
       aria-label="打开 StudyFlow 快捷中心"
+      title="拖动调整位置"
       @mouseenter="hovered = true"
       @mouseleave="hovered = false"
-      @click="toggle"
+      @pointerdown="onOrbPointerDown"
+      @pointermove="onOrbPointerMove"
+      @pointerup="onOrbPointerUp"
+      @pointercancel="onOrbPointerUp"
+      @click="onOrbClick"
+      @keydown="onOrbKeydown"
     >
       <span class="orb__aura" aria-hidden="true" />
       <span class="orb__core" aria-hidden="true">
@@ -380,14 +581,13 @@ onBeforeUnmount(() => {
   right: 24px;
   bottom: 24px;
   z-index: 90;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
+  width: 66px;
+  height: 66px;
   pointer-events: none;
 }
 
-.orb-root > * {
+.orb-root > .orb,
+.orb-root > .orb-panel {
   pointer-events: auto;
 }
 
@@ -408,11 +608,18 @@ onBeforeUnmount(() => {
     0 20px 50px -22px rgba(23, 22, 20, 0.75),
     inset 0 1px 1px rgba(255, 255, 255, 0.28);
   color: var(--on-dark);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
   transition:
     transform 220ms var(--ease),
     opacity 180ms var(--ease),
     box-shadow 220ms var(--ease);
   animation: orb-breathe 5.5s var(--ease-in-out) infinite;
+}
+
+.orb.is-dragging {
+  cursor: grabbing;
 }
 
 .orb:hover,
@@ -449,6 +656,29 @@ onBeforeUnmount(() => {
   background: rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
+}
+
+.orb-character {
+  position: absolute;
+  right: -2px;
+  bottom: 52px;
+  display: block;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 12px rgba(23, 22, 20, 0.18));
+  transform-origin: bottom center;
+}
+
+.orb-character-enter-active,
+.orb-character-leave-active {
+  transition:
+    opacity 180ms var(--ease),
+    transform 320ms var(--ease-spring);
+}
+
+.orb-character-enter-from,
+.orb-character-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.6) rotate(-4deg);
 }
 
 .orb__state {
@@ -519,6 +749,10 @@ onBeforeUnmount(() => {
 
 /* Panel ------------------------------------------------------------------- */
 .orb-panel {
+  position: fixed;
+  z-index: 91;
+  right: auto;
+  bottom: auto;
   width: min(370px, calc(100vw - 32px));
   max-height: min(680px, calc(100dvh - 120px));
   overflow: auto;
@@ -567,17 +801,40 @@ onBeforeUnmount(() => {
 
 .orb-panel__status {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 9px;
   min-width: 0;
+}
+
+.orb-panel__avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  box-shadow: inset 0 0 0 1px rgba(23, 22, 20, 0.04);
+}
+
+.orb-panel__avatar :deep(svg) {
+  width: 38px;
+  height: 38px;
 }
 
 .orb-status-dot {
   width: 7px;
   height: 7px;
-  margin-top: 5px;
   border-radius: 50%;
   background: var(--sage);
+}
+
+.orb-panel__avatar .orb-status-dot {
+  position: absolute;
+  right: 1px;
+  bottom: 2px;
+  border: 1.5px solid var(--surface);
 }
 
 .orb-status-dot.is-focusing,
@@ -600,7 +857,7 @@ onBeforeUnmount(() => {
   font-weight: 620;
 }
 
-.orb-panel__status span {
+.orb-panel__status > div > span {
   display: block;
   margin-top: 2px;
   color: var(--ink-muted);
@@ -842,8 +1099,8 @@ onBeforeUnmount(() => {
 
 @media (max-width: 900px) {
   .orb-root {
-    right: 14px;
-    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    width: 56px;
+    height: 56px;
   }
 
   .orb {
@@ -901,6 +1158,15 @@ onBeforeUnmount(() => {
     opacity: 0;
     pointer-events: none;
     transform: scale(0.9);
+  }
+}
+</style>
+
+<style scoped>
+@media (prefers-reduced-motion: reduce) {
+  .orb-character-enter-active,
+  .orb-character-leave-active {
+    transition: none;
   }
 }
 </style>
