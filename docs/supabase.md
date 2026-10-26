@@ -28,6 +28,27 @@
 
 ## 2. 获取连接字符串
 
+### 数据库密码从哪里来
+
+`DATABASE_URL` 里的密码是 **Supabase 数据库密码**，不是：
+
+- ❌ Supabase 账号登录密码
+- ❌ `anon` key
+- ❌ `service_role` key
+- ❌ JWT Secret
+
+它是在 **创建 Supabase 项目时设置的那个数据库密码**。Supabase 之后不会再次明文显示；如果当时没有保存，只能重置：
+
+1. Supabase 控制台 → 选择项目
+2. **Project Settings → Database**
+3. 找到 **Database password** → **Reset database password**
+4. 设置一个只含字母和数字的强密码（避免 URL 编码问题）
+5. 复制新密码，更新连接串和 Render 环境变量
+
+重置密码不会删除数据，但所有使用旧密码的客户端都需要更新。
+
+### 获取 Session Pooler URI
+
 Supabase 控制台 → **Project Settings → Database → Connection string**。
 
 选择 **Session pooler**（会话池，端口通常是 `5432`），复制 URI：
