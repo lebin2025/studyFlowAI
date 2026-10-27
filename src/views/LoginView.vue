@@ -19,9 +19,20 @@ const errors = reactive({})
 const submitted = ref(false)
 const submitting = ref(false)
 const apiError = ref(null)
+const shakeSignal = ref(0)
+
+const resolveTarget = () => {
+  const redirect = route.query.redirect
+  return typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')
+    ? redirect
+    : '/app'
+}
 
 const applyErrors = () => {
   const next = validateLoginForm(form)
+  // Empty fields are not input errors: leave them neutral until something is typed.
+  if (!form.email.trim()) delete next.email
+  if (!form.password) delete next.password
   Object.keys(errors).forEach((key) => delete errors[key])
   Object.assign(errors, next)
   return Object.keys(next).length === 0
@@ -39,22 +50,26 @@ watch(
 const submit = async () => {
   submitted.value = true
   apiError.value = null
-  if (!applyErrors() || submitting.value) return
+  const missingFields = !form.email.trim() || !form.password
+  if (!applyErrors() || submitting.value) {
+    if (Object.keys(errors).length) shakeSignal.value += 1
+    return
+  }
+  if (missingFields) return
 
   submitting.value = true
   try {
     const user = await auth.login({ email: form.email.trim(), password: form.password })
     ui.success(`欢迎回来，${user.displayName}`, '登录成功')
-    const redirect = route.query.redirect
-    const target =
-      typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')
-        ? redirect
-        : '/app'
-    router.replace(target)
+    router.replace(resolveTarget())
   } catch (error) {
     apiError.value = {
       message: error.message || '登录失败，请稍后重试',
       requestId: error.requestId,
+    }
+    if (error.status === 401) {
+      errors.password = '邮箱或密码不正确'
+      shakeSignal.value += 1
     }
   } finally {
     submitting.value = false
@@ -83,6 +98,7 @@ const submit = async () => {
         placeholder="you@example.com"
         autocomplete="email"
         :error="errors.email"
+        :shake-signal="shakeSignal"
         required
       >
         <template #prefix><Mail :size="16" /></template>
@@ -95,6 +111,7 @@ const submit = async () => {
         placeholder="输入你的密码"
         autocomplete="current-password"
         :error="errors.password"
+        :shake-signal="shakeSignal"
         required
       >
         <template #prefix><Lock :size="16" /></template>

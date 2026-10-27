@@ -10,6 +10,7 @@ import AppButton from '@/components/ui/AppButton.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import TaskItem from '@/components/tasks/TaskItem.vue'
 import TaskFormModal from '@/components/tasks/TaskFormModal.vue'
+import PlanCalendarCard from '@/components/dashboard/PlanCalendarCard.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import { plansApi, statsApi, tasksApi } from '@/api/index.js'
 import { useAuthStore } from '@/stores/auth.js'
@@ -215,7 +216,11 @@ onMounted(load)
     </div>
 
     <template v-else>
-      <section class="instrument" aria-label="学习数据概览">
+      <section
+        class="instrument"
+        aria-label="学习数据概览"
+        v-press-tilt="{ subtle: true }"
+      >
         <div class="instrument__today">
           <span class="instrument__label">今日完成</span>
           <div class="instrument__ring-wrap">
@@ -257,6 +262,8 @@ onMounted(load)
           </div>
         </div>
       </section>
+
+      <PlanCalendarCard @changed="load({ silent: true })" />
 
       <div class="dashboard-grid">
         <section class="today-card">

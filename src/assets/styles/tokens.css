@@ -16,6 +16,14 @@
   --surface-soft: #f8f5f0;
   --surface-muted: #ece7df;
   --surface-strong: #ded7cc;
+  /* Macaron glass palette: three low-saturation tones only. */
+  --macaron-cream-rgb: 249 243 233;
+  --macaron-mint-rgb: 216 236 224;
+  --macaron-peach-rgb: 244 221 210;
+  --glass-ink: #35483d;
+  --glass-card: rgb(var(--macaron-cream-rgb) / 0.44);
+  --glass-border: rgb(255 255 255 / 0.58);
+  --glass-shadow: 0 18px 42px -34px rgb(69 86 74 / 0.4);
   --ink: #171614;
   --ink-soft: #3d3a35;
   --ink-muted: #6d6860;

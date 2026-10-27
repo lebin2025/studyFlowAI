@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, useAttrs, useId } from 'vue'
+import { computed, onBeforeUnmount, ref, useAttrs, useId, watch } from 'vue'
 import { CircleAlert, Eye, EyeOff } from 'lucide-vue-next'
 
 defineOptions({ inheritAttrs: false })
@@ -21,6 +21,7 @@ const props = defineProps({
   revealable: { type: Boolean, default: true },
   id: { type: String, default: '' },
   autocomplete: { type: String, default: undefined },
+  shakeSignal: { type: Number, default: 0 },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -29,6 +30,38 @@ const inputId = computed(() => props.id || `field-${generatedId}`)
 const errorId = computed(() => `${inputId.value}-error`)
 const hintId = computed(() => `${inputId.value}-hint`)
 const showPassword = ref(false)
+const shaking = ref(false)
+let shakeTimer = null
+
+const triggerShake = () => {
+  if (!props.error) return
+  shaking.value = false
+  window.clearTimeout(shakeTimer)
+  window.requestAnimationFrame(() => {
+    shaking.value = true
+    shakeTimer = window.setTimeout(() => {
+      shaking.value = false
+    }, 560)
+  })
+}
+
+watch(
+  () => props.error,
+  (next, previous) => {
+    if (next && next !== previous) triggerShake()
+  },
+)
+
+watch(
+  () => props.shakeSignal,
+  (next, previous) => {
+    if (next !== previous) triggerShake()
+  },
+)
+
+onBeforeUnmount(() => {
+  window.clearTimeout(shakeTimer)
+})
 
 const actualType = computed(() => {
   if (props.type !== 'password') return props.type
@@ -54,7 +87,7 @@ const onInput = (event) => emit('update:modelValue', event.target.value)
       {{ label }}
       <span v-if="required" class="field__required" aria-hidden="true">*</span>
     </label>
-    <div class="field__control">
+    <div class="field__control" :class="{ 'is-shaking': shaking }">
       <span v-if="$slots.prefix" class="field__icon"><slot name="prefix" /></span>
       <input
         v-bind="controlAttrs"
@@ -83,9 +116,11 @@ const onInput = (event) => emit('update:modelValue', event.target.value)
       <slot name="suffix" />
     </div>
     <p v-if="hint && !error" :id="hintId" class="field__hint">{{ hint }}</p>
-    <p v-if="error" :id="errorId" class="field__error" role="alert">
-      <CircleAlert :size="13" aria-hidden="true" />
-      <span>{{ error }}</span>
-    </p>
+    <Transition name="field-error">
+      <p v-if="error" :id="errorId" class="field__error" role="alert">
+        <CircleAlert :size="13" aria-hidden="true" />
+        <span>{{ error }}</span>
+      </p>
+    </Transition>
   </div>
 </template>

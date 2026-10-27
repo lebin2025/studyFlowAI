@@ -1,0 +1,513 @@
+/*
+ * Macaron glass surface layer.
+ *
+ * Only three low-saturation colours are used:
+ *   cream  -> cards
+ *   mint   -> primary buttons / data instrument
+ *   peach  -> AI and danger actions
+ *
+ * All base fills are solid rgba colours. Only the specular highlight layers
+ * use gradients, so the material never reads as a multi-colour gradient.
+ */
+
+/* Shared card/surface material ------------------------------------------------ */
+.card,
+.surface,
+.plan-card,
+.task-group,
+.draft-row,
+.settings-card,
+.stats-cards,
+.panel,
+.today-card,
+.rhythm-card,
+.wizard-card,
+.aside-card,
+.calc-card,
+.edit-card,
+.summary-card,
+.usage-card,
+.modal__panel,
+.visual-card,
+.start__panel,
+.auth__art-card,
+.next-card,
+.detail-hero,
+.setup-card,
+.review-box,
+.plans-toolbar,
+.tasks-toolbar,
+.orb-quick,
+.orb-timer,
+.orb-ambience,
+.focus-ambience {
+  background: rgb(var(--macaron-cream-rgb) / 0.44) !important;
+  border: 1px solid rgb(255 255 255 / 0.58) !important;
+  box-shadow:
+    0 18px 42px -34px rgb(69 86 74 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.78),
+    inset 0 -8px 18px rgb(161 183 168 / 0.1) !important;
+  backdrop-filter: blur(16px) saturate(112%);
+  -webkit-backdrop-filter: blur(16px) saturate(112%);
+}
+
+/* Dialogs need slightly more body than page cards. */
+.modal__panel {
+  background: rgb(var(--macaron-cream-rgb) / 0.72) !important;
+}
+
+/* The data instrument uses the mint tone, not a dark exception. */
+.instrument {
+  background: rgb(var(--macaron-mint-rgb) / 0.52) !important;
+  border: 1px solid rgb(255 255 255 / 0.6) !important;
+  color: var(--glass-ink) !important;
+  box-shadow:
+    0 20px 48px -36px rgb(63 86 72 / 0.46),
+    inset 0 1px 0 rgb(255 255 255 / 0.82),
+    inset 0 -8px 20px rgb(126 164 140 / 0.12) !important;
+  backdrop-filter: blur(18px) saturate(112%);
+  -webkit-backdrop-filter: blur(18px) saturate(112%);
+}
+
+.instrument__label,
+.instrument__metric > span,
+.instrument__ring-label span,
+.instrument__metric small {
+  color: rgb(53 72 61 / 0.78) !important;
+}
+
+.instrument__metric {
+  border-left-color: rgb(53 72 61 / 0.12) !important;
+}
+
+.instrument__ring-track {
+  stroke: rgb(53 72 61 / 0.14) !important;
+}
+
+.instrument__bar {
+  background: rgb(53 72 61 / 0.14) !important;
+}
+
+/* Cards that are links/rows get the same material on hover. */
+.card-lift:hover,
+.plan-card:hover,
+.draft-row:hover {
+  background: rgb(var(--macaron-cream-rgb) / 0.66) !important;
+}
+
+/* Side navigation: selected item is a small cream glass pill. */
+.nav-item {
+  border: 1px solid transparent;
+}
+
+.nav-item:hover {
+  background: rgb(var(--macaron-cream-rgb) / 0.38) !important;
+  border-color: rgb(255 255 255 / 0.42);
+}
+
+.nav-item.is-active {
+  background: rgb(var(--macaron-cream-rgb) / 0.64) !important;
+  border-color: rgb(255 255 255 / 0.64) !important;
+  box-shadow:
+    0 10px 24px -20px rgb(69 86 74 / 0.38),
+    inset 0 1px 0 rgb(255 255 255 / 0.8);
+  backdrop-filter: blur(14px) saturate(112%);
+  -webkit-backdrop-filter: blur(14px) saturate(112%);
+}
+
+/* Segmented filter: cream track, small mint active pill. */
+.segmented {
+  background: rgb(var(--macaron-cream-rgb) / 0.36) !important;
+  border: 1px solid rgb(255 255 255 / 0.5);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55);
+}
+
+.segmented__item.is-active {
+  background: rgb(var(--macaron-mint-rgb) / 0.52) !important;
+  color: var(--glass-ink) !important;
+  box-shadow:
+    0 6px 14px -12px rgb(69 86 74 / 0.36),
+    inset 0 1px 0 rgb(255 255 255 / 0.78) !important;
+}
+
+/* Native action buttons that do not use AppButton. */
+.draft-action {
+  background: rgb(var(--macaron-cream-rgb) / 0.38) !important;
+  border: 1px solid rgb(255 255 255 / 0.46);
+  backdrop-filter: blur(10px) saturate(110%);
+  -webkit-backdrop-filter: blur(10px) saturate(110%);
+}
+
+.draft-action--primary,
+.focus-primary,
+.orb-timer__primary {
+  background: rgb(var(--macaron-mint-rgb) / 0.52) !important;
+  color: var(--glass-ink) !important;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.78);
+}
+
+.draft-action--danger,
+.focus-secondary {
+  background: rgb(var(--macaron-peach-rgb) / 0.54) !important;
+  color: var(--accent-deep) !important;
+  border: 1px solid rgb(255 255 255 / 0.5);
+}
+
+.segmented__item,
+.orb-modes > button,
+.orb-timer__durations button,
+.focus-durations button,
+.focus-ambience__row > button {
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease),
+    box-shadow var(--duration-fast) var(--ease);
+}
+
+.orb-modes > button.is-active,
+.orb-timer__durations button.is-active,
+.focus-durations button.is-active,
+.focus-ambience__row > button.is-active {
+  background: rgb(var(--macaron-mint-rgb) / 0.58) !important;
+  color: var(--glass-ink) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7);
+}
+
+/* Fallbacks keep the same three colours without backdrop support. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card,
+  .surface,
+  .plan-card,
+  .task-group,
+  .draft-row,
+  .settings-card,
+  .stats-cards,
+  .panel,
+  .today-card,
+  .rhythm-card,
+  .wizard-card,
+  .aside-card,
+  .calc-card,
+  .edit-card,
+  .summary-card,
+  .usage-card,
+  .modal__panel,
+  .visual-card,
+  .start__panel,
+  .auth__art-card,
+  .next-card,
+  .detail-hero,
+  .setup-card,
+  .review-box,
+  .plans-toolbar,
+  .tasks-toolbar {
+    background: rgb(var(--macaron-cream-rgb) / 0.9) !important;
+  }
+
+  .instrument {
+    background: rgb(var(--macaron-mint-rgb) / 0.95) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .card,
+  .surface,
+  .plan-card,
+  .task-group,
+  .draft-row,
+  .settings-card,
+  .stats-cards,
+  .panel,
+  .today-card,
+  .rhythm-card,
+  .wizard-card,
+  .aside-card,
+  .calc-card,
+  .edit-card,
+  .summary-card,
+  .usage-card,
+  .modal__panel,
+  .visual-card,
+  .start__panel,
+  .auth__art-card,
+  .next-card,
+  .detail-hero,
+  .setup-card,
+  .review-box,
+  .plans-toolbar,
+  .tasks-toolbar,
+  .instrument {
+    backdrop-filter: blur(10px) saturate(108%);
+    -webkit-backdrop-filter: blur(10px) saturate(108%);
+  }
+}
+
+/* Smaller option cards and empty states share the same cream material. */
+.draft-empty,
+.level-option {
+  background: rgb(var(--macaron-cream-rgb) / 0.44) !important;
+  border: 1px solid rgb(255 255 255 / 0.54) !important;
+  box-shadow:
+    0 14px 30px -28px rgb(69 86 74 / 0.34),
+    inset 0 1px 0 rgb(255 255 255 / 0.72) !important;
+  backdrop-filter: blur(12px) saturate(110%);
+  -webkit-backdrop-filter: blur(12px) saturate(110%);
+}
+
+.level-option.is-active {
+  box-shadow:
+    0 14px 30px -28px rgb(69 86 74 / 0.34),
+    inset 0 0 0 1px rgb(var(--accent-rgb, 208 69 45) / 0.3),
+    inset 0 1px 0 rgb(255 255 255 / 0.72) !important;
+}
+
+/* Small native chips/pills in forms. */
+.preset-row button,
+.weekday-row button,
+.topic-chips button {
+  background: rgb(var(--macaron-cream-rgb) / 0.38) !important;
+  border: 1px solid rgb(255 255 255 / 0.46) !important;
+  backdrop-filter: blur(10px) saturate(108%);
+  -webkit-backdrop-filter: blur(10px) saturate(108%);
+}
+
+/* Mobile navigation is a floating glass bar; the compose button is mint, never black. */
+.mobile-nav {
+  background: rgb(var(--macaron-cream-rgb) / 0.9) !important;
+  border-top: 1px solid rgb(255 255 255 / 0.6);
+  box-shadow:
+    0 -14px 34px -28px rgb(69 86 74 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.8) !important;
+  backdrop-filter: blur(18px) saturate(112%);
+  -webkit-backdrop-filter: blur(18px) saturate(112%);
+}
+
+.mobile-nav__item {
+  border-radius: 10px;
+}
+
+.mobile-nav__item.is-active {
+  background: rgb(var(--macaron-cream-rgb) / 0.44);
+}
+
+.mobile-nav__compose-circle {
+  background: rgb(var(--macaron-mint-rgb) / 0.66) !important;
+  color: var(--glass-ink) !important;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  box-shadow:
+    0 8px 18px -14px rgb(69 86 74 / 0.44),
+    inset 0 1px 0 rgb(255 255 255 / 0.8) !important;
+}
+
+.mobile-nav__compose.is-active .mobile-nav__compose-circle,
+.mobile-nav__compose:hover .mobile-nav__compose-circle {
+  background: rgb(var(--macaron-peach-rgb) / 0.68) !important;
+  color: var(--accent-deep) !important;
+}
+
+/* Mobile profile control also reads as a small glass disc. */
+.mobile-bar__avatar {
+  background: rgb(var(--macaron-cream-rgb) / 0.5);
+  border-color: rgb(255 255 255 / 0.58) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .mobile-nav {
+    background: rgb(var(--macaron-cream-rgb) / 0.96) !important;
+  }
+
+  .draft-empty,
+  .level-option {
+    background: rgb(var(--macaron-cream-rgb) / 0.9) !important;
+  }
+}
+
+/* Floating controls use a slightly more opaque cream glass for readability. */
+.orb-root.orb-root .orb-panel {
+  background: rgb(var(--macaron-cream-rgb) / 0.88) !important;
+}
+
+.focus-overlay.focus-overlay .focus-panel {
+  background: rgb(var(--macaron-cream-rgb) / 0.78) !important;
+}
+
+.orb-root.orb-root .orb-panel,
+.focus-overlay.focus-overlay .focus-panel {
+  border: 1px solid rgb(255 255 255 / 0.62) !important;
+  backdrop-filter: blur(26px) saturate(112%);
+  -webkit-backdrop-filter: blur(26px) saturate(112%);
+  box-shadow:
+    0 30px 76px -32px rgb(56 72 61 / 0.46),
+    inset 0 1px 0 rgb(255 255 255 / 0.86) !important;
+}
+
+/* Small icon/control buttons share the same glass edge. */
+.task-action,
+.modal__close,
+.orb-panel__close,
+.focus-close,
+.focus-icon-button,
+.site-header__menu {
+  background: rgb(var(--macaron-cream-rgb) / 0.36) !important;
+  border: 1px solid rgb(255 255 255 / 0.42) !important;
+  backdrop-filter: blur(10px) saturate(108%);
+  -webkit-backdrop-filter: blur(10px) saturate(108%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .orb-root.orb-root .orb-panel,
+  .focus-overlay.focus-overlay .focus-panel {
+    background: rgb(var(--macaron-cream-rgb) / 0.98) !important;
+  }
+}
+
+/* Duration / mode pills are buttons too: cream base, mint active. */
+.orb-timer__durations button,
+.focus-durations button,
+.orb-modes > button,
+.focus-ambience__row > button,
+.focus-custom button {
+  background: rgb(var(--macaron-cream-rgb) / 0.4) !important;
+  border: 1px solid rgb(255 255 255 / 0.44) !important;
+  backdrop-filter: blur(10px) saturate(108%);
+  -webkit-backdrop-filter: blur(10px) saturate(108%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.62);
+}
+
+.focus-durations button.is-active,
+.orb-timer__durations button.is-active,
+.orb-modes > button.is-active,
+.focus-ambience__row > button.is-active {
+  background: rgb(var(--macaron-mint-rgb) / 0.52) !important;
+  border-color: rgb(255 255 255 / 0.62) !important;
+  color: var(--glass-ink) !important;
+}
+
+/* Press-tilt feedback for statistic cards. Only transform (plus a light overlay) changes. */
+.press-tilt {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.press-tilt::after {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at var(--press-x, 50%) var(--press-y, 50%),
+    rgb(255 255 255 / 0.34),
+    transparent 42%
+  );
+  opacity: 0;
+  pointer-events: none;
+  content: '';
+  transition: opacity 160ms var(--ease);
+}
+
+.press-tilt.is-pressing::after {
+  opacity: 0.58;
+}
+
+.press-tilt.is-releasing::after {
+  opacity: 0;
+}
+
+.press-tilt.is-pressing {
+  cursor: grabbing;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press-tilt {
+    transform: none !important;
+  }
+
+  .press-tilt::after {
+    display: none;
+  }
+}
+
+/* Jelly-press physics for native buttons. */
+button:not(.orb):not(.task-check) {
+  transform-origin: center;
+  transition:
+    transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 280ms var(--ease),
+    filter 260ms var(--ease) !important;
+}
+
+button:not(.orb):not(.task-check):not(:disabled):hover {
+  transform: translateY(-1px) scale(1.035) !important;
+  filter: drop-shadow(0 9px 14px rgb(56 72 61 / 0.16));
+}
+
+button:not(.orb):not(.task-check):not(:disabled):active {
+  transform: translateY(0) scale(0.955) !important;
+  filter: brightness(1.035) drop-shadow(0 3px 6px rgb(56 72 61 / 0.14));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(.orb):not(.task-check) {
+    transition: none !important;
+  }
+
+  button:not(.orb):not(.task-check):not(:disabled):hover,
+  button:not(.orb):not(.task-check):not(:disabled):active {
+    transform: none !important;
+    filter: none;
+  }
+}
+
+@media (max-width: 900px) {
+  body.has-focus-bar .shell__body {
+    padding-top: 58px !important;
+  }
+
+  body.has-focus-bar .mobile-bar {
+    top: 56px;
+  }
+}
+
+.stat-card.press-tilt.is-pressing {
+  z-index: 3;
+  border-radius: 14px;
+  background: rgb(var(--macaron-cream-rgb) / 0.64);
+  box-shadow:
+    0 18px 32px -24px rgb(56 72 61 / 0.38),
+    inset 0 1px 0 rgb(255 255 255 / 0.84);
+}
+
+.stat-card.press-tilt.is-releasing {
+  border-radius: 14px;
+  background: rgb(var(--macaron-cream-rgb) / 0.5);
+}
+
+/* The mobile compose action is a RouterLink, so give it the same jelly press. */
+.mobile-nav__compose {
+  transform-origin: center;
+  transition: transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mobile-nav__compose:hover {
+  transform: translateY(-1px) scale(1.055);
+}
+
+.mobile-nav__compose:active {
+  transform: scale(0.945);
+}
+
+.mobile-nav__compose:hover .mobile-nav__compose-circle {
+  box-shadow:
+    0 12px 24px -14px rgb(56 72 61 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.8) !important;
+}
+
+body.is-calendar-open {
+  overflow: hidden;
+}

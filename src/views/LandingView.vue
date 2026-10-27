@@ -12,6 +12,7 @@ import {
 import BrandLogo from '@/components/layout/BrandLogo.vue'
 import StudyLoom from '@/components/visuals/StudyLoom.vue'
 import AppButton from '@/components/ui/AppButton.vue'
+import LiquidGlassButton from '@/components/ui/LiquidGlassButton.vue'
 import { useAuthStore } from '@/stores/auth.js'
 
 const auth = useAuthStore()
@@ -79,10 +80,9 @@ onBeforeUnmount(() => {
           <RouterLink v-if="!auth.isAuthenticated" to="/login" class="site-header__login">
             登录
           </RouterLink>
-          <AppButton :to="spaceTarget" size="sm">
+          <LiquidGlassButton :to="spaceTarget">
             {{ auth.isAuthenticated ? '进入学习空间' : '开始使用' }}
-            <template #trailing><ArrowRight :size="13" /></template>
-          </AppButton>
+          </LiquidGlassButton>
           <button
             type="button"
             class="site-header__menu"

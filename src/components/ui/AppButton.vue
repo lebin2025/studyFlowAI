@@ -315,3 +315,156 @@ const onClick = (event) => {
   }
 }
 </style>
+
+<style scoped>
+/* Macaron glass button material: solid tint + specular edge, no colour gradient. */
+.btn {
+  border: 1px solid rgb(255 255 255 / 0.52) !important;
+  background: rgb(var(--macaron-cream-rgb) / 0.5) !important;
+  color: var(--glass-ink) !important;
+  box-shadow:
+    0 12px 24px -22px rgb(69 86 74 / 0.42),
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    inset 0 -5px 11px rgb(161 183 168 / 0.1) !important;
+  backdrop-filter: blur(14px) saturate(112%);
+  -webkit-backdrop-filter: blur(14px) saturate(112%);
+}
+
+.btn--primary {
+  background: rgb(var(--macaron-mint-rgb) / 0.56) !important;
+  border-color: rgb(255 255 255 / 0.66) !important;
+  color: var(--glass-ink) !important;
+  box-shadow:
+    0 14px 28px -22px rgb(63 86 72 / 0.46),
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    inset 0 -6px 12px rgb(126 164 140 / 0.12) !important;
+}
+
+.btn--primary:hover {
+  background: rgb(var(--macaron-mint-rgb) / 0.66) !important;
+  border-color: rgb(255 255 255 / 0.76) !important;
+  color: var(--glass-ink) !important;
+}
+
+.btn--secondary {
+  background: rgb(var(--macaron-cream-rgb) / 0.52) !important;
+  color: var(--glass-ink) !important;
+}
+
+.btn--secondary:hover {
+  background: rgb(var(--macaron-cream-rgb) / 0.63) !important;
+}
+
+.btn--soft {
+  background: rgb(var(--macaron-cream-rgb) / 0.36) !important;
+  color: var(--glass-ink) !important;
+}
+
+.btn--soft:hover {
+  background: rgb(var(--macaron-cream-rgb) / 0.52) !important;
+}
+
+.btn--ai {
+  background: rgb(var(--macaron-peach-rgb) / 0.52) !important;
+  border-color: rgb(255 255 255 / 0.52) !important;
+  color: var(--accent-deep) !important;
+}
+
+.btn--ai:hover {
+  background: rgb(var(--macaron-peach-rgb) / 0.63) !important;
+  color: var(--accent-deep) !important;
+}
+
+.btn--danger {
+  background: rgb(var(--macaron-peach-rgb) / 0.56) !important;
+  border-color: rgb(255 255 255 / 0.56) !important;
+  color: var(--accent-deep) !important;
+}
+
+.btn--danger:hover {
+  background: rgb(var(--macaron-peach-rgb) / 0.68) !important;
+  color: var(--accent-deep) !important;
+}
+
+.btn--inverse {
+  background: rgb(var(--macaron-cream-rgb) / 0.56) !important;
+  border-color: rgb(255 255 255 / 0.56) !important;
+  color: var(--glass-ink) !important;
+}
+
+.btn--inverse:hover {
+  background: rgb(var(--macaron-mint-rgb) / 0.56) !important;
+  border-color: rgb(255 255 255 / 0.63) !important;
+  color: var(--glass-ink) !important;
+}
+
+.btn--glass {
+  background: rgb(var(--macaron-cream-rgb) / 0.42) !important;
+  border-color: rgb(255 255 255 / 0.56) !important;
+  color: var(--glass-ink) !important;
+}
+
+.btn--ghost {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.btn--ghost:hover {
+  background: rgb(var(--macaron-cream-rgb) / 0.42) !important;
+  border-color: rgb(255 255 255 / 0.42) !important;
+  color: var(--glass-ink) !important;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .btn--primary {
+    background: #dfeee5 !important;
+  }
+
+  .btn--ai,
+  .btn--danger {
+    background: #f4e2d9 !important;
+  }
+
+  .btn,
+  .btn--secondary,
+  .btn--soft,
+  .btn--inverse {
+    background: #f8f1e7 !important;
+  }
+}
+</style>
+
+<style scoped>
+.btn {
+  transform-origin: center;
+  transition:
+    transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 280ms var(--ease),
+    filter 260ms var(--ease) !important;
+}
+
+.btn:not(:disabled):hover {
+  transform: translateY(-1px) scale(1.035) !important;
+  filter: drop-shadow(0 9px 14px rgb(56 72 61 / 0.16));
+}
+
+.btn:not(:disabled):active {
+  transform: translateY(0) scale(0.955) !important;
+  filter: brightness(1.035) drop-shadow(0 3px 6px rgb(56 72 61 / 0.14));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none !important;
+  }
+
+  .btn:not(:disabled):hover,
+  .btn:not(:disabled):active {
+    transform: none !important;
+    filter: none;
+  }
+}
+</style>

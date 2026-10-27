@@ -23,7 +23,7 @@ const barColor = computed(() => {
 </script>
 
 <template>
-  <article class="plan-card">
+  <article class="plan-card" v-press-tilt="{ to: `/app/plans/${plan.id}` }">
     <RouterLink
       :to="`/app/plans/${plan.id}`"
       class="plan-card__overlay"

@@ -14,6 +14,7 @@ import {
 import { useAmbienceStore } from '@/stores/ambience.js'
 import { useFocusStore } from '@/stores/focus.js'
 import FocusRing from '@/components/focus/FocusRing.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
 
 const focus = useFocusStore()
 const ambience = useAmbienceStore()
@@ -45,7 +46,7 @@ const close = () => {
 }
 
 const start = (minutes) => {
-  focus.startFocus(minutes, { openOverlay: true })
+  focus.startFocus(minutes, { openOverlay: false })
 }
 
 const startBreak = () => {
@@ -58,7 +59,7 @@ const primary = () => {
   } else if (focus.status === 'paused') {
     focus.resume()
   } else {
-    focus.startFocus(focus.durationMinutes || 25, { openOverlay: true })
+    focus.startFocus(focus.durationMinutes || 25, { openOverlay: false })
   }
 }
 
@@ -183,7 +184,8 @@ onBeforeUnmount(() => {
                 :key="minutes"
                 type="button"
                 :class="{ 'is-active': focus.durationMinutes === minutes }"
-                @click="start(minutes)"
+                :disabled="focus.isActive"
+                @click="focus.setDuration(minutes)"
               >
                 {{ minutes }} 分钟
               </button>
@@ -251,12 +253,16 @@ onBeforeUnmount(() => {
 
           <p v-if="ambience.error" class="focus-error">{{ ambience.error }}</p>
           <div class="focus-settings">
-            <label>
+            <div class="focus-threshold">
               <span>休息提醒</span>
-              <select :value="focus.restThresholdMinutes" @change="focus.setRestThreshold($event.target.value)">
-                <option v-for="item in thresholds" :key="item.value" :value="item.value">{{ item.label }}</option>
-              </select>
-            </label>
+              <AppSelect
+                class="focus-threshold__select"
+                :model-value="focus.restThresholdMinutes"
+                :options="thresholds"
+                aria-label="休息提醒间隔"
+                @update:model-value="focus.setRestThreshold($event)"
+              />
+            </div>
             <button type="button" class="focus-notify" @click="requestNotifications">
               <Bell v-if="focus.notificationEnabled" :size="13" />
               <BellOff v-else :size="13" />
@@ -516,7 +522,7 @@ onBeforeUnmount(() => {
   margin-top: 12px;
 }
 
-.focus-settings label {
+.focus-threshold {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -524,13 +530,25 @@ onBeforeUnmount(() => {
   font-size: 10.5px;
 }
 
-.focus-settings select {
-  padding: 3px 4px;
-  border: 0;
-  border-radius: 5px;
-  background: var(--surface-soft);
-  color: var(--ink-soft);
+.focus-threshold__select {
+  width: 86px;
+}
+
+.focus-threshold__select :deep(.field__control) {
+  min-height: 28px;
+  padding: 0 6px;
+  border-radius: 7px;
+}
+
+.focus-threshold__select :deep(.field__select-trigger) {
+  height: 26px;
+  padding-right: 16px;
   font-size: 10.5px;
+}
+
+.focus-threshold__select :deep(.field__chevron) {
+  width: 13px;
+  height: 13px;
 }
 
 .focus-notify {

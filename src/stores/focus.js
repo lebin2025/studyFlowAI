@@ -153,6 +153,17 @@ export const useFocusStore = defineStore('focus', {
       }
     },
 
+    setDuration(minutes = this.durationMinutes) {
+      if (this.isActive) return
+      const duration = Math.min(180, Math.max(1, Number(minutes) || 25))
+      this.durationMinutes = duration
+      this.remainingMs = duration * 60000
+      this.endsAt = null
+      this.lastTickAt = null
+      if (this.status === 'finished') this.status = 'idle'
+      this.persist()
+    },
+
     startFocus(minutes = this.durationMinutes, { openOverlay = true } = {}) {
       const duration = Math.min(180, Math.max(1, Number(minutes) || 25))
       const today = localDay()

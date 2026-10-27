@@ -135,7 +135,12 @@ onMounted(load)
 
       <template v-else>
         <div class="stats-cards">
-          <article v-for="card in cards" :key="card.label" class="stat-card">
+          <article
+            v-for="card in cards"
+            :key="card.label"
+            class="stat-card"
+            v-press-tilt
+          >
             <div class="stat-card__top">
               <span class="stat-card__label">{{ card.label }}</span>
             </div>
@@ -452,6 +457,12 @@ onMounted(load)
   border-radius: 20px;
   background: var(--surface);
   box-shadow: var(--shadow-sm);
+}
+
+.stats-empty {
+  padding: 0 18px;
+  border-radius: 18px;
+  box-shadow: var(--shadow-xs);
 }
 
 .stats-error {

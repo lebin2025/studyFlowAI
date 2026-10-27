@@ -13,6 +13,7 @@ import {
 } from 'lucide-vue-next'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import {
   countStudyDays,
   diffDays,
@@ -23,6 +24,11 @@ import {
   todayISO,
 } from '@/utils/date.js'
 import { formatNumber, formatUsd, PRIORITY_LABELS } from '@/utils/format.js'
+
+const priorityOptions = Object.entries(PRIORITY_LABELS).map(([value, label]) => ({
+  value,
+  label,
+}))
 
 const props = defineProps({
   plan: { type: Object, required: true },
@@ -412,15 +418,12 @@ const saveDraft = () => {
                     />
                     分
                   </label>
-                  <select
+                  <AppSelect
                     v-model="task.priority"
                     class="task-edit__select"
+                    :options="priorityOptions"
                     aria-label="优先级"
-                  >
-                    <option v-for="(label, value) in PRIORITY_LABELS" :key="value" :value="value">
-                      {{ label }}
-                    </option>
-                  </select>
+                  />
                   <label class="task-edit__review">
                     <input v-model="task.isReview" type="checkbox" />
                     复习
@@ -1022,12 +1025,25 @@ const saveDraft = () => {
 }
 
 .task-edit__select {
-  padding: 2px 4px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  background: var(--surface);
-  color: var(--ink-muted);
+  width: 88px;
+  flex: none;
+}
+
+.task-edit__select :deep(.field__control) {
+  min-height: 28px;
+  padding: 0 6px;
+  border-radius: 6px;
+}
+
+.task-edit__select :deep(.field__select-trigger) {
+  height: 26px;
+  padding-right: 14px;
   font-size: 9.5px;
+}
+
+.task-edit__select :deep(.field__chevron) {
+  width: 12px;
+  height: 12px;
 }
 
 .task-edit__review {

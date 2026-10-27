@@ -4,6 +4,7 @@ import { RouterView, useRoute } from 'vue-router'
 import AppToastHost from '@/components/ui/AppToastHost.vue'
 import FloatingOrb from '@/components/orb/FloatingOrb.vue'
 import FocusOverlay from '@/components/focus/FocusOverlay.vue'
+import FocusTimerBar from '@/components/focus/FocusTimerBar.vue'
 import { useAuthStore } from '@/stores/auth.js'
 import { useAmbienceStore } from '@/stores/ambience.js'
 import { useDraftsStore } from '@/stores/drafts.js'
@@ -38,6 +39,7 @@ onBeforeUnmount(() => {
     </Transition>
   </RouterView>
   <FloatingOrb />
+  <FocusTimerBar />
   <FocusOverlay />
   <AppToastHost />
 </template>

@@ -9,7 +9,6 @@ import {
   Pause,
   Play,
   Plus,
-  Sparkles,
   Square,
   Timer,
   Volume2,
@@ -51,8 +50,11 @@ const isMobile = ref(initialMobile)
 const panelLeft = ref(0)
 const panelTop = ref(0)
 const dragging = ref(false)
+const snappedEdge = ref('right')
+const scrolling = ref(false)
 let dragState = null
 let suppressClick = false
+let scrollTimer = null
 
 const orbSize = () => (window.innerWidth <= 900 ? 56 : 66)
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
@@ -95,12 +97,17 @@ const orbState = computed(() => {
   return 'idle'
 })
 
-const characterVisible = computed(
-  () =>
-    hovered.value ||
-    open.value ||
-    ['processing', 'success', 'rest', 'error'].includes(orbState.value),
-)
+const edgeMargin = () => (isMobile.value ? 14 : 20)
+const mobileMinBottom = () => (isMobile.value ? 72 : 8)
+
+const hideTranslation = computed(() => {
+  if (!scrolling.value || open.value) return '0px 0px'
+  const distance = Math.round(orbSize() * 0.8)
+  if (snappedEdge.value === 'left') return `-${distance}px 0px`
+  if (snappedEdge.value === 'top') return `0px -${distance}px`
+  if (snappedEdge.value === 'bottom') return `0px ${distance}px`
+  return `${distance}px 0px`
+})
 
 const stateLabel = computed(() => {
   if (orbState.value === 'processing') return '正在生成'
@@ -141,23 +148,66 @@ const loadPosition = () => {
   const size = orbSize()
   const min = 8
   const maxRight = Math.max(min, window.innerWidth - size - min)
-  const minBottom = isMobile.value ? 72 : min
+  const minBottom = mobileMinBottom()
   const maxBottom = Math.max(minBottom, window.innerHeight - size - minBottom)
   const fallbackRight = isMobile.value ? 14 : 24
   const fallbackBottom = isMobile.value ? 80 : 24
   position.right = clamp(Number(saved?.right) || fallbackRight, min, maxRight)
   position.bottom = clamp(Number(saved?.bottom) || fallbackBottom, minBottom, maxBottom)
+  snappedEdge.value = ['left', 'right', 'top', 'bottom'].includes(saved?.edge)
+    ? saved.edge
+    : inferredEdge()
+}
+
+const inferredEdge = () => {
+  const size = orbSize()
+  const x = window.innerWidth - position.right - size / 2
+  const y = window.innerHeight - position.bottom - size / 2
+  const distances = {
+    left: x,
+    right: window.innerWidth - x,
+    top: y,
+    bottom: window.innerHeight - y,
+  }
+  return Object.entries(distances).sort((a, b) => a[1] - b[1])[0][0]
 }
 
 const savePosition = () => {
   try {
     localStorage.setItem(
       positionKey.value,
-      JSON.stringify({ right: position.right, bottom: position.bottom }),
+      JSON.stringify({
+        right: position.right,
+        bottom: position.bottom,
+        edge: snappedEdge.value,
+      }),
     )
   } catch {
     /* position persistence is best-effort */
   }
+}
+
+const applyEdge = (edge, { animate = true } = {}) => {
+  const size = orbSize()
+  const margin = edgeMargin()
+  const minBottom = mobileMinBottom()
+  const maxRight = Math.max(8, window.innerWidth - size - 8)
+  const maxBottom = Math.max(minBottom, window.innerHeight - size - 8)
+  snappedEdge.value = edge
+  if (edge === 'left') position.right = window.innerWidth - size - margin
+  else if (edge === 'right') position.right = margin
+  else if (edge === 'top') position.bottom = window.innerHeight - size - margin
+  else if (edge === 'bottom') position.bottom = minBottom
+  position.right = clamp(position.right, 8, maxRight)
+  position.bottom = clamp(position.bottom, minBottom, maxBottom)
+  savePosition()
+  if (open.value) {
+    window.setTimeout(updatePanelPosition, animate ? 430 : 0)
+  }
+}
+
+const snapToNearestEdge = ({ animate = true } = {}) => {
+  applyEdge(inferredEdge(), { animate })
 }
 
 const updatePanelPosition = () => {
@@ -165,23 +215,60 @@ const updatePanelPosition = () => {
   const orbRect = orbButton.value.getBoundingClientRect()
   const width = panel.value.offsetWidth || 370
   const height = panel.value.offsetHeight || 520
-  const left =
+  const gap = 12
+  const maxLeft = Math.max(12, window.innerWidth - width - gap)
+  const maxTop = Math.max(12, window.innerHeight - height - gap)
+  const alignLeft =
     orbRect.left + orbRect.width / 2 < window.innerWidth / 2
       ? orbRect.left
       : orbRect.right - width
-  panelLeft.value = clamp(left, 12, Math.max(12, window.innerWidth - width - 12))
-  let top = orbRect.top - height - 12
-  if (top < 12) top = orbRect.bottom + 12
-  panelTop.value = clamp(top, 12, Math.max(12, window.innerHeight - height - 12))
+  const fitsAbove = orbRect.top - height - gap >= gap
+  const fitsBelow = orbRect.bottom + height + gap <= window.innerHeight - gap
+
+  if (fitsAbove || fitsBelow) {
+    panelLeft.value = clamp(alignLeft, gap, maxLeft)
+    panelTop.value = clamp(
+      fitsAbove ? orbRect.top - height - gap : orbRect.bottom + gap,
+      gap,
+      maxTop,
+    )
+    return
+  }
+
+  const roomRight = window.innerWidth - orbRect.right - gap
+  const roomLeft = orbRect.left - gap
+  if (roomRight >= width || roomRight >= roomLeft) {
+    panelLeft.value = clamp(orbRect.right + gap, gap, maxLeft)
+  } else {
+    panelLeft.value = clamp(orbRect.left - width - gap, gap, maxLeft)
+  }
+  panelTop.value = clamp(orbRect.top, gap, maxTop)
 }
 
 const onResize = () => {
   loadPosition()
+  applyEdge(snappedEdge.value, { animate: false })
   if (open.value) nextTick(updatePanelPosition)
+}
+
+const onWindowScroll = () => {
+  scrolling.value = true
+  hovered.value = false
+  if (scrollTimer) window.clearTimeout(scrollTimer)
+  scrollTimer = window.setTimeout(() => {
+    scrolling.value = false
+    scrollTimer = null
+  }, 160)
 }
 
 const onOrbPointerDown = (event) => {
   if (event.button !== undefined && event.button !== 0) return
+  if (scrollTimer) {
+    window.clearTimeout(scrollTimer)
+    scrollTimer = null
+  }
+  scrolling.value = false
+  hovered.value = false
   dragState = {
     pointerId: event.pointerId,
     x: event.clientX,
@@ -225,7 +312,7 @@ const onOrbPointerUp = (event) => {
   dragState = null
   if (moved) {
     suppressClick = true
-    savePosition()
+    snapToNearestEdge()
     window.setTimeout(() => {
       suppressClick = false
     }, 260)
@@ -264,6 +351,7 @@ const onOrbKeydown = (event) => {
     minBottom,
     Math.max(minBottom, window.innerHeight - size - 8),
   )
+  snappedEdge.value = inferredEdge()
   savePosition()
   if (open.value) updatePanelPosition()
 }
@@ -296,10 +384,6 @@ const focusPrimary = async () => {
     return
   }
   focus.startFocus(focus.durationMinutes || 25, { openOverlay: false })
-}
-
-const startFocus = (minutes) => {
-  focus.startFocus(minutes, { openOverlay: false })
 }
 
 const openFocus = () => {
@@ -401,12 +485,15 @@ onMounted(() => {
   document.addEventListener('keydown', onKeydown, true)
   document.addEventListener('pointerdown', onPointerDown, true)
   window.addEventListener('resize', onResize)
+  window.addEventListener('scroll', onWindowScroll, { passive: true })
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', onKeydown, true)
   document.removeEventListener('pointerdown', onPointerDown, true)
   window.removeEventListener('resize', onResize)
+  window.removeEventListener('scroll', onWindowScroll)
+  if (scrollTimer) window.clearTimeout(scrollTimer)
   if (dragState) document.body.style.userSelect = dragState.previousUserSelect || ''
   if (completionTimer) window.clearTimeout(completionTimer)
 })
@@ -416,7 +503,12 @@ onBeforeUnmount(() => {
   <div
     ref="root"
     class="orb-root"
-    :class="{ 'is-expanded': open }"
+    :class="{
+      'is-expanded': open,
+      'is-scrolling': scrolling,
+      'is-dragging': dragging,
+      'is-top-edge': snappedEdge === 'top',
+    }"
     :style="{ right: `${position.right}px`, bottom: `${position.bottom}px` }"
   >
     <Transition name="orb-panel">
@@ -483,7 +575,8 @@ onBeforeUnmount(() => {
               :key="minutes"
               type="button"
               :class="{ 'is-active': focus.durationMinutes === minutes }"
-              @click="startFocus(minutes)"
+              :disabled="focus.isActive"
+              @click="focus.setDuration(minutes)"
             >
               {{ minutes }} 分
             </button>
@@ -548,8 +641,9 @@ onBeforeUnmount(() => {
       class="orb"
       :class="[
         `is-${orbState}`,
-        { 'is-open': open, 'is-dragging': dragging, 'is-character': characterVisible },
+        { 'is-open': open, 'is-dragging': dragging },
       ]"
+      :style="{ translate: hideTranslation }"
       :aria-expanded="open"
       :aria-controls="open ? panelId : undefined"
       aria-label="打开 StudyFlow 快捷中心"
@@ -564,14 +658,28 @@ onBeforeUnmount(() => {
       @keydown="onOrbKeydown"
     >
       <span class="orb__aura" aria-hidden="true" />
-      <span class="orb__sphere" aria-hidden="true">
-        <span class="orb__core">
-          <Sparkles :size="19" />
+      <span class="orb__avatar" aria-hidden="true">
+        <svg viewBox="0 0 64 64">
+          <path
+            d="M32 47c-9.4 0-17-6.7-17-15 0-1.4.2-2.7.5-4 2.5 1.2 5.3 1.8 8.2 1.8 3.6 0 7-1 9.9-2.7 2.2 1 4.6 1.5 7.2 1.6 2.4.1 4.8-.2 6.9-1A15.2 15.2 0 0 1 49 32c0 8.3-7.6 15-17 15Z"
+            fill="#f4c9b6"
+            stroke="#c68b77"
+            stroke-width="1.4"
+          />
+          <circle cx="25.5" cy="34" r="2.4" fill="#292531" />
+          <circle cx="38.5" cy="34" r="2.4" fill="#292531" />
+          <path d="M28.5 40c1.1 1.3 2.3 2 3.5 2s2.4-.7 3.5-2" stroke="#292531" stroke-width="2.2" stroke-linecap="round" fill="none" />
+          <ellipse cx="20.5" cy="38.5" rx="3.4" ry="1.9" fill="#eaa895" opacity=".65" />
+          <ellipse cx="43.5" cy="38.5" rx="3.4" ry="1.9" fill="#eaa895" opacity=".65" />
+          <path d="M32 25c-1.8-6.2.7-11.6 6.6-15.1.9 5.9-1.4 11.1-6.6 15.1Z" fill="#5d705d" />
+          <path d="M32 25c-4.3-3.6-9.4-4.4-14.2-1.9 3.5 4.6 8.3 6.2 14.2 1.9Z" fill="#b83e27" />
+        </svg>
+      </span>
+      <Transition name="orb-character">
+        <span v-if="hovered && !open" class="orb-character" aria-hidden="true">
+          <Mascot :size="62" :variant="mascotVariant" :animated="false" />
         </span>
-      </span>
-      <span class="orb__character" aria-hidden="true">
-        <Mascot :size="66" :variant="mascotVariant" :animated="false" />
-      </span>
+      </Transition>
       <span class="orb__state">{{ stateLabel }}</span>
     </button>
   </div>
@@ -586,6 +694,17 @@ onBeforeUnmount(() => {
   width: 66px;
   height: 66px;
   pointer-events: none;
+  transition:
+    right 420ms var(--ease-spring),
+    bottom 420ms var(--ease-spring);
+}
+
+.orb-root.is-dragging {
+  transition: none;
+}
+
+.orb-root.is-scrolling .orb {
+  transition: none;
 }
 
 .orb-root > .orb,
@@ -604,13 +723,14 @@ onBeforeUnmount(() => {
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: var(--on-dark);
+  color: var(--ink);
   cursor: grab;
   touch-action: none;
   user-select: none;
   transition:
     transform 220ms var(--ease),
-    opacity 180ms var(--ease);
+    opacity 180ms var(--ease),
+    translate 460ms var(--ease-spring);
   animation: orb-breathe 5.5s var(--ease-in-out) infinite;
 }
 
@@ -627,89 +747,86 @@ onBeforeUnmount(() => {
   transform: scale(0.97);
 }
 
-.orb__sphere {
+.orb__avatar {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.88);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.34), transparent 24%),
-    radial-gradient(circle at 70% 75%, rgba(208, 69, 45, 0.5), transparent 54%),
-    radial-gradient(circle at 50% 50%, #2e2a25, #141311 72%);
+    radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.94), transparent 36%),
+    linear-gradient(145deg, #f8ebdf, #e7f0e7 58%, #f1e2e9);
   box-shadow:
-    0 20px 50px -22px rgba(23, 22, 20, 0.75),
-    inset 0 1px 1px rgba(255, 255, 255, 0.28);
-  transition:
-    opacity 180ms var(--ease),
-    transform 320ms var(--ease-spring);
+    0 16px 34px -17px rgba(87, 104, 92, 0.46),
+    inset 0 1px 1px rgba(255, 255, 255, 0.94),
+    inset 0 -7px 14px rgba(170, 188, 175, 0.2);
+  transition: transform 260ms var(--ease-spring);
 }
 
-.orb:hover .orb__sphere,
-.orb.is-open .orb__sphere {
-  box-shadow:
-    0 26px 62px -22px rgba(23, 22, 20, 0.82),
-    inset 0 1px 1px rgba(255, 255, 255, 0.34);
+.orb:hover .orb__avatar,
+.orb.is-open .orb__avatar {
+  transform: scale(1.035);
 }
 
-.orb.is-character .orb__sphere {
-  opacity: 0;
-  transform: scale(0.55) rotate(-6deg);
+.orb__avatar svg {
+  width: 82%;
+  height: 82%;
 }
 
 .orb__aura {
   position: absolute;
   inset: -9px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(208, 69, 45, 0.22), transparent 66%);
-  opacity: 0.58;
+  background: radial-gradient(circle, rgba(208, 69, 45, 0.16), transparent 66%);
+  opacity: 0.46;
   filter: blur(5px);
   animation: orb-aura 6s var(--ease-in-out) infinite;
   pointer-events: none;
 }
 
-.orb__core {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
-}
-
-.orb__character {
+.orb-character {
   position: absolute;
-  inset: -1px;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  opacity: 0;
+  left: 50%;
+  bottom: 52px;
+  width: 66px;
+  height: 66px;
+  z-index: 3;
   pointer-events: none;
-  filter: drop-shadow(0 10px 14px rgba(23, 22, 20, 0.2));
-  transform: translateY(7px) scale(0.55) rotate(-5deg);
+  filter: drop-shadow(0 10px 14px rgba(23, 22, 20, 0.18));
+  opacity: 1;
+  transform: translateX(-50%);
   transform-origin: bottom center;
-  transition:
-    opacity 180ms var(--ease),
-    transform 340ms var(--ease-spring);
 }
 
-.orb__character :deep(svg) {
+.orb-character :deep(svg) {
   width: 100%;
   height: 100%;
 }
 
-.orb.is-character .orb__character {
-  opacity: 1;
-  transform: none;
+.orb-root.is-top-edge .orb-character {
+  bottom: auto;
+  top: 52px;
 }
 
-.orb.is-character .orb__aura {
-  opacity: 0.34;
+.orb-character-enter-active,
+.orb-character-leave-active {
+  transition:
+    opacity 160ms var(--ease),
+    transform 330ms var(--ease-spring);
+}
+
+.orb-character-enter-from,
+.orb-character-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(9px) scale(0.55) rotate(-5deg);
+}
+
+.orb-character-enter-to,
+.orb-character-leave-from {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1) rotate(0deg);
 }
 
 .orb__state {
@@ -735,10 +852,6 @@ onBeforeUnmount(() => {
 .orb.is-focusing .orb__aura {
   opacity: 0.42;
   animation-duration: 8s;
-}
-
-.orb.is-focusing .orb__core {
-  background: rgba(208, 69, 45, 0.16);
 }
 
 .orb.is-processing .orb__aura {

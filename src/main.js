@@ -6,7 +6,9 @@ import { setUnauthorizedHandler } from './api/http.js'
 import { useAuthStore } from './stores/auth.js'
 import { useUiStore } from './stores/ui.js'
 import { revealDirective } from './composables/reveal.js'
+import { pressTilt } from './directives/pressTilt.js'
 import './assets/styles/base.css'
+import './assets/styles/glass.css'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -14,6 +16,7 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.directive('reveal', revealDirective)
+app.directive('press-tilt', pressTilt)
 
 let sessionToastShown = false
 

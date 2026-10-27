@@ -184,3 +184,70 @@
 textarea {
   scrollbar-width: thin;
 }
+
+/* Validation feedback: red border + horizontal shake + slide-in message. */
+.field__control.is-shaking {
+  animation: field-shake 500ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes field-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  12% {
+    transform: translateX(-7px);
+  }
+  26% {
+    transform: translateX(7px);
+  }
+  40% {
+    transform: translateX(-6px);
+  }
+  54% {
+    transform: translateX(5px);
+  }
+  68% {
+    transform: translateX(-3px);
+  }
+  82% {
+    transform: translateX(2px);
+  }
+  92% {
+    transform: translateX(-1px);
+  }
+}
+
+.field-error-enter-active,
+.field-error-leave-active {
+  overflow: hidden;
+  transition:
+    opacity 180ms var(--ease),
+    transform 260ms var(--ease-spring),
+    max-height 260ms var(--ease);
+}
+
+.field-error-enter-from,
+.field-error-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.field-error-enter-to,
+.field-error-leave-from {
+  max-height: 80px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field__control.is-shaking {
+    animation: none;
+  }
+
+  .field-error-enter-active,
+  .field-error-leave-active {
+    transition: none;
+  }
+}
